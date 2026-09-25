@@ -1,0 +1,41 @@
+# nginx server block for fiftysixty.misaki.fi.
+#
+# Start HTTP-only so certbot can complete the ACME challenge, then
+#   sudo certbot --nginx -d fiftysixty.misaki.fi
+# adds the 443 block and the HTTP->HTTPS redirect.
+#
+# Layout under the web root (WEBROOT in deploy.sh, default /var/www/fiftysixty), owned by
+# the deploying user:
+#   current -> releases/<sha>   flipped by deploy.sh
+#   data/*.csv                  written daily by the host's cron job
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name fiftysixty.misaki.fi;
+
+    root /var/www/fiftysixty/current;
+    index index.html;
+
+    # Single-page app: every path falls back to index.html.
+    location / {
+        try_files $uri /index.html;
+        add_header Cache-Control "no-cache";
+    }
+
+    # Vite fingerprints everything under /assets/, so cache hard.
+    location /assets/ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # The market data lives outside the releases so deploys never touch it.
+    location /data/ {
+        alias /var/www/fiftysixty/data/;
+        add_header Cache-Control "no-cache";
+    }
+
+    location ~ /\. {
+        deny all;
+    }
+}
