@@ -1,5 +1,5 @@
 import type { Layer } from '@deck.gl/core'
-import { IconLayer, PathLayer } from '@deck.gl/layers'
+import { IconLayer, SolidPolygonLayer } from '@deck.gl/layers'
 import { load, type FlowSlot } from '../market/flows'
 import { AREA_BY_ID, type Area } from '../regions/areas'
 import { OCCTO_LINE_IDS } from '../regions/interconnectors'
@@ -82,8 +82,6 @@ const RIM_PX = 4
 /** How far along the line the shaft starts, clear of the column it leaves, and where it ends and the head begins. */
 const SHAFT_FROM = 0.07
 const HEAD_AT = 0.78
-/** The shaft tapers from a hair at its start to its full width at the head, in this many steps. */
-const TAPER_STEPS = 12
 
 /** The line's width on screen, a pixel plus one per gigawatt. */
 export const widthOf = (d: FlowDatum) => MIN_PX + d.mw / MW_PER_PX
@@ -117,25 +115,30 @@ export function shaft(path: FlowDatum['path']): FlowDatum['path'] {
   return [along(path, SHAFT_FROM), along(path, HEAD_AT)]
 }
 
-/** A piece of a tapering shaft: its own path and its width, a fraction of the whole shaft's. */
-export interface Taper {
-  flow: FlowDatum
-  path: FlowDatum['path']
-  width: number
-}
+/** Degrees of longitude per screen pixel at a zoom, on MapLibre's 512-pixel tiles. */
+export const degreesPerPixel = (zoom: number) => 360 / (512 * 2 ** zoom)
 
-/** The shaft cut into pieces of growing width, thin where the power leaves and full where the head begins. */
-export function tapered(d: FlowDatum, extra = 0): Taper[] {
-  const full = widthOf(d)
-  return Array.from({ length: TAPER_STEPS }, (_, i) => {
-    const from = SHAFT_FROM + ((HEAD_AT - SHAFT_FROM) * i) / TAPER_STEPS
-    const to = SHAFT_FROM + ((HEAD_AT - SHAFT_FROM) * (i + 1)) / TAPER_STEPS
-    return {
-      flow: d,
-      path: [along(d.path, from), along(d.path, to)],
-      width: MIN_PX + ((full - MIN_PX) * (i + 1)) / TAPER_STEPS + extra,
-    }
-  })
+/**
+ * The shaft as one solid shape: a hair wide where the power leaves, the flow's width where the head begins, its
+ * widths turned from pixels into degrees at the map's zoom, so it is rebuilt as the map zooms and never has a joint.
+ */
+export function taperPolygon(d: FlowDatum, zoom: number, extraPx = 0): [number, number][] {
+  const [from, to] = shaft(d.path)
+  const perPixel = degreesPerPixel(zoom)
+  const lat = ((from[1] + to[1]) / 2) * (Math.PI / 180)
+  const dLon = perPixel
+  const dLat = perPixel * Math.cos(lat)
+  const px = (to[0] - from[0]) / dLon
+  const py = (to[1] - from[1]) / dLat
+  const length = Math.hypot(px, py) || 1
+  const normal = [-py / length, px / length]
+  const offset = (p: [number, number], pixels: number): [number, number] => [
+    p[0] + normal[0] * pixels * dLon,
+    p[1] + normal[1] * pixels * dLat,
+  ]
+  const h0 = (MIN_PX + extraPx) / 2
+  const h1 = (widthOf(d) + extraPx) / 2
+  return [offset(from, h0), offset(to, h1), offset(to, -h1), offset(from, -h0)]
 }
 
 /** The arrow's heading in degrees counterclockwise from east, on the map's mercator plane. */
@@ -147,38 +150,32 @@ export function heading([[x1, y1], [x2, y2]]: FlowDatum['path']): number {
 const mix = (a: Rgb, b: Rgb, t: number): Rgb => [0, 1, 2].map((i) => Math.round(a[i] + (b[i] - a[i]) * t)) as Rgb
 
 /**
- * The flows as arrows: a shaft tapering from a hair where the power leaves to the flow's width where the head begins,
- * colored by the load, with a bright rim under it where the market split, and a head in the same color, sized with
- * the shaft, pointing on the way the power goes.
+ * The flows as arrows: a solid shaft tapering from a hair where the power leaves to the flow's width where the head
+ * begins, colored by the load, with a bright rim under it where the market split, and a head in the same color,
+ * sized with the shaft, pointing on the way the power goes.
  */
-export function buildFlowLayers(flows: ReadonlyMap<string, FlowSlot>, palette: Palette): Layer[] {
+export function buildFlowLayers(flows: ReadonlyMap<string, FlowSlot>, palette: Palette, zoom: number): Layer[] {
   const data = flowData(flows)
   if (!data.length) return []
   const color = (d: FlowDatum): Rgba => [...mix(palette.flow.idle, palette.flow.full, d.load), 230]
   const head = (d: FlowDatum): [number, number] => shaft(d.path)[1]
   return [
-    new PathLayer<Taper, Interleaved>({
+    new SolidPolygonLayer<FlowDatum, Interleaved>({
       id: 'flow-splits',
       beforeId: BELOW_LABELS,
-      data: data.filter((d) => d.split).flatMap((d) => tapered(d, RIM_PX)),
-      getPath: (t) => t.path,
-      getColor: [...palette.text, 200],
-      getWidth: (t) => t.width,
-      widthUnits: 'pixels',
-      capRounded: true,
-      updateTriggers: { getColor: palette },
+      data: data.filter((d) => d.split),
+      getPolygon: (d) => taperPolygon(d, zoom, RIM_PX),
+      getFillColor: [...palette.text, 200],
+      updateTriggers: { getPolygon: zoom, getFillColor: palette },
     }),
-    new PathLayer<Taper, Interleaved>({
+    new SolidPolygonLayer<FlowDatum, Interleaved>({
       id: 'flows',
       beforeId: BELOW_LABELS,
-      data: data.flatMap((d) => tapered(d)),
-      getPath: (t) => t.path,
-      getColor: (t) => color(t.flow),
-      getWidth: (t) => t.width,
-      widthUnits: 'pixels',
-      capRounded: true,
+      data,
+      getPolygon: (d) => taperPolygon(d, zoom),
+      getFillColor: color,
       pickable: true,
-      updateTriggers: { getColor: palette },
+      updateTriggers: { getPolygon: zoom, getFillColor: palette },
     }),
     new IconLayer<FlowDatum, Interleaved>({
       id: 'flow-heads',
