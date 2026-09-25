@@ -45,8 +45,9 @@ ls -1dt "$WEBROOT"/releases/* | tail -n +4 | xargs -r rm -rf
 
 fetch="$PWD/scripts/fetch-data.mjs"
 if ! crontab -l 2>/dev/null | grep -qF "$fetch"; then
-  # JEPX posts the next day's prices after the 10:00 JST auction; the grid records trail by a day.
-  cron_line="23 11 * * * $(command -v node) $fetch $WEBROOT/data >> $WEBROOT/fetch-data.log 2>&1"
+  # JEPX posts the next day's prices after the 10:00 JST auction; the grid records add the previous
+  # day in the evening. One fetch after both catches tomorrow's prices and yesterday's balance.
+  cron_line="23 19 * * * $(command -v node) $fetch $WEBROOT/data >> $WEBROOT/fetch-data.log 2>&1"
   { crontab -l 2>/dev/null || true; echo "$cron_line"; } | crontab -
   echo "Installed cron job: $cron_line"
 fi
