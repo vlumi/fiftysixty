@@ -17,7 +17,7 @@ test('a column of the bands, capped by the curtailment, with a stub below the li
   const svg = glyph.querySelector('svg')!
   const generated = 2960 + 526 + 1056 + 88 + 148 + 346 + 126 + 608 + 6562 + 116 + 310
   const exports = 1106 + 1944
-  expect(Number(svg.getAttribute('height'))).toBeCloseTo((generated + 1877 + 218 + exports) / 400, 3)
+  expect(Number(svg.getAttribute('height'))).toBeCloseTo((generated + 1877 + 218 + exports) / 500, 3)
   await userEvent.click(glyph)
   expect(onPick).toHaveBeenCalled()
 })

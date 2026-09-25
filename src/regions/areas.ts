@@ -12,7 +12,7 @@ export interface AreaInfo {
   hz: Hz
   /** JIS X 0401 prefecture codes; the areas follow the prefecture lines, see PREFECTURES. */
   prefectures: readonly number[]
-  /** A point inside the area, clear of the big city labels, where its glyph stands. */
+  /** A point in the middle of the area's land, where its glyph is centered. */
   anchor: readonly [number, number]
 }
 
@@ -30,7 +30,7 @@ export const AREAS: readonly AreaInfo[] = [
     ja: '東京',
     hz: 50,
     prefectures: [8, 9, 10, 11, 12, 13, 14, 19],
-    anchor: [140.0, 36.7],
+    anchor: [139.6, 36.1],
   },
   { id: 'chubu', name: 'Chubu', ja: '中部', hz: 60, prefectures: [20, 21, 22, 23, 24], anchor: [137.4, 35.5] },
   { id: 'hokuriku', name: 'Hokuriku', ja: '北陸', hz: 60, prefectures: [16, 17, 18], anchor: [136.7, 36.6] },
@@ -43,7 +43,7 @@ export const AREAS: readonly AreaInfo[] = [
     ja: '九州',
     hz: 60,
     prefectures: [40, 41, 42, 43, 44, 45, 46],
-    anchor: [131.5, 32.9],
+    anchor: [131.0, 32.6],
   },
   { id: 'okinawa', name: 'Okinawa', ja: '沖縄', hz: 60, prefectures: [47], anchor: [127.8, 26.5] },
 ]

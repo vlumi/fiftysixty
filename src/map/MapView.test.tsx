@@ -74,7 +74,7 @@ test('a recorded area gets a glyph on its anchor, which picks the area, and lose
   const record = recordSlot(TEPCO.parse(csv), '2026-09-24', 25)!
   const { rerender } = render(<MapView regions={regions} mixes={{ tokyo: record }} onPick={onPick} />)
   expect(markers).toHaveLength(1)
-  expect(markers[0].lngLat).toEqual([140.0, 36.7])
+  expect(markers[0].lngLat).toEqual([139.6, 36.1])
   const glyph = markers[0].element.querySelector('button')!
   expect(glyph).toHaveAccessibleName('Tokyo mix')
   glyph.click()

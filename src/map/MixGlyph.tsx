@@ -3,7 +3,7 @@ import { SERIES, stackDay } from '../market/stack'
 import styles from './MixGlyph.module.css'
 
 const WIDTH = 18
-const MW_PER_PX = 400
+const MW_PER_PX = 500
 const GW = 1000
 
 interface Props {
@@ -12,7 +12,7 @@ interface Props {
   onPick: () => void
 }
 
-/** What ran in an area for the slot, as a column beside it on the map: the chart's bands, a hatched cap for curtailment, demand as its height. */
+/** What ran in an area for the slot, as a column in the middle of it on the map: the chart's bands, a hatched cap for curtailment, demand as its height. */
 export default function MixGlyph({ name, record, onPick }: Props) {
   const [at] = stackDay([record]).slots
   const px = (mw: number) => mw / MW_PER_PX
