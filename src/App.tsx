@@ -9,6 +9,7 @@ import { loadRegions, type Regions } from './regions/geometry'
 import { useApp } from './store'
 import { openingDay } from './time/days'
 import TimeBar from './time/TimeBar'
+import { useNow } from './time/useNow'
 
 const MapView = lazy(() => import('./map/MapView'))
 
@@ -27,7 +28,8 @@ export default function App() {
   const setSlot = useApp((s) => s.setSlot)
   const area = useApp((s) => s.area)
   const selectArea = useApp((s) => s.selectArea)
-  const date = chosenDate ?? openingDay(spot, new Date())
+  const now = useNow()
+  const date = chosenDate ?? openingDay(spot, now)
   const days = spot ? [...spot.keys()].sort() : []
   const displayed = slotOf(spot, date, slot)
 
@@ -74,7 +76,7 @@ export default function App() {
           onClose={() => selectArea(null)}
           onSlot={setSlot}
         />
-        <TimeBar date={date} days={days} slot={slot} onDate={setDate} onSlot={setSlot} />
+        <TimeBar date={date} days={days} slot={slot} now={now} onDate={setDate} onSlot={setSlot} />
         <Legend />
       </main>
     </>
