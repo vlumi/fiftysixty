@@ -15,7 +15,8 @@ interface Props {
 
 /**
  * The day and its 48 half hours: a controlled row of native inputs, so it scrubs and takes the keyboard for free, with
- * a step to the priced day before and after, a jump to today, and a word for where the half hour stands.
+ * a step to the priced day before and after, a jump to today, and a word for where the half hour stands; on today,
+ * whether it is now or still ahead, since the price is known before the record.
  */
 export default function TimeBar({ date, days, slot, now, onDate, onSlot }: Props) {
   const at = date ? days.indexOf(date) : -1
@@ -54,8 +55,8 @@ export default function TimeBar({ date, days, slot, now, onDate, onSlot }: Props
       />
       <output>
         {stands && <span className={styles[stands.when]}>{stands.day}</span>} {slotRange(slot)} JST
-        {stands?.when === 'now' && <span className={styles.now}> · now</span>}
-        {stands?.when === 'ahead' && <span className="muted"> · ahead</span>}
+        {stands?.day === 'Today' && stands.when === 'now' && <span className={styles.now}> · now</span>}
+        {stands?.day === 'Today' && stands.when === 'ahead' && <span className="muted"> · ahead</span>}
       </output>
     </div>
   )
