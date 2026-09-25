@@ -29,15 +29,13 @@ export function neighbors(area: Area): Area[] {
   return INTERCONNECTORS.flatMap(({ ends: [a, b] }) => (a === area ? [b] : b === area ? [a] : []))
 }
 
-/** The middle of the Chubu, Hokuriku and Kansai triangle, where OCCTO's three fences meet on the map. */
-export const MIDDLE: readonly [number, number] = [136.4, 35.6]
-
 export type FlowEnd = Area | 'middle'
 
 /**
  * A line as OCCTO publishes it, with its forward direction, which runs north to south and east to west; the two
- * Kansai–Chugoku circuits share an id and are summed. Around the triangle OCCTO publishes fences, each area's
- * boundary against the other two, drawn between the area and the middle.
+ * Kansai–Chugoku circuits share an id and are summed. Around the Chubu, Hokuriku and Kansai triangle OCCTO publishes
+ * fences, each area's boundary against the other two, with 'middle' standing for the far end; the map resolves them
+ * into flows between the neighbors.
  */
 export interface OcctoLine {
   name: string
