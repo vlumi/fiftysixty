@@ -79,11 +79,13 @@ const SOURCES = [
     // Next month exists only for its first days, from two days before; until then the site answers with a page.
     optional: m === nextMonth,
   })),
-  {
-    name: `jepx-spot-${fiscalYear}.csv`,
-    url: `https://www.jepx.jp/js/csv_read.php?dir=spot_summary&file=spot_summary_${fiscalYear}.csv`,
+  // Last fiscal year's prices, final since March, are taken once: they hold the winter for the story days.
+  ...[fiscalYear - 1, fiscalYear].map((year) => ({
+    name: `jepx-spot-${year}.csv`,
+    url: `https://www.jepx.jp/js/csv_read.php?dir=spot_summary&file=spot_summary_${year}.csv`,
     headers: { Referer: 'https://www.jepx.jp/electricpower/market-data/spot/' },
-  },
+    once: year < fiscalYear,
+  })),
   // The current month grows through the day; the previous one stays, so the map has a month of record behind it.
   ...[previousMonth, month].flatMap((m) =>
     Object.entries(RECORDS).map(([area, { month: path, day }]) => ({
@@ -146,6 +148,7 @@ await mkdir(output, { recursive: true })
 for (const source of SOURCES) {
   const target = join(output, source.name)
   const raw = `${target}.raw`
+  if (source.once && existsSync(target)) continue
   if (source.staleAfterMs && existsSync(target) && Date.now() - (await stat(target)).mtimeMs < source.staleAfterMs) {
     console.log(`fresh enough: ${source.name}`)
     continue

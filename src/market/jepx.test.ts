@@ -1,4 +1,4 @@
-import { fiscalYear, latestDay, parseSpot, slotOf } from './jepx'
+import { fiscalYear, latestDay, loadSpotYears, parseSpot, slotOf } from './jepx'
 import csv from '../test/fixtures/jepx-spot.csv?raw'
 
 test('four real days parse into 48 slots each, found by column name', () => {
@@ -39,4 +39,16 @@ test('the fiscal year turns in April', () => {
   expect(fiscalYear(new Date(2026, 8, 25))).toBe(2026)
   expect(fiscalYear(new Date(2027, 2, 31))).toBe(2026)
   expect(fiscalYear(new Date(2027, 3, 1))).toBe(2027)
+})
+
+test('the years are loaded together, a year the host lacks contributing nothing', async () => {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn((url: string) =>
+      Promise.resolve(url.endsWith('2026.csv') ? new Response(csv) : new Response('', { status: 404 })),
+    ),
+  )
+  const days = await loadSpotYears(2026)
+  expect([...days.keys()]).toEqual(['2026-09-22', '2026-09-23', '2026-09-25', '2026-09-26'])
+  vi.unstubAllGlobals()
 })
