@@ -6,6 +6,7 @@
 //   EVAL="document.querySelector('[aria-label=Constellation] li button').click()" node scripts/screenshot.mjs out.png  # act first
 //   HOVER=1 node scripts/screenshot.mjs out.png    # sweep the pointer across the map first (surfaces hover errors)
 //   CLICK=812,600 node scripts/screenshot.mjs out.png   # click the page at a point first, e.g. an area on the map
+//   WHEEL=812,600,-1500 node scripts/screenshot.mjs out.png   # scroll at a point first, a negative delta zooming the map in
 //   WIDTH=390 HEIGHT=844 node scripts/screenshot.mjs phone.png   # phone-sized viewport
 //   DPR=2 node scripts/screenshot.mjs retina.png                  # high-DPI rendering
 //   TOUCH=1 node scripts/screenshot.mjs phone.png                 # a touch screen: no hover, coarse pointer
@@ -22,6 +23,7 @@ const waitMs = Number(process.env.WAIT_MS ?? 15_000)
 const evalJs = process.env.EVAL
 const hover = process.env.HOVER === '1'
 const click = process.env.CLICK?.split(',').map(Number)
+const wheel = process.env.WHEEL?.split(',').map(Number)
 const width = Number(process.env.WIDTH ?? 1400)
 const height = Number(process.env.HEIGHT ?? 900)
 const dpr = Number(process.env.DPR ?? 1)
@@ -87,6 +89,12 @@ try {
   if (evalJs) {
     await send('Runtime.evaluate', { expression: evalJs, awaitPromise: true })
     await new Promise((resolve) => setTimeout(resolve, 1500))
+  }
+  if (wheel) {
+    const [x, y, deltaY] = wheel
+    await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x, y })
+    await send('Input.dispatchMouseEvent', { type: 'mouseWheel', x, y, deltaX: 0, deltaY })
+    await new Promise((resolve) => setTimeout(resolve, 3000))
   }
   if (click) {
     const [x, y] = click
