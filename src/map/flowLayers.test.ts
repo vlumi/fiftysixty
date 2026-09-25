@@ -1,25 +1,63 @@
-import type { PathLayer, TextLayer } from '@deck.gl/layers'
+import type { IconLayer, PathLayer } from '@deck.gl/layers'
 import csv from '../test/fixtures/occto-renkei.csv?raw'
 import { flowsAt, parseFlows } from '../market/flows'
 import { AREA_BY_ID } from '../regions/areas'
-import { MIDDLE } from '../regions/interconnectors'
 import { DARK } from '../shared/palette'
-import { buildFlowLayers, flowData, headSize, heading, shaft, widthOf, type FlowDatum } from './flowLayers'
+import {
+  buildFlowLayers,
+  flowData,
+  headSize,
+  heading,
+  shaft,
+  triangleFlows,
+  widthOf,
+  type FlowDatum,
+} from './flowLayers'
 
 const noon = flowsAt(parseFlows(csv), '2026-09-23', 24)
 
-test('a line is laid from where the power comes: Kansai–Chugoku from Chugoku, the Chubu fence from the middle', () => {
+test('a line is laid from where the power comes: Kansai–Chugoku from Chugoku, Kitahon from Hokkaido', () => {
   const data = flowData(noon)
   const kc = data.find((d) => d.id === 'kansai-chugoku')!
   expect(kc.path).toEqual([AREA_BY_ID.chugoku.anchor, AREA_BY_ID.kansai.anchor])
   expect(kc.mw).toBe(6580)
   expect(kc.load).toBe(1)
   expect(kc.split).toBe(true)
-  const chubu = data.find((d) => d.id === 'chubu-fence')!
-  expect(chubu.path).toEqual([MIDDLE, AREA_BY_ID.chubu.anchor])
   const kitahon = data.find((d) => d.id === 'kitahon')!
   expect(kitahon.path).toEqual([AREA_BY_ID.hokkaido.anchor, AREA_BY_ID.tohoku.anchor])
-  expect(data).toHaveLength(10)
+  expect(data.map((d) => d.id)).not.toContain('chubu-fence')
+  expect(data).toHaveLength(7 + 2)
+})
+
+test('the fences resolve into flows between the neighbors: at that noon Kansai and Hokuriku both feed Chubu', () => {
+  const pairs = triangleFlows(noon)
+  expect(pairs.map((p) => [p.id, p.mw, p.path])).toEqual([
+    ['chubu-hokuriku', 539, [AREA_BY_ID.hokuriku.anchor, AREA_BY_ID.chubu.anchor]],
+    ['chubu-kansai', 1290, [AREA_BY_ID.kansai.anchor, AREA_BY_ID.chubu.anchor]],
+  ])
+  expect(pairs[1].split).toBe(true)
+  expect(pairs[1].load).toBe(1)
+  expect(pairs[1].label).toBe('Kansai–Chubu')
+})
+
+test('with one sender and two receivers the flows fan out from it, and with a fence missing none are drawn', () => {
+  const fence = (flowMW: number) => ({
+    slot: 1,
+    capacityMW: { forward: 2000, reverse: 2000 },
+    flowMW,
+    freeMW: { forward: 0, reverse: 0 },
+    split: false,
+  })
+  const spreading = new Map([
+    ['chubu-fence', fence(1000)],
+    ['hokuriku-fence', fence(300)],
+    ['kansai-fence', fence(700)],
+  ])
+  expect(triangleFlows(spreading).map((p) => [p.id, p.mw])).toEqual([
+    ['chubu-hokuriku', 300],
+    ['chubu-kansai', 700],
+  ])
+  expect(triangleFlows(new Map([['chubu-fence', fence(1000)]]))).toEqual([])
 })
 
 test('the arrow heads along the path, the layers take width from the flow and color from the load, and split lines get a rim', () => {
@@ -38,7 +76,7 @@ test('the arrow heads along the path, the layers take width from the flow and co
   const [rims, paths, heads] = buildFlowLayers(noon, DARK) as [
     PathLayer<FlowDatum>,
     PathLayer<FlowDatum>,
-    TextLayer<FlowDatum>,
+    IconLayer<FlowDatum>,
   ]
   expect([rims.id, paths.id, heads.id]).toEqual(['flow-splits', 'flows', 'flow-heads'])
   const kc = flowData(noon).find((d) => d.id === 'kansai-chugoku')!
@@ -61,6 +99,9 @@ test('the arrow heads along the path, the layers take width from the flow and co
   if (typeof position !== 'function') throw new Error('accessor')
   expect(position(kc, { index: 0, data: [], target: [] })).toEqual(end)
   expect(headSize(kc)).toBeCloseTo(8 + (1 + 6.58) * 3)
+  const headColor = heads.props.getColor
+  if (typeof headColor !== 'function') throw new Error('accessor')
+  expect(headColor(kc, { index: 0, data: [], target: [] })).toEqual(color(kc, { index: 0, data: [], target: [] }))
 })
 
 test('no flows, no layers', () => {
