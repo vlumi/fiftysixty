@@ -4,7 +4,7 @@ The Japanese power market on a map, from public data. A sibling of [nebulosa](ht
 
 **The name:** 50 Hz east, 60 Hz west, and the three converter stations between them that cap the flow across the middle of the country; also Nykänen's *fifty-sixty*, "more or less", which is what a day-ahead price is. Styled 50/60.
 
-**Status:** unofficial demo project, not affiliated with JEPX, OCCTO or any utility. Bootstrapped 2026-09-25 with the toolchain and a map of Japan; the same day, the day-ahead price on the map and what ran in Tokyo and Kyushu. The milestones below are in the order they are meant to land; the first one alone makes the point.
+**Status:** unofficial demo project, not affiliated with JEPX, OCCTO or any utility. Bootstrapped 2026-09-25 with the toolchain and a map of Japan; the same day, the day-ahead price on the map, what ran in every area, and the flows between them. The milestones below are in the order they are meant to land; the first one alone makes the point.
 
 ## Data
 
@@ -45,9 +45,9 @@ Toolchain, CI, a map of Japan under the name, the data fetcher for JEPX and TEPC
 - A second transmission company (Kyushu, for curtailment) through the same interface, then the other seven the same day: all nine publish OCCTO's layout, Kyushu with two departures.
 - Solar and wind curtailment shown distinctly, since it is the most visible thing the market does.
 
-### M3 — the flows
+### M3 — the flows (done 2026-09-25)
 
-- The interconnectors as arrows between regions, width by flow, color by share of capacity, from OCCTO's data; the three converters marked as such.
+- The interconnectors as arrows between regions, width by flow, color by share of capacity, from OCCTO's day-ahead forecast of each line; the market split marked on the line. Actual flows are on OCCTONET behind a browser session and are not fetched.
 - The price split made visible: when the middle is saturated, the east and west prices diverge, and the map shows the cause and the effect at once.
 
 ### M4 — the story days

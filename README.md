@@ -10,9 +10,9 @@ Unofficial demo project, built from public data; not affiliated with any exchang
 
 Live at [fiftysixty.misaki.fi](https://fiftysixty.misaki.fi). [SCOPE.md](SCOPE.md) is the plan; [ARCHITECTURE.md](ARCHITECTURE.md) explains how it works.
 
-![Noon on a September day: the nine areas colored by price with a column beside each showing what ran, Kansai picked with its price against its neighbors, the day's supply stack under the demand line, and the mix in numbers](docs/screenshots/002-what-ran.png)
+![A holiday noon: the nine areas colored by price with a column of what ran beside each, arrows along the interconnectors sized by flow and rimmed where the market split, Kansai picked with its lines, its neighbors' prices, the day's supply stack and the mix in numbers](docs/screenshots/003-flows.png)
 
-<img src="docs/screenshots/002-what-ran-phone.png" alt="The same site on a phone: the nine columns on the map, the system price above, the clock at the foot" width="260">
+<img src="docs/screenshots/003-flows-phone.png" alt="The same site on a phone: the arrows between the nine columns, the system price above, the clock at the foot" width="260">
 
 Every capture, one per milestone, is shown in [docs/screenshots](docs/screenshots/README.md).
 
@@ -20,7 +20,7 @@ Every capture, one per milestone, is shown in [docs/screenshots](docs/screenshot
 
 **The regions.** Each of the nine areas colored by its price in the displayed half-hour slot, with its supply mix beside it: how much of the demand was nuclear, gas, coal, hydro, solar, wind, and how much solar was curtailed.
 
-**The interconnectors.** Arrows between the regions sized by the flow and colored by how close it is to the line's limit, the three frequency-converter stations between the two halves included, since that is where the Tokyo and Kansai prices split.
+**The interconnectors.** Arrows between the regions sized by the flow and colored by how close it is to the line's limit, from OCCTO's day-ahead forecast of each line, with a rim where the day-ahead market split across it; the three frequency-converter stations between the two halves are one of the lines, since that is where the east and west prices part.
 
 **The clock.** A time bar over the day with 48 slots and a date picker, so the solar hump can be watched rolling across the country at noon, the price collapsing under it and the evening peak arriving; and a jump to a heat wave, a typhoon or a spring Sunday when Kyushu had more solar than it could use.
 

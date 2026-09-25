@@ -2,6 +2,16 @@
 
 One capture per milestone, taken with [`scripts/screenshot.mjs`](../../scripts/screenshot.mjs), newest first. The files carry a running number so they sort in order, then a name for what they show; the headings carry the dates. The README shows the latest desktop and phone captures; the rest stay here as a record of how the site grew.
 
+## 2026-09-25 · M3, the flows
+
+![The flows](003-flows.png)
+
+The holiday noon of 2026-09-23 again, 11:30 to 12:00, with the interconnectors drawn from OCCTO's day-ahead forecast: an arrow along each line the way the power goes, a pixel wide plus one per gigawatt, brighter the nearer the flow is to the line's limit, and a white rim where the day-ahead market split across it. Kansai is picked: both Kansai–Chugoku circuits and the Anan–Kihoku line from Shikoku come in full and rimmed, the Kansai fence sends 1,290 MW on toward Chubu, and the readout lists each line's flow in or out against its limit with the split marked. The Tohoku trunk into Tokyo is full and rimmed too, while the converters carry a trickle west to east.
+
+<img src="003-flows-phone.png" alt="The flows, on a phone" width="260">
+
+The same half hour on a phone (390×844), nothing picked: the arrows between the columns, the legend keying width, brightness and the rim.
+
 ## 2026-09-25 · M2, what ran
 
 ![What ran](002-what-ran.png)
