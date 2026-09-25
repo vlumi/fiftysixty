@@ -4,7 +4,7 @@ The Japanese power market on a map, from public data. A sibling of [nebulosa](ht
 
 **The name:** 50 Hz east, 60 Hz west, and the three converter stations between them that cap the flow across the middle of the country; also Nykänen's *fifty-sixty*, "more or less", which is what a day-ahead price is. Styled 50/60.
 
-**Status:** unofficial demo project, not affiliated with JEPX, OCCTO or any utility. Bootstrapped 2026-09-25 with the toolchain and a map of Japan; the same day, the day-ahead price on the map, what ran in every area, the flows between them, play and the story days. The milestones below are in the order they are meant to land; the first one alone makes the point.
+**Status:** unofficial demo project, not affiliated with JEPX, OCCTO or any utility. Bootstrapped 2026-09-25 with the toolchain and a map of Japan; the same day, the day-ahead price on the map, what ran in every area, the flows between them, play and the story days, and the plants, the phone layout, the light theme and the Japanese interface: every milestone below landed on the first day. are in the order they are meant to land; the first one alone makes the point.
 
 ## Data
 
@@ -55,10 +55,10 @@ Toolchain, CI, a map of Japan under the name, the data fetcher for JEPX and TEPC
 - Named days to jump to, chosen from the prices rather than by hand: the summer and the winter peak by the system price, the widest split between areas, the day with the most half hours at the floor, and the cheapest day; last fiscal year's prices are held for the winter. A typhoon is not in the prices, so there is no typhoon day.
 - Play at speed, so a day runs in seconds: four half hours a second, on into the next day.
 
-### M5 — closer in
+### M5 — closer in (done 2026-09-25)
 
 - The plants by fuel and capacity at higher zoom, honest about showing capacity and not output: from OpenStreetMap, the 408 tagged with an output of 10 MW or more (done 2026-09-25).
-- Phone layout (done 2026-09-25: the key and the readout fold to a button and a headline), light theme (done 2026-09-25), English and Japanese interfaces, following the nebulosa patterns.
+- Phone layout (the key and the readout fold to a button and a headline), light theme, English and Japanese interfaces, following the nebulosa patterns.
 
 ## Non-goals
 

@@ -10,11 +10,11 @@ Unofficial demo project, built from public data; not affiliated with any exchang
 
 Live at [fiftysixty.misaki.fi](https://fiftysixty.misaki.fi). [SCOPE.md](SCOPE.md) is the plan; [ARCHITECTURE.md](ARCHITECTURE.md) explains how it works.
 
-![The summer peak: every area at the 50 yen cap with a column of what ran beside each, arrows along the interconnectors sized by flow, Tokyo picked with its lines, its neighbors' prices, the day's supply stack and the mix in numbers](docs/screenshots/004-story-days.png)
+![Closer in, in the light theme and Japanese: the plants along the Sea of Japan coast as dots by fuel and capacity, Kashiwazaki-Kariwa picked with its capacity, the plants panel with the fuels and their counts](docs/screenshots/005-closer-in.png)
 
-<img src="docs/screenshots/004-story-days-phone.png" alt="The same site on a phone: the arrows between the nine columns, the system price above, the clock at the foot" width="260">
+<img src="docs/screenshots/005-closer-in-phone.png" alt="The same site on a phone in the light theme and Japanese: the columns and arrows on the map, the readout folded to its headline, the clock at the foot" width="260">
 
-Every capture, one per milestone, is shown in [docs/screenshots](docs/screenshots/README.md).
+Every capture, one per milestone, is shown in [docs/screenshots](docs/screenshots/README.md). The interface comes in English and Japanese, dark and light.
 
 ## What you will see
 
