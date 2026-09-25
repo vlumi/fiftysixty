@@ -1,8 +1,14 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
+import { loadRegions, type Regions } from './regions/geometry'
 
 const MapView = lazy(() => import('./map/MapView'))
 
 export default function App() {
+  const [regions, setRegions] = useState<Regions | null>(null)
+  useEffect(() => {
+    loadRegions().then(setRegions, console.error)
+  }, [])
+
   return (
     <>
       <header>
@@ -11,7 +17,7 @@ export default function App() {
       </header>
       <main>
         <Suspense fallback={null}>
-          <MapView />
+          <MapView regions={regions} />
         </Suspense>
       </main>
     </>

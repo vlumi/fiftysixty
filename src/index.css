@@ -1,4 +1,4 @@
-/* Dark by default; the light set follows below. The numeric twins for WebGL live in shared/theme.ts. */
+/* Dark by default; the light set follows below. The numeric twins for WebGL live in shared/palette.ts. */
 :root {
   --bg: #0b0d14;
   --panel: #141826;

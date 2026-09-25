@@ -8,3 +8,6 @@ export const JAPAN_BOUNDS: LngLatBoundsLike = [
   [127, 30],
   [147, 46],
 ]
+
+/** The style's first label layer; the market layers are interleaved beneath it so the place names stay legible. */
+export const BELOW_LABELS = 'water_name'
