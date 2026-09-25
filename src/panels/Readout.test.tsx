@@ -147,3 +147,15 @@ test('a picked plant: its capacity and fuel, and that its output is not public',
     screen.getByText(/Nuclear\. Capacity as mapped in OpenStreetMap; what it runs is not public\./),
   ).toBeInTheDocument()
 })
+
+test('on a phone a picked area opens on its headline, the rest a tap away', async () => {
+  vi.stubGlobal('matchMedia', () => ({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() }))
+  render(<Readout slot={slot} record={record} day={day} flows={none} area="tokyo" onClose={vi.fn()} onSlot={vi.fn()} />)
+  expect(screen.getByRole('heading', { name: 'Tokyo 50 Hz' })).toBeInTheDocument()
+  expect(screen.queryByText('Tohoku')).not.toBeInTheDocument()
+  expect(screen.queryByRole('region', { name: 'What ran' })).not.toBeInTheDocument()
+  await userEvent.click(screen.getByRole('button', { name: 'More' }))
+  expect(screen.getByText('Tohoku')).toBeInTheDocument()
+  expect(screen.getByRole('region', { name: 'What ran' })).toBeInTheDocument()
+  vi.unstubAllGlobals()
+})

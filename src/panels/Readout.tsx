@@ -1,4 +1,4 @@
-import { Fragment } from 'react'
+import { Fragment, useState } from 'react'
 import type { PricedArea, SpotSlot } from '../market/jepx'
 import { capacityOf, type FlowSlot } from '../market/flows'
 import { SOURCES, type RecordSlot, type Source } from '../market/record'
@@ -7,6 +7,7 @@ import { linesOf, neighbors } from '../regions/interconnectors'
 import type { PlantProps } from '../regions/plants'
 import { SERIES_NAMES } from '../market/stack'
 import { mw, signed, yen } from '../shared/format'
+import { useNarrow } from '../shared/useNarrow'
 import styles from './Readout.module.css'
 import SupplyChart from './SupplyChart'
 
@@ -30,6 +31,11 @@ interface Props {
  * neighbors and what ran in it.
  */
 export default function Readout({ slot, record, day, flows, area, plant, onClose, onSlot }: Props) {
+  const narrow = useNarrow()
+  // On a phone the panel opens on its headline alone, since the map is what the screen is for; the rest is
+  // remembered for the area it was asked for, so another area opens folded again.
+  const [expandedFor, setExpandedFor] = useState<Area | null>(null)
+  const expanded = expandedFor !== null && expandedFor === area
   if (!slot) return null
   if (plant) {
     return (
@@ -52,10 +58,23 @@ export default function Readout({ slot, record, day, flows, area, plant, onClose
     <aside className={styles.panel} aria-label="Readout">
       {picked ? (
         <>
-          <AreaReadout area={picked} slot={slot} onClose={onClose} />
-          <Lines area={picked} flows={flows} />
-          {day?.length ? <SupplyChart day={day} slot={slot.slot} onSlot={onSlot} /> : null}
-          <Mix record={record} />
+          <AreaReadout area={picked} slot={slot} onClose={onClose} brief={narrow && !expanded} />
+          {narrow && (
+            <button
+              className={styles.more}
+              aria-expanded={expanded}
+              onClick={() => setExpandedFor(expanded ? null : area)}
+            >
+              {expanded ? 'Less' : 'More'}
+            </button>
+          )}
+          {(!narrow || expanded) && (
+            <>
+              <Lines area={picked} flows={flows} />
+              {day?.length ? <SupplyChart day={day} slot={slot.slot} onSlot={onSlot} /> : null}
+              <Mix record={record} />
+            </>
+          )}
         </>
       ) : (
         <SystemReadout slot={slot} okinawa={area === 'okinawa'} />
@@ -82,7 +101,18 @@ function SystemReadout({ slot, okinawa }: { slot: SpotSlot; okinawa: boolean }) 
   )
 }
 
-function AreaReadout({ area, slot, onClose }: { area: PricedArea; slot: SpotSlot; onClose: () => void }) {
+function AreaReadout({
+  area,
+  slot,
+  onClose,
+  brief = false,
+}: {
+  area: PricedArea
+  slot: SpotSlot
+  onClose: () => void
+  /** The name and the price alone, without the neighbors. */
+  brief?: boolean
+}) {
   const info = AREA_BY_ID[area]
   const price = slot.areaPrice[area]
   return (
@@ -101,9 +131,10 @@ function AreaReadout({ area, slot, onClose }: { area: PricedArea; slot: SpotSlot
         <dd>
           {yen(slot.systemPrice)} <span className="muted">{signed(slot.systemPrice - price)}</span>
         </dd>
-        {neighbors(area).map((n) => (
-          <Neighbor key={n} area={n as PricedArea} price={slot.areaPrice[n as PricedArea]} against={price} />
-        ))}
+        {!brief &&
+          neighbors(area).map((n) => (
+            <Neighbor key={n} area={n as PricedArea} price={slot.areaPrice[n as PricedArea]} against={price} />
+          ))}
       </dl>
     </>
   )

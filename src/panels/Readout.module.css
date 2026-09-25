@@ -64,12 +64,30 @@
   color: var(--text);
 }
 
-@media (max-width: 720px) {
+.more {
+  margin-top: 0.5rem;
+  padding: 0.1rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+@media (max-width: 720px), (max-height: 560px) {
   .panel {
+    top: 0.5rem;
     left: 0.5rem;
     right: 0.5rem;
     width: auto;
-    max-height: 55%;
+    max-height: 60%;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .price {
+    font-size: 1.25rem;
   }
 }
 
