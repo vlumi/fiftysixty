@@ -20,11 +20,19 @@ export function fiscalYear(date: Date): number {
   return date.getMonth() >= 3 ? date.getFullYear() : date.getFullYear() - 1
 }
 
-export async function loadSpot(year: number, base = '/data'): Promise<SpotDays> {
+/** The fiscal year's prices, or none when the host has no file for it, as before the fetcher took last year's. */
+export async function loadSpot(year: number, base = '/data'): Promise<SpotDays | null> {
   const url = `${base}/jepx-spot-${year}.csv`
   const response = await fetch(url)
+  if (response.status === 404 || response.headers.get('content-type')?.includes('text/html')) return null
   if (!response.ok) throw new Error(`${url}: ${response.status}`)
   return parseSpot(await response.text())
+}
+
+/** This fiscal year's prices and last year's together, by day. */
+export async function loadSpotYears(year: number, base = '/data'): Promise<SpotDays> {
+  const years = await Promise.all([year - 1, year].map((y) => loadSpot(y, base)))
+  return new Map(years.flatMap((days) => (days ? [...days] : [])))
 }
 
 /** Parses JEPX's spot_summary CSV: a Japanese header, then one row per half hour. Columns are found by name. */

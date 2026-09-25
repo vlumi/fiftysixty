@@ -32,8 +32,9 @@ export default function SupplyChart({ day, slot, onSlot }: Props) {
   }
   const line = (v: (s: StackedSlot) => number) =>
     `M${stack.slots.map((s) => `${x(s.slot).toFixed(1)},${y(v(s)).toFixed(1)}`).join('L')}`
+  const gridStep = (stack.maxMW - stack.minMW > 25 * GW ? 10 : 5) * GW
   const gridlines = []
-  for (let mw = Math.ceil(stack.minMW / (5 * GW)) * 5 * GW; mw <= stack.maxMW; mw += 5 * GW) gridlines.push(mw)
+  for (let mw = Math.ceil(stack.minMW / gridStep) * gridStep; mw <= stack.maxMW; mw += gridStep) gridlines.push(mw)
   const curtailed = stack.slots.some((s) => s.curtailedMW > 0)
 
   const slotAt = (e: PointerEvent<SVGSVGElement>) => {

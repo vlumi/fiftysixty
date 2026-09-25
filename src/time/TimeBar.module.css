@@ -14,7 +14,7 @@
 }
 
 .bar input[type='range'] {
-  width: 16rem;
+  width: 13rem;
   accent-color: var(--accent);
 }
 
@@ -37,6 +37,16 @@
 
 .bar button:not(:disabled):hover {
   background: var(--hover);
+}
+
+.bar select {
+  max-width: 7rem;
+  padding: 0.15rem 0.3rem;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
 }
 
 .bar input[type='date'] {

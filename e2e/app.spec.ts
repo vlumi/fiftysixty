@@ -88,3 +88,10 @@ async function kansai(page: Page) {
   const box = (await page.locator('.maplibregl-canvas').boundingBox())!
   return { x: box.width * 0.465, y: box.height * 0.72 }
 }
+
+test('a story day is a jump away: the day the data found most at the floor', async ({ page }) => {
+  await open(page)
+  await page.getByRole('combobox', { name: 'Jump to' }).selectOption('floor')
+  await expect(page.getByLabel('Delivery day')).toHaveValue('2026-09-22')
+  await expect(page.getByRole('complementary', { name: 'Readout' })).toContainText('System price')
+})
