@@ -1,0 +1,93 @@
+.figure {
+  margin: 0.75rem 0 0;
+}
+
+.chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  touch-action: none;
+  cursor: crosshair;
+  border-radius: 0.25rem;
+}
+
+.chart:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.band {
+  stroke: var(--panel);
+  stroke-width: 1;
+}
+
+.curtailed {
+  fill: var(--src-solar);
+  fill-opacity: 0.35;
+  stroke: var(--src-solar);
+  stroke-width: 1;
+  stroke-dasharray: 3 2;
+}
+
+.demand {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.marker {
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+
+.grid line {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.grid text,
+.hour {
+  fill: var(--muted);
+  font-size: 9px;
+}
+
+/* Read down the columns: the bands from the top of the stack, then the exchange, curtailment and the line. */
+.legend {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-flow: column;
+  grid-template-rows: repeat(6, auto);
+  gap: 0.1rem 0.75rem;
+  margin-top: 0.4rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.key {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+.swatch,
+.hatchedKey,
+.lineKey {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 2px;
+  flex: none;
+}
+
+.hatchedKey {
+  background: none !important;
+  border: 1px dashed;
+}
+
+.lineKey {
+  height: 0;
+  border-top: 2px solid var(--text);
+  border-radius: 0;
+}

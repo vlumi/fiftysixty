@@ -20,6 +20,8 @@ How fiftysixty works, as built. Everything under *Planned* is intent, kept apart
 
 **The record.** `market/record.ts` is the interface one transmission company at a time is wired behind: an adapter names the file for a month and parses it into days of half-hour slots with the demand, the MW by source (pumping, charging and exports negative) and the solar and wind curtailment; `market/tepco.ts` is the first, `market/adapters.ts` the table by area. The newest day runs only to the latest published half hour. `App.tsx` loads the month of the displayed day for the picked area on demand and remembers it, a month missing on the host being no record rather than an error.
 
+**The supply stack.** `market/stack.ts` groups the record's fourteen columns into eight series in a fixed stack order, coal and nuclear at the bottom, gas and hydro on top, with storage and the interconnectors as one signed exchange drawn gray above the stack when the area took power in and below zero when it sent power out, and curtailment as a hatched band on top. The order was chosen so every adjacent pair stays apart under color-blindness, checked with a validator rather than by eye; the series colors are CSS tokens, `--src-*`, in both theme sets. `panels/SupplyChart.tsx` draws the day as SVG under the demand line with the displayed half hour marked and is itself a slider: pointing, dragging or the arrow keys move the half hour, so the readout beside it is the tooltip. A legend names the bands; the numbers list under it is the table view.
+
 **The readout.** `panels/Readout.tsx` shows the displayed slot in numbers: with nothing picked, the system price and the spread across the areas; with an area picked by a click on the map, its price against the system price and against each neighbor across an interconnector, then what ran in it for the slot, the idle sources left out and curtailment shown when there was any. `regions/interconnectors.ts` is the hand-written list of the ten lines with their ends and kind, AC, HVDC or the frequency converters; the capacities come with OCCTO's data in M3. The picked area is outlined on the map.
 
 **Tests.** Unit tests on real rows cut from the JEPX file, which also feed the browser tests; component tests with the map mocked; Playwright against the built app in headless Chromium with the basemap's tile requests answered empty and the price file served from the fixture, so nothing depends on a third party but the style.
@@ -30,4 +32,4 @@ How fiftysixty works, as built. Everything under *Planned* is intent, kept apart
 
 **Layers.** `LineLayer` or `ArcLayer` for the interconnectors with width from flow and color from load, `ScatterplotLayer` for plants later; all fed from the store's per-slot selectors, as nebulosa's `layers.ts` is.
 
-**Readouts.** The supply stack for the day as a chart and the mix for the slot beside the price; a legend for sources.
+**Readouts.** The mix for the slot beside each region on the map.

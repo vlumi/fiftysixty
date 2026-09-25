@@ -39,6 +39,7 @@ export default function App() {
     )
   }, [adapter, recordKey, records])
   const record = recordKey ? recordSlot(records.get(recordKey), date, slot) : undefined
+  const recordedDay = recordKey && date ? records.get(recordKey)?.get(date) : undefined
 
   return (
     <>
@@ -54,7 +55,14 @@ export default function App() {
         <Suspense fallback={null}>
           <MapView regions={regions} prices={displayed?.areaPrice} selected={area} onPick={selectArea} />
         </Suspense>
-        <Readout slot={displayed} record={record} area={area} onClose={() => selectArea(null)} />
+        <Readout
+          slot={displayed}
+          record={record}
+          day={recordedDay}
+          area={area}
+          onClose={() => selectArea(null)}
+          onSlot={setSlot}
+        />
         <TimeBar date={date} days={days} slot={slot} onDate={setDate} onSlot={setSlot} />
         <Legend />
       </main>
