@@ -1,5 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
+import { ADAPTERS } from './market/adapters'
 import { fiscalYear, latestDay, loadSpot, slotOf, type SpotDays } from './market/jepx'
+import { loadRecord, monthOf, recordSlot, type RecordDays } from './market/record'
 import Legend from './panels/Legend'
 import Readout from './panels/Readout'
 import { loadRegions, type Regions } from './regions/geometry'
@@ -11,6 +13,7 @@ const MapView = lazy(() => import('./map/MapView'))
 export default function App() {
   const [regions, setRegions] = useState<Regions | null>(null)
   const [spot, setSpot] = useState<SpotDays | null>(null)
+  const [records, setRecords] = useState<ReadonlyMap<string, RecordDays | null>>(new Map())
   useEffect(() => {
     loadRegions().then(setRegions, console.error)
     loadSpot(fiscalYear(new Date())).then(setSpot, console.error)
@@ -26,6 +29,17 @@ export default function App() {
   const days = spot ? [...spot.keys()].sort() : []
   const displayed = slotOf(spot, date, slot)
 
+  const adapter = area ? ADAPTERS[area] : undefined
+  const recordKey = adapter && date ? `${adapter.area}/${monthOf(date)}` : null
+  useEffect(() => {
+    if (!adapter || !recordKey || records.has(recordKey)) return
+    loadRecord(adapter, recordKey.slice(-6)).then(
+      (days) => setRecords((r) => new Map(r).set(recordKey, days)),
+      console.error,
+    )
+  }, [adapter, recordKey, records])
+  const record = recordKey ? recordSlot(records.get(recordKey), date, slot) : undefined
+
   return (
     <>
       <header>
@@ -40,7 +54,7 @@ export default function App() {
         <Suspense fallback={null}>
           <MapView regions={regions} prices={displayed?.areaPrice} selected={area} onPick={selectArea} />
         </Suspense>
-        <Readout slot={displayed} area={area} onClose={() => selectArea(null)} />
+        <Readout slot={displayed} record={record} area={area} onClose={() => selectArea(null)} />
         <TimeBar date={date} days={days} slot={slot} onDate={setDate} onSlot={setSlot} />
         <Legend />
       </main>

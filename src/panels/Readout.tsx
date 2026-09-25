@@ -1,23 +1,33 @@
+import { ADAPTERS } from '../market/adapters'
 import type { PricedArea, SpotSlot } from '../market/jepx'
+import { SOURCES, type RecordSlot, type Source } from '../market/record'
 import { AREA_BY_ID, PRICED_AREAS, type Area } from '../regions/areas'
 import { neighbors } from '../regions/interconnectors'
-import { signed, yen } from '../shared/format'
+import { mw, signed, yen } from '../shared/format'
 import styles from './Readout.module.css'
 
 interface Props {
   slot: SpotSlot | undefined
+  /** The picked area's balance for the slot, where its transmission company is wired and has published it. */
+  record: RecordSlot | undefined
   area: Area | null
   onClose: () => void
 }
 
-/** The displayed slot in numbers: the system price and the spread across the areas, or a picked area against its neighbors. */
-export default function Readout({ slot, area, onClose }: Props) {
+/**
+ * The displayed slot in numbers: the system price and the spread across the areas, or a picked area against its
+ * neighbors and what ran in it.
+ */
+export default function Readout({ slot, record, area, onClose }: Props) {
   if (!slot) return null
   const picked = area && area !== 'okinawa' ? (area as PricedArea) : null
   return (
     <aside className={styles.panel} aria-label="Readout">
       {picked ? (
-        <AreaReadout area={picked} slot={slot} onClose={onClose} />
+        <>
+          <AreaReadout area={picked} slot={slot} onClose={onClose} />
+          <Mix area={picked} record={record} />
+        </>
       ) : (
         <SystemReadout slot={slot} okinawa={area === 'okinawa'} />
       )}
@@ -77,6 +87,53 @@ function Neighbor({ area, price, against }: { area: PricedArea; price: number; a
       <dd>
         {yen(price)} <span className="muted">{signed(price - against)}</span>
       </dd>
+    </>
+  )
+}
+
+const SOURCE_NAMES: Record<Source, string> = {
+  nuclear: 'Nuclear',
+  lng: 'Gas',
+  coal: 'Coal',
+  oil: 'Oil',
+  otherThermal: 'Other thermal',
+  hydro: 'Hydro',
+  geothermal: 'Geothermal',
+  biomass: 'Biomass',
+  solar: 'Solar',
+  wind: 'Wind',
+  pumped: 'Pumped storage',
+  battery: 'Batteries',
+  interconnector: 'Interconnectors',
+  other: 'Other',
+}
+
+/** What ran in the area for the slot, in MW, the sources that were idle left out; curtailment when there was any. */
+function Mix({ area, record }: { area: PricedArea; record: RecordSlot | undefined }) {
+  if (!ADAPTERS[area]) return <p className="muted">The record for {AREA_BY_ID[area].name} is not wired yet.</p>
+  if (!record) return <p className="muted">No record for this half hour yet.</p>
+  const ran = SOURCES.filter((s) => record.bySource[s] !== 0)
+  return (
+    <section aria-label="What ran">
+      <h3>
+        Demand {mw(record.demandMW)} <span className="muted">MW</span>
+      </h3>
+      <dl className={styles.rows}>
+        {ran.map((s) => (
+          <Row key={s} name={SOURCE_NAMES[s]} value={record.bySource[s]} />
+        ))}
+        {record.curtailedMW.solar > 0 && <Row name="Solar curtailed" value={record.curtailedMW.solar} />}
+        {record.curtailedMW.wind > 0 && <Row name="Wind curtailed" value={record.curtailedMW.wind} />}
+      </dl>
+    </section>
+  )
+}
+
+function Row({ name, value }: { name: string; value: number }) {
+  return (
+    <>
+      <dt>{name}</dt>
+      <dd>{mw(value)}</dd>
     </>
   )
 }

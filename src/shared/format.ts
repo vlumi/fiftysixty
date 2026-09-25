@@ -6,3 +6,6 @@ export function signed(delta: number): string {
   const text = yen(Math.abs(delta))
   return delta < 0 ? `−${text}` : delta > 0 ? `+${text}` : `±${text}`
 }
+
+/** Megawatts as a whole number with thousands separators, the sign kept for pumping, charging and exports. */
+export const mw = (value: number) => Math.round(value).toLocaleString('en-US').replace('-', '−')

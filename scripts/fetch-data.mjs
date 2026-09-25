@@ -16,7 +16,9 @@ import { join } from 'node:path'
 const output = process.argv[2] ?? 'public/data'
 const now = new Date()
 const fiscalYear = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1
-const month = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}`
+const yyyymm = (d) => `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}`
+const month = yyyymm(now)
+const previousMonth = yyyymm(new Date(now.getFullYear(), now.getMonth() - 1, 1))
 
 const SOURCES = [
   {
@@ -24,11 +26,12 @@ const SOURCES = [
     url: `https://www.jepx.jp/js/csv_read.php?dir=spot_summary&file=spot_summary_${fiscalYear}.csv`,
     headers: { Referer: 'https://www.jepx.jp/electricpower/market-data/spot/' },
   },
-  {
-    name: `tepco-jukyu-${month}.csv`,
-    url: `https://www.tepco.co.jp/forecast/html/images/eria_jukyu_${month}_03.csv`,
+  // The current month grows through the day; the previous one stays, so the map has a month of record behind it.
+  ...[previousMonth, month].map((m) => ({
+    name: `tepco-jukyu-${m}.csv`,
+    url: `https://www.tepco.co.jp/forecast/html/images/eria_jukyu_${m}_03.csv`,
     headers: {},
-  },
+  })),
 ]
 
 function decode(bytes) {
