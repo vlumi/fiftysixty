@@ -1,6 +1,7 @@
 import type { KeyboardEvent, PointerEvent } from 'react'
 import type { RecordSlot } from '../market/record'
-import { SERIES, SERIES_NAMES, SLOTS, stackDay, type Series, type StackedSlot } from '../market/stack'
+import { SLOTS } from '../market/jepx'
+import { SERIES, SERIES_NAMES, stackDay, type Series, type StackedSlot } from '../market/stack'
 import { clampSlot, slotRange } from '../time/slots'
 import styles from './SupplyChart.module.css'
 

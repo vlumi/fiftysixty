@@ -1,6 +1,6 @@
 import { Fragment } from 'react'
 import type { PricedArea, SpotSlot } from '../market/jepx'
-import { load, type FlowSlot } from '../market/flows'
+import { capacityOf, type FlowSlot } from '../market/flows'
 import { SOURCES, type RecordSlot, type Source } from '../market/record'
 import { AREA_BY_ID, PRICED_AREAS, type Area } from '../regions/areas'
 import { linesOf, neighbors } from '../regions/interconnectors'
@@ -151,10 +151,10 @@ function Lines({ area, flows }: { area: PricedArea; flows: ReadonlyMap<string, F
   const rows = linesOf(area).flatMap((line) => {
     const at = flows.get(line.id)
     if (!at) return []
-    const inward = (line.to === area) === at.flowMW >= 0
-    const capacity = at.flowMW >= 0 ? at.capacityMW.forward : at.capacityMW.reverse
+    const forward = at.flowMW >= 0
+    const inward = (line.to === area) === forward
     return [
-      { id: line.id, label: line.label, inward, mw: Math.abs(at.flowMW), capacity, load: load(at), split: at.split },
+      { id: line.id, label: line.label, inward, mw: Math.abs(at.flowMW), capacity: capacityOf(at), split: at.split },
     ]
   })
   if (!rows.length) return null

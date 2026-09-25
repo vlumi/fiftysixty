@@ -3,7 +3,8 @@ import { IconLayer, SolidPolygonLayer } from '@deck.gl/layers'
 import { load, type FlowSlot } from '../market/flows'
 import { AREA_BY_ID, type Area } from '../regions/areas'
 import { OCCTO_LINE_IDS } from '../regions/interconnectors'
-import type { Palette, Rgb, Rgba } from '../shared/palette'
+import type { Palette, Rgba } from '../shared/palette'
+import { lerpRgb } from '../shared/scale'
 import { BELOW_LABELS } from './basemap'
 import type { Interleaved } from './layers'
 
@@ -147,8 +148,6 @@ export function heading([[x1, y1], [x2, y2]]: FlowDatum['path']): number {
   return (Math.atan2((y2 - y1) / Math.cos(lat), x2 - x1) * 180) / Math.PI
 }
 
-const mix = (a: Rgb, b: Rgb, t: number): Rgb => [0, 1, 2].map((i) => Math.round(a[i] + (b[i] - a[i]) * t)) as Rgb
-
 /**
  * The flows as arrows: a solid shaft tapering from a hair where the power leaves to the flow's width where the head
  * begins, colored by the load, with a bright rim under it where the market split, and a head in the same color,
@@ -157,7 +156,7 @@ const mix = (a: Rgb, b: Rgb, t: number): Rgb => [0, 1, 2].map((i) => Math.round(
 export function buildFlowLayers(flows: ReadonlyMap<string, FlowSlot>, palette: Palette, zoom: number): Layer[] {
   const data = flowData(flows)
   if (!data.length) return []
-  const color = (d: FlowDatum): Rgba => [...mix(palette.flow.idle, palette.flow.full, d.load), 230]
+  const color = (d: FlowDatum): Rgba => [...lerpRgb(palette.flow.idle, palette.flow.full, d.load), 230]
   const head = (d: FlowDatum): [number, number] => shaft(d.path)[1]
   return [
     new SolidPolygonLayer<FlowDatum, Interleaved>({
@@ -174,7 +173,6 @@ export function buildFlowLayers(flows: ReadonlyMap<string, FlowSlot>, palette: P
       data,
       getPolygon: (d) => taperPolygon(d, zoom),
       getFillColor: color,
-      pickable: true,
       updateTriggers: { getPolygon: zoom, getFillColor: palette },
     }),
     new IconLayer<FlowDatum, Interleaved>({

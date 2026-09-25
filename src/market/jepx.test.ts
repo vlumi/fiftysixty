@@ -36,9 +36,9 @@ test('the latest day and a slot in it', () => {
 })
 
 test('the fiscal year turns in April', () => {
-  expect(fiscalYear(new Date(2026, 8, 25))).toBe(2026)
-  expect(fiscalYear(new Date(2027, 2, 31))).toBe(2026)
-  expect(fiscalYear(new Date(2027, 3, 1))).toBe(2027)
+  expect(fiscalYear('2026-09-25')).toBe(2026)
+  expect(fiscalYear('2027-03-31')).toBe(2026)
+  expect(fiscalYear('2027-04-01')).toBe(2027)
 })
 
 test('the years are loaded together, a year the host lacks contributing nothing', async () => {

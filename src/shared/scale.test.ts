@@ -1,5 +1,5 @@
 import type { Rgb } from './palette'
-import { cssRgb, PRICE_DOMAIN, priceColor } from './scale'
+import { cssRgb, lerpRgb, PRICE_DOMAIN, priceColor } from './scale'
 
 const ramp: Rgb[] = [
   [0, 0, 0],
@@ -21,4 +21,8 @@ test('between stops the color is interpolated', () => {
 
 test('a color as CSS', () => {
   expect(cssRgb([1, 2, 3])).toBe('rgb(1 2 3)')
+})
+
+test('a color between two', () => {
+  expect(lerpRgb([0, 0, 0], [100, 200, 50], 0.5)).toEqual([50, 100, 25])
 })

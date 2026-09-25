@@ -1,4 +1,5 @@
 import { OCCTO_LINES } from '../regions/interconnectors'
+import { fetchText } from './fetch'
 
 /** One half hour of a line as OCCTO forecast it the day before: limits both ways, the flow, and whether the market split there. */
 export interface FlowSlot {
@@ -18,11 +19,8 @@ export type FlowDays = Map<string, Map<string, FlowSlot[]>>
 const LINE_BY_NAME = new Map(OCCTO_LINES.map((l) => [l.name, l.id]))
 
 export async function loadFlows(month: string, base = '/data'): Promise<FlowDays | null> {
-  const url = `${base}/occto-renkei-${month}.csv`
-  const response = await fetch(url)
-  if (response.status === 404 || response.headers.get('content-type')?.includes('text/html')) return null
-  if (!response.ok) throw new Error(`${url}: ${response.status}`)
-  return parseFlows(await response.text())
+  const text = await fetchText(`${base}/occto-renkei-${month}.csv`)
+  return text === null ? null : parseFlows(text)
 }
 
 /**
@@ -99,8 +97,11 @@ export function flowsAt(days: FlowDays | null | undefined, date: string | null, 
   return at
 }
 
+/** The operating capacity in the direction the line flows. */
+export const capacityOf = (s: FlowSlot) => (s.flowMW >= 0 ? s.capacityMW.forward : s.capacityMW.reverse)
+
 /** How full the line is in the direction of its flow, 0 to 1; 0 when it has no capacity that way. */
 export function load(s: FlowSlot): number {
-  const capacity = s.flowMW >= 0 ? s.capacityMW.forward : s.capacityMW.reverse
+  const capacity = capacityOf(s)
   return capacity > 0 ? Math.min(1, Math.abs(s.flowMW) / capacity) : 0
 }

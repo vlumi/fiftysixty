@@ -53,7 +53,8 @@ export default function MapView({ regions, prices, selected, flows, mixes = {}, 
     overlay.current = new MapLibreOverlay({
       interleaved: true,
       layers: [],
-      onClick: (info) => pick.current((info.object as { properties: AreaProps } | undefined)?.properties.area ?? null),
+      onClick: (info) =>
+        pick.current((info.object as { properties?: AreaProps } | undefined)?.properties?.area ?? null),
       getCursor: ({ isHovering, isDragging }) => (isDragging ? 'grabbing' : isHovering ? 'pointer' : 'grab'),
     })
     map.addControl(overlay.current)
