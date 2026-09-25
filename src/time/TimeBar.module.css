@@ -1,0 +1,45 @@
+.bar {
+  position: absolute;
+  z-index: 5;
+  left: 0.75rem;
+  bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--panel);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.bar input[type='range'] {
+  width: 16rem;
+  accent-color: var(--accent);
+}
+
+.bar input[type='date'] {
+  font: inherit;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  padding: 0.1rem 0.3rem;
+}
+
+.bar output {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 720px) {
+  .bar {
+    left: 0.5rem;
+    right: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .bar input[type='range'] {
+    flex: 1 1 8rem;
+    width: auto;
+  }
+}

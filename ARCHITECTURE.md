@@ -12,14 +12,20 @@ How fiftysixty works, as built. Everything under *Planned* is intent, kept apart
 
 **Theme tokens.** `index.css` carries the dark and light sets, with two colors named for the halves of the grid, `--hz50` and `--hz60`, so the split can be drawn in the app's own palette.
 
-**Tests.** A component test with the map mocked, and two Playwright tests against the built app in headless Chromium with the basemap's tile requests answered empty, so nothing depends on a third party but the style.
+**The prices.** `market/jepx.ts` parses JEPX's spot CSV into a map from delivery day to its 48 slots, each with the system price, the nine area prices keyed by area id and the contracted volume; the columns are found by their Japanese names, so a reordered header still parses and a missing one is an error. `App.tsx` loads the current fiscal year's file once and passes the displayed slot's prices down as props.
+
+**The clock.** `store.ts` holds what the reader has chosen: the delivery day (null for the newest priced day), the half-hour slot and the selected area, as plain zustand actions tested without React. `time/TimeBar.tsx` is a controlled row of native inputs, a date picker bounded to the days there are prices for and a range over the 48 slots, with the slot's half hour read out beside them; native inputs scrub and take the keyboard for free. Play at speed is M4.
+
+**The price on the map.** With prices, the areas are filled through `shared/scale.ts`: one warm hue from near the surface to bright over a fixed 0 to 50 yen domain, so one day's colors mean the same as another's; Okinawa, which has no price, is muted. `panels/Legend.tsx` draws the same ramp with its ends.
+
+**Tests.** Unit tests on real rows cut from the JEPX file, which also feed the browser tests; component tests with the map mocked; Playwright against the built app in headless Chromium with the basemap's tile requests answered empty and the price file served from the fixture, so nothing depends on a third party but the style.
 
 ## Planned
 
-**Parsing.** A `market/` module parses the CSVs into typed rows: JEPX into `{ date, slot, systemPrice, areaPrice: Record<Area, number>, volume }`, the supply-demand records into `{ date, slot, demand, bySource: Record<Source, number>, curtailed: { solar, wind }, interconnector }` behind one interface per transmission company, since their layouts differ. Tests on real rows cut from the files.
+**Parsing the records.** The supply-demand records into `{ date, slot, demand, bySource: Record<Source, number>, curtailed: { solar, wind }, interconnector }` behind one interface per transmission company, since their layouts differ. Tests on real rows cut from the files.
 
-**The clock.** nebulosa's frame store and time bar, with the day's 48 slots as the domain instead of a continuous time; the displayed slot drives every layer through one selector.
+**Playing.** nebulosa's frame store and eased clock, with the day's 48 slots as the domain, so a day runs in seconds.
 
-**Layers.** deck.gl `GeoJsonLayer` for the regions colored by price, `LineLayer` or `ArcLayer` for the interconnectors with width from flow and color from load, `ScatterplotLayer` for plants later; all fed from the store's per-slot selectors, as nebulosa's `layers.ts` is.
+**Layers.** `LineLayer` or `ArcLayer` for the interconnectors with width from flow and color from load, `ScatterplotLayer` for plants later; all fed from the store's per-slot selectors, as nebulosa's `layers.ts` is.
 
 **Readouts.** A panel for the selected region with the price, the supply stack for the day as a chart, and the mix for the slot; a legend for price and for sources.
