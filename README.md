@@ -37,7 +37,7 @@ Fifty-sixty is the grid: 50 Hz east of the Fossa Magna, 60 Hz west of it, a divi
 - **OCCTO** for interconnector capacities and flows.
 - Region boundaries from the prefecture polygons of [dataofjapan/land](https://github.com/dataofjapan/land), derived from GSI's 地球地図日本 (Global Map Japan); plant locations from METI's and OCCTO's registries where they are public.
 
-Everything is fetched by a script on the host once a day and served as static files. No backend, no account, no key.
+Everything is fetched by a script on the host once an hour and served as static files. No backend, no account, no key.
 
 ## Development
 
@@ -49,7 +49,7 @@ npm test          # unit and component tests
 npm run test:e2e  # browser tests against the built app
 ```
 
-`./deploy.sh` builds and publishes a release under a web root and installs the daily data refresh; [nginx.conf.example](nginx.conf.example) is the server block.
+`./deploy.sh` builds and publishes a release under a web root and installs the hourly data refresh; [nginx.conf.example](nginx.conf.example) is the server block.
 
 ## License
 
