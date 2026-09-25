@@ -4,11 +4,14 @@
 //   node scripts/fetch-data.mjs /var/www/fiftysixty/data
 //
 // JEPX publishes the day-ahead spot market as one CSV per fiscal year (April to March); each of the
-// transmission companies publishes its area's half-hourly supply-demand record, TEPCO and Kyushu as one
-// CSV per month. JEPX is UTF-8; TEPCO's files are UTF-8 some months and Shift_JIS others and Kyushu's
-// are Shift_JIS, so each file is decoded as UTF-8 when it is valid UTF-8 and as Shift_JIS otherwise, and
-// written as UTF-8 either way. JEPX serves its file only with the market page as the referer, and
-// Kyushu's CDN refuses Node's TLS client while accepting curl's, so every file is downloaded with curl.
+// transmission companies publishes its area's half-hourly supply-demand record as one CSV per month under
+// OCCTO's file name, eria_jukyu_<month>_<area number>.csv, on a host of its own. JEPX is UTF-8; the
+// records are Shift_JIS, or UTF-8 some months at TEPCO, so each file is decoded as UTF-8 when it is valid
+// UTF-8 and as Shift_JIS otherwise, and written as UTF-8 either way. JEPX serves its file only with the
+// market page as the referer, and Kyushu's CDN refuses Node's TLS client while accepting curl's, so every
+// file is downloaded with curl. Tohoku posts the running month as one file per day and the whole month
+// only around the 25th of the next, so its month is stitched from the days when the month's own file is
+// not there; a month no company has published at all is skipped rather than an error.
 // All sources move once a day, the auction result by late morning and the previous day's balance by
 // evening, so a daily fetch after both is current; an intraday view would want its own, more frequent
 // fetch of the hour-ahead and flow data.
@@ -24,6 +27,35 @@ const yyyymm = (d) => `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, 
 const month = yyyymm(now)
 const previousMonth = yyyymm(new Date(now.getFullYear(), now.getMonth() - 1, 1))
 
+/** Where each transmission company keeps the month's record, by the area's name in the data directory. */
+const RECORDS = {
+  hokkaido: {
+    month: (m) =>
+      `https://www.hepco.co.jp/network/con_service/public_document/supply_demand_results/csv/eria_jukyu_${m}_01.csv`,
+  },
+  tohoku: {
+    month: (m) => `https://setsuden.nw.tohoku-epco.co.jp/common/demand/eria_jukyu_${m}_02.csv`,
+    day: (d) => `https://setsuden.nw.tohoku-epco.co.jp/common/demand/realtime_jukyu/realtime_jukyu_${d}_02.csv`,
+  },
+  tepco: { month: (m) => `https://www.tepco.co.jp/forecast/html/images/eria_jukyu_${m}_03.csv` },
+  chubu: { month: (m) => `https://powergrid.chuden.co.jp/denki_yoho_content_data/eria_jukyu_${m}_04.csv` },
+  hokuriku: { month: (m) => `https://www.rikuden.co.jp/nw/denki-yoho/csv/eria_jukyu_${m}_05.csv` },
+  kansai: {
+    month: (m) => `https://www.kansai-td.co.jp/interchange/denkiyoho/area-performance/eria_jukyu_${m}_06.csv`,
+  },
+  chugoku: { month: (m) => `https://www.energia.co.jp/nw/jukyuu/sys/eria_jukyu_${m}_07.csv` },
+  shikoku: { month: (m) => `https://www.yonden.co.jp/nw/supply_demand/csv/eria_jukyu_${m}_08.csv` },
+  kyushu: { month: (m) => `https://www.kyuden.co.jp/td_area_jukyu/csv/eria_jukyu_${m}_09.csv` },
+}
+
+/** The days of a month that have begun, as YYYYMMDD. */
+function daysOf(m) {
+  const year = Number(m.slice(0, 4))
+  const monthIndex = Number(m.slice(4)) - 1
+  const last = m === month ? now.getDate() : new Date(year, monthIndex + 1, 0).getDate()
+  return Array.from({ length: last }, (_, i) => `${m}${String(i + 1).padStart(2, '0')}`)
+}
+
 const SOURCES = [
   {
     name: `jepx-spot-${fiscalYear}.csv`,
@@ -31,18 +63,14 @@ const SOURCES = [
     headers: { Referer: 'https://www.jepx.jp/electricpower/market-data/spot/' },
   },
   // The current month grows through the day; the previous one stays, so the map has a month of record behind it.
-  ...[previousMonth, month].flatMap((m) => [
-    {
-      name: `tepco-jukyu-${m}.csv`,
-      url: `https://www.tepco.co.jp/forecast/html/images/eria_jukyu_${m}_03.csv`,
+  ...[previousMonth, month].flatMap((m) =>
+    Object.entries(RECORDS).map(([area, { month: path, day }]) => ({
+      name: `${area}-jukyu-${m}.csv`,
+      url: path(m),
       headers: {},
-    },
-    {
-      name: `kyushu-jukyu-${m}.csv`,
-      url: `https://www.kyuden.co.jp/td_area_jukyu/csv/eria_jukyu_${m}_09.csv`,
-      headers: {},
-    },
-  ]),
+      days: day && daysOf(m).map(day),
+    })),
+  ),
 ]
 
 function decode(bytes) {
@@ -55,10 +83,26 @@ function decode(bytes) {
 
 const USER_AGENT = 'fiftysixty/0.0 (+https://github.com/vlumi/fiftysixty)'
 
+/** The file's bytes, or null when the server has no such file yet. */
 async function download(source, target) {
   const headers = Object.entries(source.headers).flatMap(([k, v]) => ['-H', `${k}: ${v}`])
-  await promisify(execFile)('curl', ['-fsSL', '--compressed', '-A', USER_AGENT, ...headers, '-o', target, source.url])
+  const args = ['-sSL', '--compressed', '-A', USER_AGENT, ...headers, '-o', target, '-w', '%{http_code}', source.url]
+  const { stdout: status } = await promisify(execFile)('curl', args)
+  if (status === '404') return null
+  if (status !== '200') throw new Error(`${source.url} responded ${status}`)
   return readFile(target)
+}
+
+/** The month stitched from its daily files, the header kept once; null when not even the first day is there. */
+async function downloadDays(source, target) {
+  const lines = []
+  for (const url of source.days) {
+    const bytes = await download({ ...source, url }, target)
+    if (!bytes) break
+    const day = decode(bytes).trim().split(/\r?\n/)
+    lines.push(...(lines.length ? day.slice(2) : day))
+  }
+  return lines.length ? lines.join('\n') + '\n' : null
 }
 
 await mkdir(output, { recursive: true })
@@ -66,7 +110,12 @@ for (const source of SOURCES) {
   const target = join(output, source.name)
   const raw = `${target}.raw`
   try {
-    const text = decode(await download(source, raw))
+    const bytes = await download(source, raw)
+    const text = bytes ? decode(bytes) : source.days ? await downloadDays(source, raw) : null
+    if (!text) {
+      console.log(`not published yet: ${source.name}`)
+      continue
+    }
     if (!text.includes(',') || text.trimStart().startsWith('<'))
       throw new Error(`Unexpected payload from ${source.url}`)
     await writeFile(`${target}.tmp`, text)
