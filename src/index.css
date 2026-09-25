@@ -1,0 +1,85 @@
+/* Dark by default; the light set follows below. The numeric twins for WebGL live in shared/theme.ts. */
+:root {
+  --bg: #0b0d14;
+  --panel: #141826;
+  --text: #d6d9e0;
+  --muted: #8a90a0;
+  --accent: #00c6e6;
+  --border: rgb(255 255 255 / 0.15);
+  --border-strong: rgb(255 255 255 / 0.4);
+  --hover: rgb(255 255 255 / 0.08);
+  --fill-soft: rgb(255 255 255 / 0.12);
+  --hz50: #00c6e6;
+  --hz60: #eedd66;
+
+  font:
+    16px/1.5 system-ui,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  color-scheme: dark;
+}
+
+:root[data-theme='light'] {
+  --bg: #f4f5f8;
+  --panel: #ffffff;
+  --text: #1c1f26;
+  --muted: #5b6270;
+  --accent: #007a90;
+  --border: rgb(0 0 0 / 0.15);
+  --border-strong: rgb(0 0 0 / 0.45);
+  --hover: rgb(0 0 0 / 0.06);
+  --fill-soft: rgb(0 0 0 / 0.1);
+  --hz50: #007a90;
+  --hz60: #8f5f00;
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+}
+
+#root {
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+header p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+main {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* More specific than MapLibre's own .maplibregl-map { position: relative }, which would collapse the container. */
+main > .map {
+  position: absolute;
+  inset: 0;
+}
+
+.muted {
+  color: var(--muted);
+}
