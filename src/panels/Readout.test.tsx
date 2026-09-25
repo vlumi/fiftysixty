@@ -143,9 +143,9 @@ test('a picked plant: its capacity and fuel, and that its output is not public',
   )
   expect(screen.getByRole('heading', { name: 'Kashiwazaki-Kariwa Nuclear Power Plant' })).toBeInTheDocument()
   expect(screen.getByText('8,212')).toBeInTheDocument()
-  expect(
-    screen.getByText(/Nuclear\. Capacity as mapped in OpenStreetMap; what it runs is not public\./),
-  ).toBeInTheDocument()
+  expect(screen.getByText('Nuclear').className).toMatch(/pill/)
+  expect(screen.getByText('Nuclear').className).toMatch(/nuclear/)
+  expect(screen.getByText('Capacity as mapped in OpenStreetMap; what it runs is not public.')).toBeInTheDocument()
 })
 
 test('on a phone a picked area opens on its headline, the rest a tap away', async () => {
