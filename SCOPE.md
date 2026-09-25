@@ -4,7 +4,7 @@ The Japanese power market on a map, from public data. A sibling of [nebulosa](ht
 
 **The name:** 50 Hz east, 60 Hz west, and the three converter stations between them that cap the flow across the middle of the country; also Nykänen's *fifty-sixty*, "more or less", which is what a day-ahead price is. Styled 50/60.
 
-**Status:** unofficial demo project, not affiliated with JEPX, OCCTO or any utility. Bootstrapped 2026-09-25 with the toolchain and a map of Japan; nothing drawn yet. The milestones below are in the order they are meant to land; the first one alone makes the point.
+**Status:** unofficial demo project, not affiliated with JEPX, OCCTO or any utility. Bootstrapped 2026-09-25 with the toolchain and a map of Japan; the same day, the day-ahead price on the map. The milestones below are in the order they are meant to land; the first one alone makes the point.
 
 ## Data
 
@@ -32,7 +32,7 @@ All public, all fetched by `scripts/fetch-data.mjs` on the host into `data/` and
 
 Toolchain, CI, a map of Japan under the name, the data fetcher for JEPX and TEPCO with real files verified, deploy script and nginx block.
 
-### M1 — the price on the map
+### M1 — the price on the map (done 2026-09-25)
 
 - Regions drawn from the prefecture polygons, colored by their JEPX area price for the displayed slot, with a legend.
 - A time bar over one day with the 48 slots, scrubbable, and a date picker; the price per region updates as the slot moves.
