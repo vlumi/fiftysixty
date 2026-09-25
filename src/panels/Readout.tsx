@@ -4,6 +4,8 @@ import { capacityOf, type FlowSlot } from '../market/flows'
 import { SOURCES, type RecordSlot, type Source } from '../market/record'
 import { AREA_BY_ID, PRICED_AREAS, type Area } from '../regions/areas'
 import { linesOf, neighbors } from '../regions/interconnectors'
+import type { PlantProps } from '../regions/plants'
+import { SERIES_NAMES } from '../market/stack'
 import { mw, signed, yen } from '../shared/format'
 import styles from './Readout.module.css'
 import SupplyChart from './SupplyChart'
@@ -17,6 +19,8 @@ interface Props {
   /** OCCTO's forecast for the slot's interconnectors, by line id. */
   flows: ReadonlyMap<string, FlowSlot>
   area: Area | null
+  /** A picked plant, shown instead of an area. */
+  plant?: PlantProps | null
   onClose: () => void
   onSlot: (slot: number) => void
 }
@@ -25,8 +29,24 @@ interface Props {
  * The displayed slot in numbers: the system price and the spread across the areas, or a picked area against its
  * neighbors and what ran in it.
  */
-export default function Readout({ slot, record, day, flows, area, onClose, onSlot }: Props) {
+export default function Readout({ slot, record, day, flows, area, plant, onClose, onSlot }: Props) {
   if (!slot) return null
+  if (plant) {
+    return (
+      <aside className={styles.panel} aria-label="Readout">
+        <button className={styles.close} aria-label="Close" onClick={onClose}>
+          ×
+        </button>
+        <h2>{plant.name || 'A plant'}</h2>
+        <p className={styles.price}>
+          {mw(plant.mw)} <span className="muted">MW</span>
+        </p>
+        <p className="muted">
+          {SERIES_NAMES[plant.fuel]}. Capacity as mapped in OpenStreetMap; what it runs is not public.
+        </p>
+      </aside>
+    )
+  }
   const picked = area && area !== 'okinawa' ? (area as PricedArea) : null
   return (
     <aside className={styles.panel} aria-label="Readout">

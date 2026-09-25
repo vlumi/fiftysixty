@@ -14,7 +14,7 @@ beforeEach(() => {
       Promise.resolve(
         url.endsWith('jepx-spot-2026.csv')
           ? new Response(csv)
-          : url.endsWith('.csv')
+          : url.endsWith('.csv') || url.endsWith('plants.geojson')
             ? new Response('', { status: 404 })
             : new Response(JSON.stringify({ type: 'FeatureCollection', features: [] })),
       ),

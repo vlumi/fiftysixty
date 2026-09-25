@@ -30,6 +30,16 @@
   border-top: 3px solid var(--accent);
 }
 
+.dot {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  vertical-align: middle;
+  border-radius: 50%;
+  background: var(--src-gas);
+  border: 1px solid var(--bg);
+}
+
 .rimmed {
   box-shadow: 0 0 0 2px var(--text);
 }

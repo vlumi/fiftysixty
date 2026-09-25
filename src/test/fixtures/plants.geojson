@@ -1,0 +1,30 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [136.9605, 34.8404] },
+      "properties": { "id": "way/101926129", "name": "碧南火力発電所", "fuel": "coal", "mw": 4100 }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [138.5992, 37.4309] },
+      "properties": {
+        "id": "way/216480979",
+        "name": "Kashiwazaki-Kariwa Nuclear Power Plant",
+        "fuel": "nuclear",
+        "mw": 8212
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [134.1559, 34.6387] },
+      "properties": { "id": "relation/9172397", "name": "Setouchi Kirei Solar Farm", "fuel": "solar", "mw": 235 }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [138.8886, 35.7162] },
+      "properties": { "id": "way/1087202479", "name": "葛野川地下発電所", "fuel": "hydro", "mw": 1600 }
+    }
+  ]
+}

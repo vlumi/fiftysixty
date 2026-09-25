@@ -24,7 +24,7 @@ Every capture, one per milestone, is shown in [docs/screenshots](docs/screenshot
 
 **The clock.** A time bar over the day with 48 slots and a date picker, so the solar hump can be watched rolling across the country at noon, the price collapsing under it and the evening peak arriving; play runs a day in seconds, and a menu jumps to the days the prices single out, the summer and the winter peak, the widest split, the most at the floor, the cheapest day.
 
-**Closer in.** The plants themselves by fuel and capacity where the data allows; what each one is running is not public, only the per-area totals, and the map says so.
+**Closer in.** Zoom in and the plants appear, by fuel and capacity as OpenStreetMap maps them; what each one is running is not public, only the per-area totals, and the map says so.
 
 ## The name
 
@@ -35,7 +35,7 @@ Fifty-sixty is the grid: 50 Hz east of the Fossa Magna, 60 Hz west of it, a divi
 - **JEPX day-ahead spot market**: system and area prices, bid and contracted volumes, per half hour, one CSV per fiscal year.
 - **Area supply-demand records** from the transmission companies, half-hourly, by source; TEPCO first, the other eight as their formats are wired in.
 - **OCCTO** for interconnector capacities and flows.
-- Region boundaries from the prefecture polygons of [dataofjapan/land](https://github.com/dataofjapan/land), derived from GSI's 地球地図日本 (Global Map Japan); plant locations from METI's and OCCTO's registries where they are public.
+- Region boundaries from the prefecture polygons of [dataofjapan/land](https://github.com/dataofjapan/land), derived from GSI's 地球地図日本 (Global Map Japan); the plants from OpenStreetMap, © OpenStreetMap contributors.
 
 Everything is fetched by a script on the host once an hour and served as static files. No backend, no account, no key.
 

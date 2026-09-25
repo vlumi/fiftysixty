@@ -8,6 +8,8 @@ import type { Area } from './regions/areas'
 import Legend from './panels/Legend'
 import Readout from './panels/Readout'
 import { loadRegions, type Regions } from './regions/geometry'
+import { loadPlants, type Plants } from './regions/plants'
+import { PLANTS_FROM_ZOOM } from './map/plantLayers'
 import { useApp } from './store'
 import { jstDate, openingDay } from './time/days'
 import TimeBar from './time/TimeBar'
@@ -20,11 +22,14 @@ const REFRESH_MS = 30 * 60_000
 
 export default function App() {
   const [regions, setRegions] = useState<Regions | null>(null)
+  const [plants, setPlants] = useState<Plants | null>(null)
+  const [zoom, setZoom] = useState(5)
   const [spot, setSpot] = useState<SpotDays | null>(null)
   const [records, setRecords] = useState<ReadonlyMap<string, RecordDays | null>>(new Map())
   const [flowMonths, setFlowMonths] = useState<ReadonlyMap<string, FlowDays | null>>(new Map())
   useEffect(() => {
     loadRegions().then(setRegions, console.error)
+    loadPlants().then(setPlants, console.error)
     loadSpotYears(fiscalYear(jstDate(new Date()))).then(setSpot, console.error)
   }, [])
 
@@ -34,6 +39,12 @@ export default function App() {
   const setSlot = useApp((s) => s.setSlot)
   const area = useApp((s) => s.area)
   const selectArea = useApp((s) => s.selectArea)
+  const plantId = useApp((s) => s.plant)
+  const pickPlant = useApp((s) => s.pickPlant)
+  const plant = useMemo(
+    () => plants?.features.find((f) => f.properties.id === plantId)?.properties ?? null,
+    [plants, plantId],
+  )
   const playing = useApp((s) => s.playing)
   const togglePlay = useApp((s) => s.togglePlay)
   const step = useApp((s) => s.step)
@@ -101,8 +112,12 @@ export default function App() {
             prices={displayed?.areaPrice}
             selected={area}
             flows={flows}
+            plants={plants}
+            selectedPlant={plantId}
             mixes={mixes}
             onPick={selectArea}
+            onPickPlant={pickPlant}
+            onZoom={setZoom}
           />
         </Suspense>
         <Readout
@@ -111,7 +126,8 @@ export default function App() {
           day={recordedDay}
           flows={flows}
           area={area}
-          onClose={() => selectArea(null)}
+          plant={plant}
+          onClose={() => (plant ? pickPlant(null) : selectArea(null))}
           onSlot={setSlot}
         />
         <TimeBar
@@ -125,7 +141,7 @@ export default function App() {
           onSlot={setSlot}
           onPlay={togglePlay}
         />
-        <Legend />
+        <Legend plants={plants !== null && zoom >= PLANTS_FROM_ZOOM} />
       </main>
     </>
   )

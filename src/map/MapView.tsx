@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { RecordSlot } from '../market/record'
 import { AREA_BY_ID, type Area } from '../regions/areas'
+import type { PlantProps } from '../regions/plants'
 import type { AreaProps, Regions } from '../regions/geometry'
 import { DARK } from '../shared/palette'
 import { JAPAN_BOUNDS, STYLE_URL } from './basemap'
@@ -24,18 +25,33 @@ interface Props extends LayerOptions {
   mixes?: Partial<Record<Area, RecordSlot>>
   /** A click on an area, or on the sea for none. */
   onPick: (area: Area | null) => void
+  /** A click on a plant's dot. */
+  onPickPlant: (id: string) => void
+  /** The map's zoom as it changes, for whoever shows what depends on it. */
+  onZoom?: (zoom: number) => void
 }
 
 /** The basemap over Japan with the market layers interleaved into it. */
-export default function MapView({ regions, prices, selected, flows, mixes = {}, onPick }: Props) {
+export default function MapView({
+  regions,
+  prices,
+  selected,
+  flows,
+  plants,
+  selectedPlant,
+  mixes = {},
+  onPick,
+  onPickPlant,
+  onZoom,
+}: Props) {
   const container = useRef<HTMLDivElement>(null)
   const overlay = useRef<MapLibreOverlay>(null)
   const [map, setMap] = useState<MapLibre | null>(null)
   const [zoom, setZoom] = useState(5)
-  const pick = useRef(onPick)
+  const pick = useRef({ onPick, onPickPlant, onZoom })
   useEffect(() => {
-    pick.current = onPick
-  }, [onPick])
+    pick.current = { onPick, onPickPlant, onZoom }
+  }, [onPick, onPickPlant, onZoom])
 
   useEffect(() => {
     if (!container.current) return
@@ -49,12 +65,18 @@ export default function MapView({ regions, prices, selected, flows, mixes = {}, 
     map.addControl(new NavigationControl({ visualizePitch: false }), 'top-right')
     setMap(map)
     setZoom(map.getZoom())
-    map.on('zoom', () => setZoom(map.getZoom()))
+    map.on('zoom', () => {
+      setZoom(map.getZoom())
+      pick.current.onZoom?.(map.getZoom())
+    })
     overlay.current = new MapLibreOverlay({
       interleaved: true,
       layers: [],
-      onClick: (info) =>
-        pick.current((info.object as { properties?: AreaProps } | undefined)?.properties?.area ?? null),
+      onClick: (info) => {
+        const properties = (info.object as { properties?: Partial<AreaProps & PlantProps> } | undefined)?.properties
+        if (properties?.fuel && properties.id) pick.current.onPickPlant(properties.id)
+        else pick.current.onPick(properties?.area ?? null)
+      },
       getCursor: ({ isHovering, isDragging }) => (isDragging ? 'grabbing' : isHovering ? 'pointer' : 'grab'),
     })
     map.addControl(overlay.current)
@@ -66,8 +88,10 @@ export default function MapView({ regions, prices, selected, flows, mixes = {}, 
   }, [])
 
   useEffect(() => {
-    overlay.current?.setProps({ layers: buildLayers(regions, DARK, { prices, selected, flows, zoom }) })
-  }, [regions, prices, selected, flows, zoom])
+    overlay.current?.setProps({
+      layers: buildLayers(regions, DARK, { prices, selected, flows, zoom, plants, selectedPlant }),
+    })
+  }, [regions, prices, selected, flows, zoom, plants, selectedPlant])
 
   return (
     <>
@@ -75,7 +99,7 @@ export default function MapView({ regions, prices, selected, flows, mixes = {}, 
       {map &&
         (Object.entries(mixes) as [Area, RecordSlot][]).map(([area, record]) => (
           <AreaMarker key={area} map={map} area={area}>
-            <MixGlyph name={AREA_BY_ID[area].name} record={record} onPick={() => pick.current(area)} />
+            <MixGlyph name={AREA_BY_ID[area].name} record={record} onPick={() => pick.current.onPick(area)} />
           </AreaMarker>
         ))}
     </>
