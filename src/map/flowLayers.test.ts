@@ -4,7 +4,7 @@ import { flowsAt, parseFlows } from '../market/flows'
 import { AREA_BY_ID } from '../regions/areas'
 import { MIDDLE } from '../regions/interconnectors'
 import { DARK } from '../shared/palette'
-import { buildFlowLayers, flowData, heading, widthOf, type FlowDatum } from './flowLayers'
+import { buildFlowLayers, flowData, headSize, heading, shaft, widthOf, type FlowDatum } from './flowLayers'
 
 const noon = flowsAt(parseFlows(csv), '2026-09-23', 24)
 
@@ -52,6 +52,15 @@ test('the arrow heads along the path, the layers take width from the flow and co
       .map((d) => d.id),
   )
   expect((rims.props.data as FlowDatum[]).length).toBeGreaterThan(0)
+  const path = paths.props.getPath
+  if (typeof path !== 'function') throw new Error('accessor')
+  const end = shaft(kc.path)[1]
+  expect(path(kc, { index: 0, data: [], target: [] })).toEqual([kc.path[0], end])
+  expect(end[0]).toBeCloseTo(kc.path[0][0] + (kc.path[1][0] - kc.path[0][0]) * 0.78)
+  const position = heads.props.getPosition
+  if (typeof position !== 'function') throw new Error('accessor')
+  expect(position(kc, { index: 0, data: [], target: [] })).toEqual(end)
+  expect(headSize(kc)).toBeCloseTo(8 + (1 + 6.58) * 3)
 })
 
 test('no flows, no layers', () => {
