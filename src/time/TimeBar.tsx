@@ -1,5 +1,5 @@
 import { SLOTS } from '../market/jepx'
-import { jstDate, relation } from './days'
+import { jstDate, relation, slotNow } from './days'
 import { slotRange } from './slots'
 import styles from './TimeBar.module.css'
 
@@ -15,7 +15,7 @@ interface Props {
 
 /**
  * The day and its 48 half hours: a controlled row of native inputs, so it scrubs and takes the keyboard for free, with
- * a step to the priced day before and after, a jump to today, and a word for where the half hour stands; on today,
+ * a step to the priced day before and after, a jump to the half hour under way, and a word for where the half hour stands; on today,
  * whether it is now or still ahead, since the price is known before the record.
  */
 export default function TimeBar({ date, days, slot, now, onDate, onSlot }: Props) {
@@ -41,8 +41,14 @@ export default function TimeBar({ date, days, slot, now, onDate, onSlot }: Props
       <button aria-label="Next day" disabled={!next} onClick={() => next && onDate(next)}>
         ›
       </button>
-      <button disabled={date === today || !days.includes(today)} onClick={() => onDate(today)}>
-        Today
+      <button
+        disabled={!days.includes(today) || (date === today && slot === slotNow(now))}
+        onClick={() => {
+          onDate(today)
+          onSlot(slotNow(now))
+        }}
+      >
+        Now
       </button>
       <input
         type="range"

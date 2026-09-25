@@ -58,6 +58,9 @@ const JST_TIME = new Intl.DateTimeFormat('en-GB', {
   hour12: false,
 })
 
+/** The half hour under way in Japan, 1 to 48. */
+export const slotNow = (now: Date) => Math.floor(jstMinutes(now) / 30) + 1
+
 function jstMinutes(now: Date): number {
   const [h, m] = JST_TIME.format(now).split(':').map(Number)
   return (h % 24) * 60 + m
