@@ -29,7 +29,7 @@ Fifty-sixty is the grid: 50 Hz east of the Fossa Magna, 60 Hz west of it, a divi
 - **JEPX day-ahead spot market**: system and area prices, bid and contracted volumes, per half hour, one CSV per fiscal year.
 - **Area supply-demand records** from the transmission companies, half-hourly, by source; TEPCO first, the other eight as their formats are wired in.
 - **OCCTO** for interconnector capacities and flows.
-- Region boundaries from prefecture polygons; plant locations from METI's and OCCTO's registries where they are public.
+- Region boundaries from the prefecture polygons of [dataofjapan/land](https://github.com/dataofjapan/land), derived from GSI's 地球地図日本 (Global Map Japan); plant locations from METI's and OCCTO's registries where they are public.
 
 Everything is fetched by a script on the host once a day and served as static files. No backend, no account, no key.
 
