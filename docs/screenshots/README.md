@@ -6,7 +6,7 @@ One capture per milestone, taken with [`scripts/screenshot.mjs`](../../scripts/s
 
 ![The flows](003-flows.png)
 
-The holiday noon of 2026-09-23 again, 11:30 to 12:00, with the interconnectors drawn from OCCTO's day-ahead forecast: an arrow along each line the way the power goes, a pixel wide plus one per gigawatt, brighter the nearer the flow is to the line's limit, and a white rim where the day-ahead market split across it. Kansai is picked: both Kansai–Chugoku circuits and the Anan–Kihoku line from Shikoku come in full and rimmed, the Kansai fence sends 1,290 MW on toward Chubu, and the readout lists each line's flow in or out against its limit with the split marked. The Tohoku trunk into Tokyo is full and rimmed too, while the converters carry a trickle west to east.
+The holiday noon of 2026-09-23 again, 11:30 to 12:00, with the interconnectors drawn from OCCTO's day-ahead forecast: an arrow along each line the way the power goes, its shaft tapering from a hair at the source to a pixel plus one per gigawatt at the head, brighter the nearer the flow is to the line's limit, and a white rim where the day-ahead market split across it. Kansai is picked: both Kansai–Chugoku circuits and the Anan–Kihoku line from Shikoku come in full and rimmed, 1,290 MW go on from Kansai to Chubu and 539 MW from Hokuriku, resolved from OCCTO's three fences around that triangle, and the readout lists each line's flow in or out against its limit with the split marked. The Tohoku trunk into Tokyo is full and rimmed too, while the converters carry a trickle west to east.
 
 <img src="003-flows-phone.png" alt="The flows, on a phone" width="260">
 
