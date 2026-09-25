@@ -7,12 +7,15 @@ test('the map of Japan comes up under the name, with no page errors', async ({ p
   expect(errors).toEqual([])
 })
 
-test('the clock opens on the newest priced day and scrubs through its half hours', async ({ page }) => {
+test('the clock opens on yesterday, steps a day and scrubs through the half hours', async ({ page }) => {
   await open(page)
-  await expect(page.getByLabel('Delivery day')).toHaveValue('2026-09-26')
+  await expect(page.getByLabel('Delivery day')).toHaveValue('2026-09-25')
   await expect(page.getByRole('status')).toHaveText('12:00–12:30 JST')
   await page.getByRole('slider', { name: 'Half hour' }).fill('48')
   await expect(page.getByRole('status')).toHaveText('23:30–00:00 JST')
+  await page.getByRole('button', { name: 'Next day' }).click()
+  await expect(page.getByLabel('Delivery day')).toHaveValue('2026-09-26')
+  await expect(page.getByRole('button', { name: 'Next day' })).toBeDisabled()
   await expect(page.getByRole('figure', { name: 'Price scale' })).toBeVisible()
   await expect(page.getByRole('complementary', { name: 'Readout' })).toContainText('12.75')
 })
@@ -25,8 +28,9 @@ test('a click on Tokyo reads out its price against the system and its neighbors,
   const readout = page.getByRole('complementary', { name: 'Readout' })
   await expect(readout).toContainText('Tokyo')
   await expect(readout).toContainText('Chubu')
+  await page.getByRole('button', { name: 'Next day' }).click()
   await expect(readout).toContainText('No record for this half hour yet.')
-  await page.getByLabel('Delivery day').fill('2026-09-25')
+  await page.getByRole('button', { name: 'Previous day' }).click()
   await page.getByRole('slider', { name: 'Half hour' }).fill('1')
   await expect(readout.getByRole('region', { name: 'What ran' })).toContainText('Demand 25,609 MW')
   await expect(page.getByRole('button', { name: 'Tokyo mix' })).toBeVisible()

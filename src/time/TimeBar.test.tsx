@@ -1,7 +1,8 @@
 import { fireEvent, render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import TimeBar from './TimeBar'
 
-const days = ['2026-09-25', '2026-09-26']
+const days = ['2026-09-22', '2026-09-25', '2026-09-26']
 
 test('the slot reads as its half hour and scrubbing reports the new slot', () => {
   const onSlot = vi.fn()
@@ -15,7 +16,7 @@ test('the day picker spans the days there are prices for', () => {
   const onDate = vi.fn()
   render(<TimeBar date="2026-09-26" days={days} slot={1} onDate={onDate} onSlot={vi.fn()} />)
   const picker = screen.getByLabelText('Delivery day')
-  expect(picker).toHaveAttribute('min', '2026-09-25')
+  expect(picker).toHaveAttribute('min', '2026-09-22')
   expect(picker).toHaveAttribute('max', '2026-09-26')
   fireEvent.change(picker, { target: { value: '2026-09-25' } })
   expect(onDate).toHaveBeenCalledWith('2026-09-25')
@@ -24,4 +25,16 @@ test('the day picker spans the days there are prices for', () => {
 test('before the data arrives the picker is disabled', () => {
   render(<TimeBar date={null} days={[]} slot={1} onDate={vi.fn()} onSlot={vi.fn()} />)
   expect(screen.getByLabelText('Delivery day')).toBeDisabled()
+})
+
+test('the day steps to the priced day before and after, and stops at the ends', async () => {
+  const onDate = vi.fn()
+  const { rerender } = render(<TimeBar date="2026-09-25" days={days} slot={1} onDate={onDate} onSlot={vi.fn()} />)
+  await userEvent.click(screen.getByRole('button', { name: 'Previous day' }))
+  expect(onDate).toHaveBeenLastCalledWith('2026-09-22')
+  await userEvent.click(screen.getByRole('button', { name: 'Next day' }))
+  expect(onDate).toHaveBeenLastCalledWith('2026-09-26')
+  rerender(<TimeBar date="2026-09-26" days={days} slot={1} onDate={onDate} onSlot={vi.fn()} />)
+  expect(screen.getByRole('button', { name: 'Next day' })).toBeDisabled()
+  expect(screen.getByRole('button', { name: 'Previous day' })).toBeEnabled()
 })

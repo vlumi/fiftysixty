@@ -1,12 +1,13 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { ADAPTERS } from './market/adapters'
-import { fiscalYear, latestDay, loadSpot, slotOf, type SpotDays } from './market/jepx'
+import { fiscalYear, loadSpot, slotOf, type SpotDays } from './market/jepx'
 import { loadRecord, monthOf, recordSlot, type RecordDays, type RecordSlot } from './market/record'
 import type { Area } from './regions/areas'
 import Legend from './panels/Legend'
 import Readout from './panels/Readout'
 import { loadRegions, type Regions } from './regions/geometry'
 import { useApp } from './store'
+import { openingDay } from './time/days'
 import TimeBar from './time/TimeBar'
 
 const MapView = lazy(() => import('./map/MapView'))
@@ -26,7 +27,7 @@ export default function App() {
   const setSlot = useApp((s) => s.setSlot)
   const area = useApp((s) => s.area)
   const selectArea = useApp((s) => s.selectArea)
-  const date = chosenDate ?? latestDay(spot)
+  const date = chosenDate ?? openingDay(spot, new Date())
   const days = spot ? [...spot.keys()].sort() : []
   const displayed = slotOf(spot, date, slot)
 
