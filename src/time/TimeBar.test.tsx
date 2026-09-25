@@ -243,5 +243,24 @@ test('in Japanese the words follow', () => {
   )
   expect(screen.getByRole('status')).toHaveTextContent('昨日 12:00–12:30 JST')
   expect(screen.getByRole('button', { name: '今' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: '2026年9月25日(金)' })).toBeInTheDocument()
   useApp.getState().setLang('en')
+})
+
+test('the day reads in words with its weekday, over the picker', () => {
+  render(
+    <TimeBar
+      date="2026-09-25"
+      days={days}
+      slot={1}
+      now={now}
+      playing={false}
+      stories={[]}
+      onDate={vi.fn()}
+      onSlot={vi.fn()}
+      onPlay={vi.fn()}
+    />,
+  )
+  expect(screen.getByRole('button', { name: 'Fri, 25 Sept 2026' })).toBeInTheDocument()
+  expect(screen.getByLabelText('Delivery day')).toHaveValue('2026-09-25')
 })

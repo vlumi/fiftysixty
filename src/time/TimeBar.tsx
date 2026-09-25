@@ -1,7 +1,9 @@
+import { useRef } from 'react'
 import { useStrings } from '../i18n/useStrings'
+import { useApp } from '../store'
 import { SLOTS } from '../market/jepx'
 import type { Story } from '../market/stories'
-import { jstDate, relation, slotNow } from './days'
+import { formatDay, jstDate, relation, slotNow } from './days'
 import { slotRange } from './slots'
 import styles from './TimeBar.module.css'
 
@@ -21,12 +23,15 @@ interface Props {
 
 /**
  * The day and its 48 half hours: a controlled row of native inputs, so it scrubs and takes the keyboard for free, with
- * a step to the priced day before and after, a jump to the half hour under way or to a day the data singled out, play
+ * a step to the priced day before and after, the day in words in the reader's language over the native picker, a jump
+ * to the half hour under way or to a day the data singled out, play
  * through the day at four half hours a second, and a word for where the half hour stands; on today,
  * whether it is now or still ahead, since the price is known before the record.
  */
 export default function TimeBar({ date, days, slot, now, playing, stories, onDate, onSlot, onPlay }: Props) {
   const s = useStrings()
+  const lang = useApp((x) => x.lang)
+  const picker = useRef<HTMLInputElement>(null)
   const at = date ? days.indexOf(date) : -1
   const previous = at > 0 ? days[at - 1] : undefined
   const next = at >= 0 && at < days.length - 1 ? days[at + 1] : undefined
@@ -49,15 +54,25 @@ export default function TimeBar({ date, days, slot, now, playing, stories, onDat
       <button aria-label={s.time.previousDay} disabled={!previous} onClick={() => previous && onDate(previous)}>
         ‹
       </button>
-      <input
-        type="date"
-        aria-label={s.time.day}
-        value={date ?? ''}
-        min={days[0]}
-        max={days.at(-1)}
-        disabled={!date}
-        onChange={(e) => days.includes(e.target.value) && onDate(e.target.value)}
-      />
+      <span className={styles.date}>
+        <button
+          className={styles.dateWords}
+          disabled={!date}
+          onClick={() => (picker.current?.showPicker ? picker.current.showPicker() : picker.current?.focus())}
+        >
+          {date ? formatDay(date, lang) : '…'}
+        </button>
+        <input
+          ref={picker}
+          type="date"
+          aria-label={s.time.day}
+          value={date ?? ''}
+          min={days[0]}
+          max={days.at(-1)}
+          disabled={!date}
+          onChange={(e) => days.includes(e.target.value) && onDate(e.target.value)}
+        />
+      </span>
       <button aria-label={s.time.nextDay} disabled={!next} onClick={() => next && onDate(next)}>
         ›
       </button>

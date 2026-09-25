@@ -54,3 +54,14 @@ function jstMinutes(now: Date): number {
   const [h, m] = JST_TIME.format(now).split(':').map(Number)
   return (h % 24) * 60 + m
 }
+
+/** The day in words for the language, with its weekday: `Thu, 24 Sept 2026` or `2026年9月24日(木)`. */
+export function formatDay(date: string, lang: 'en' | 'ja'): string {
+  return new Intl.DateTimeFormat(lang === 'ja' ? 'ja-JP' : 'en-GB', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    weekday: 'short',
+    timeZone: 'UTC',
+  }).format(Date.parse(`${date}T00:00Z`))
+}
