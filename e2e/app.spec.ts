@@ -95,3 +95,12 @@ test('a story day is a jump away: the day the data found most at the floor', asy
   await expect(page.getByLabel('Delivery day')).toHaveValue('2026-09-22')
   await expect(page.getByRole('complementary', { name: 'Readout' })).toContainText('System price')
 })
+
+test('the light theme is a click away and is kept across a reload', async ({ page }) => {
+  await open(page)
+  await page.getByRole('button', { name: 'Switch to the light theme' }).click()
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+  await page.reload()
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+  await expect(page.locator('.maplibregl-canvas')).toBeVisible()
+})

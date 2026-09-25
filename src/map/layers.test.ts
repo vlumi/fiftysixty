@@ -33,6 +33,8 @@ test('the areas are filled by their frequency and the split line drawn in the ac
   expect(split.props.getLineColor).toEqual([...DARK.accent, 255])
   expect(areas.props.beforeId).toBe('water_name')
   expect(split.props.beforeId).toBe('water_name')
+  const [under] = buildLayers(regions, DARK, { beforeId: 'x' }) as GeoJsonLayer<AreaProps, Interleaved>[]
+  expect(under.props.beforeId).toBe('x')
 })
 
 test('with prices the areas take the price scale and Okinawa, which has none, is muted', () => {

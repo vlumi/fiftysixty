@@ -1,4 +1,4 @@
-/* Dark by default; the light set follows below. The numeric twins for WebGL live in shared/palette.ts. */
+/* Dark by default; the light set follows below, for data-theme='light'. The numeric twins for WebGL live in shared/palette.ts. */
 :root {
   --bg: #0b0d14;
   --panel: #141826;
@@ -99,6 +99,23 @@ header p {
   margin: 0;
   color: var(--muted);
   font-size: 0.8rem;
+}
+
+header .theme {
+  margin-left: auto;
+  padding: 0 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: none;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+header .theme:hover {
+  color: var(--text);
+  background: var(--hover);
 }
 
 main {

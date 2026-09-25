@@ -49,3 +49,12 @@ test('play runs the half hours on', async () => {
   act(() => vi.advanceTimersByTime(1000))
   expect(screen.getByRole('status')).toHaveTextContent('14:00–14:30 JST')
 })
+
+test('the theme follows the system until chosen, the choice on the document and kept', async () => {
+  render(<App />)
+  expect(document.documentElement.dataset.theme).toBe('dark')
+  act(() => screen.getByRole('button', { name: 'Switch to the light theme' }).click())
+  expect(document.documentElement.dataset.theme).toBe('light')
+  expect(localStorage.getItem('fiftysixty.theme')).toBe('light')
+  localStorage.clear()
+})

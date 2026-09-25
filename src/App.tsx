@@ -12,6 +12,8 @@ import { loadPlants, type Plants } from './regions/plants'
 import { PLANTS_FROM_ZOOM } from './map/plantLayers'
 import { useApp } from './store'
 import { jstDate, openingDay } from './time/days'
+import { PALETTES } from './shared/palette'
+import { resolveTheme, useSystemDark } from './shared/theme'
 import TimeBar from './time/TimeBar'
 import { useNow } from './time/useNow'
 import { usePlayer } from './time/usePlayer'
@@ -52,6 +54,13 @@ export default function App() {
   const togglePlay = useApp((s) => s.togglePlay)
   const step = useApp((s) => s.step)
   const now = useNow()
+  const systemDark = useSystemDark()
+  const themeChoice = useApp((s) => s.themeChoice)
+  const setThemeChoice = useApp((s) => s.setThemeChoice)
+  const theme = resolveTheme(themeChoice, systemDark)
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+  }, [theme])
   const date = chosenDate ?? openingDay(spot, now)
   const days = useMemo(() => (spot ? [...spot.keys()].sort() : []), [spot])
   const storyDays = useMemo(() => stories(spot), [spot])
@@ -107,10 +116,18 @@ export default function App() {
           <span className="hz60">60</span>
         </h1>
         <p>The Japanese power market on a map</p>
+        <button
+          className="theme"
+          aria-label={theme === 'light' ? 'Switch to the dark theme' : 'Switch to the light theme'}
+          onClick={() => setThemeChoice(theme === 'light' ? 'dark' : 'light')}
+        >
+          {theme === 'light' ? '☾' : '☀'}
+        </button>
       </header>
       <main>
         <Suspense fallback={null}>
           <MapView
+            theme={theme}
             regions={regions}
             prices={displayed?.areaPrice}
             selected={area}
@@ -146,6 +163,7 @@ export default function App() {
           onPlay={togglePlay}
         />
         <Corner
+          palette={PALETTES[theme]}
           plants={plants}
           hiddenFuels={hiddenFuels}
           onToggleFuel={toggleFuel}
