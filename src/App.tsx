@@ -33,7 +33,6 @@ export default function App() {
   useEffect(() => {
     loadRegions().then(setRegions, console.error)
     loadPlants().then(setPlants, console.error)
-    loadSpotYears(fiscalYear(jstDate(new Date()))).then(setSpot, console.error)
   }, [])
 
   const chosenDate = useApp((s) => s.date)
@@ -96,6 +95,17 @@ export default function App() {
     }
     ask(`flows/${month}`, () => loadFlows(month).then((days) => setFlowMonths((f) => new Map(f).set(month, days))))
   }, [month, now])
+  // The prices likewise, so an open tab learns of the next delivery day and, in April, of the next file.
+  useEffect(() => {
+    const key = `spot/${fiscalYear(jstDate(now))}`
+    const at = askedAt.current.get(key)
+    if (at !== undefined && now.getTime() - at < REFRESH_MS) return
+    askedAt.current.set(key, now.getTime())
+    loadSpotYears(fiscalYear(jstDate(now))).then(setSpot, (error: unknown) => {
+      console.error(error)
+      askedAt.current.delete(key)
+    })
+  }, [now])
   const flows = useMemo(
     () => flowsAt(month ? flowMonths.get(month) : null, date, slot),
     [flowMonths, month, date, slot],
@@ -149,7 +159,7 @@ export default function App() {
             mixes={mixes}
             onPick={selectArea}
             onPickPlant={pickPlant}
-            onZoom={setZoom}
+            onZoom={(z) => setZoom((was) => (was >= PLANTS_FROM_ZOOM === z >= PLANTS_FROM_ZOOM ? was : z))}
           />
         </Suspense>
         <Readout

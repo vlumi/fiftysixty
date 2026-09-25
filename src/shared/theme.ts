@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { readItem, storage, writeItem } from './storage'
+import { useMediaQuery } from './useMediaQuery'
 
 export type Theme = 'light' | 'dark'
 /** What the reader chose; `system` follows the operating system's preference. */
@@ -21,43 +22,16 @@ export function resolveTheme(choice: ThemeChoice, systemDark: boolean): Theme {
 
 const KEY = 'fiftysixty.theme'
 
-function storage(): Storage | null {
-  try {
-    return globalThis.localStorage ?? null
-  } catch {
-    return null
-  }
-}
-
 export function loadThemeChoice(store = storage()): ThemeChoice {
-  try {
-    const raw = store?.getItem(KEY)
-    return raw === 'light' || raw === 'dark' ? raw : 'system'
-  } catch {
-    return 'system'
-  }
+  const raw = readItem(KEY, store)
+  return raw === 'light' || raw === 'dark' ? raw : 'system'
 }
 
 export function saveThemeChoice(choice: ThemeChoice, store = storage()): void {
-  try {
-    if (choice === 'system') store?.removeItem(KEY)
-    else store?.setItem(KEY, choice)
-  } catch {
-    // Storage full or forbidden: the choice lives on for this visit only.
-  }
+  writeItem(KEY, choice === 'system' ? null : choice, store)
 }
 
 const DARK_QUERY = '(prefers-color-scheme: dark)'
 
 /** Whether the operating system asks for dark; true where matchMedia is unavailable, since the site is dark by default. */
-export function useSystemDark(): boolean {
-  const [dark, setDark] = useState(() => window.matchMedia?.(DARK_QUERY).matches ?? true)
-  useEffect(() => {
-    const media = window.matchMedia?.(DARK_QUERY)
-    if (!media) return
-    const onChange = () => setDark(media.matches)
-    media.addEventListener('change', onChange)
-    return () => media.removeEventListener('change', onChange)
-  }, [])
-  return dark
-}
+export const useSystemDark = () => useMediaQuery(DARK_QUERY, true)

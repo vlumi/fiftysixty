@@ -91,6 +91,8 @@ test('a click on a plant reports the plant, and the zoom is reported as it chang
   const onClick = MapLibreOverlay.mock.lastCall![0].onClick!
   onClick({ object: { properties: { id: 'way/1', name: 'x', fuel: 'coal', mw: 100 } } })
   expect(onPickPlant).toHaveBeenCalledWith('way/1')
+  expect(onZoom).toHaveBeenCalledWith(5)
+  onZoom.mockClear()
   const zoomed = mapInstance.on.mock.calls.find((c) => c[0] === 'zoom')![1] as () => void
   zoomed()
   expect(onZoom).toHaveBeenCalledWith(5)

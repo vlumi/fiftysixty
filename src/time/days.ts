@@ -55,13 +55,18 @@ function jstMinutes(now: Date): number {
   return (h % 24) * 60 + m
 }
 
-/** The day in words for the language, with its weekday: `Thu, 24 Sept 2026` or `2026年9月24日(木)`. */
+/** The day for the language, with its weekday: ISO in English, `2026-09-24 (Thu)`, and `2026年9月24日(木)` in Japanese. */
 export function formatDay(date: string, lang: 'en' | 'ja'): string {
-  return new Intl.DateTimeFormat(lang === 'ja' ? 'ja-JP' : 'en-GB', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    weekday: 'short',
-    timeZone: 'UTC',
-  }).format(Date.parse(`${date}T00:00Z`))
+  const at = Date.parse(`${date}T00:00Z`)
+  if (lang === 'ja') {
+    return new Intl.DateTimeFormat('ja-JP', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      weekday: 'short',
+      timeZone: 'UTC',
+    }).format(at)
+  }
+  const weekday = new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone: 'UTC' }).format(at)
+  return `${date} (${weekday})`
 }
