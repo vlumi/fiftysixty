@@ -12,12 +12,14 @@
 // file is downloaded with curl. Tohoku posts the running month as one file per day and the whole month
 // only around the 25th of the next, so its month is stitched from the days when the month's own file is
 // not there; a month no company has published at all is skipped rather than an error.
+// OCCTO's reserve-margin site publishes each line's operating capacity, forecast flow and market split
+// per half hour, a month per request, two days ahead, updated around 17:30; it is asked for once a day.
 // The auction result lands by late morning and the companies add each half hour to the running month
 // within about an hour, so the fetch runs hourly; a file already held is asked for with If-Modified-Since
 // and left alone when the host says it has not changed, which the previous month's files never have.
 import { execFile } from 'node:child_process'
 import { existsSync } from 'node:fs'
-import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { promisify } from 'node:util'
 
@@ -27,6 +29,7 @@ const fiscalYear = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() -
 const yyyymm = (d) => `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}`
 const month = yyyymm(now)
 const previousMonth = yyyymm(new Date(now.getFullYear(), now.getMonth() - 1, 1))
+const nextMonth = yyyymm(new Date(now.getFullYear(), now.getMonth() + 1, 1))
 
 /** Where each transmission company keeps the month's record, by the area's name in the data directory. */
 const RECORDS = {
@@ -57,7 +60,25 @@ function daysOf(m) {
   return Array.from({ length: last }, (_, i) => `${m}${String(i + 1).padStart(2, '0')}`)
 }
 
+/** OCCTO's interconnector forecast for a month, from its first day to its last. */
+function occtoRange(m) {
+  const year = Number(m.slice(0, 4))
+  const monthIndex = Number(m.slice(4)) - 1
+  const last = new Date(year, monthIndex + 1, 0).getDate()
+  const day = (d) => `${year}/${String(monthIndex + 1).padStart(2, '0')}/${String(d).padStart(2, '0')}`
+  return `https://web-kohyo.occto.or.jp/kks-web-public/download/downloadCsv?jhSybt=06&tgtYmdFrom=${day(1)}&tgtYmdTo=${day(last)}`
+}
+
 const SOURCES = [
+  ...[previousMonth, month, nextMonth].map((m) => ({
+    name: `occto-renkei-${m}.csv`,
+    url: occtoRange(m),
+    headers: {},
+    // Refreshed once a day: the site answers every request in full, and the forecast moves once a day.
+    staleAfterMs: 20 * 3600_000,
+    // Next month exists only for its first days, from two days before; until then the site answers with a page.
+    optional: m === nextMonth,
+  })),
   {
     name: `jepx-spot-${fiscalYear}.csv`,
     url: `https://www.jepx.jp/js/csv_read.php?dir=spot_summary&file=spot_summary_${fiscalYear}.csv`,
@@ -125,6 +146,10 @@ await mkdir(output, { recursive: true })
 for (const source of SOURCES) {
   const target = join(output, source.name)
   const raw = `${target}.raw`
+  if (source.staleAfterMs && existsSync(target) && Date.now() - (await stat(target)).mtimeMs < source.staleAfterMs) {
+    console.log(`fresh enough: ${source.name}`)
+    continue
+  }
   try {
     // A month stitched from days is asked for afresh: a host may say 'not modified' about a file it does not have.
     const bytes = await download(source, raw, source.days ? undefined : target)
@@ -133,12 +158,13 @@ for (const source of SOURCES) {
       continue
     }
     const text = bytes ? decode(bytes) : source.days ? await downloadDays(source, raw) : null
-    if (!text) {
+    const page = !text || !text.includes(',') || text.trimStart().startsWith('<')
+    // OCCTO answers a month it has nothing for with the header alone, or with a page.
+    if (!text || (page && source.optional) || text.trim().split('\n').length < 3) {
       console.log(`not published yet: ${source.name}`)
       continue
     }
-    if (!text.includes(',') || text.trimStart().startsWith('<'))
-      throw new Error(`Unexpected payload from ${source.url}`)
+    if (page) throw new Error(`Unexpected payload from ${source.url}`)
     await writeFile(`${target}.tmp`, text)
     await rename(`${target}.tmp`, target)
     console.log(`${text.split('\n').length - 1} rows → ${target}`)

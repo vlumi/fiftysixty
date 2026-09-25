@@ -26,6 +26,7 @@ export const test = base.extend<{ errors: string[] }>({
     await page.clock.setFixedTime(new Date('2026-09-26T10:00:00+09:00'))
     await page.route(EMPTY_ASSETS, (route) => route.fulfill({ status: 204 }))
     await page.route('**/data/*-jukyu-*.csv', (route) => route.fulfill({ status: 404 }))
+    await page.route('**/data/occto-*.csv', (route) => route.fulfill({ status: 404 }))
     await page.route('**/data/jepx-spot-*.csv', (route) => route.fulfill({ body: SPOT, contentType: 'text/csv' }))
     await page.route('**/data/tepco-jukyu-*.csv', (route) => route.fulfill({ body: TEPCO, contentType: 'text/csv' }))
     await page.route('**/data/kyushu-jukyu-*.csv', (route) => route.fulfill({ body: KYUSHU, contentType: 'text/csv' }))
