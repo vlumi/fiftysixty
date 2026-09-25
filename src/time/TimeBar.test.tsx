@@ -7,7 +7,18 @@ const now = new Date('2026-09-26T10:10:00+09:00')
 
 test('the slot reads as its half hour and scrubbing reports the new slot', () => {
   const onSlot = vi.fn()
-  render(<TimeBar date="2026-09-26" days={days} slot={25} now={now} onDate={vi.fn()} onSlot={onSlot} />)
+  render(
+    <TimeBar
+      date="2026-09-26"
+      days={days}
+      slot={25}
+      now={now}
+      playing={false}
+      onDate={vi.fn()}
+      onSlot={onSlot}
+      onPlay={vi.fn()}
+    />,
+  )
   expect(screen.getByRole('status')).toHaveTextContent('Today 12:00–12:30 JST · ahead')
   fireEvent.change(screen.getByRole('slider', { name: 'Half hour' }), { target: { value: '48' } })
   expect(onSlot).toHaveBeenCalledWith(48)
@@ -15,7 +26,18 @@ test('the slot reads as its half hour and scrubbing reports the new slot', () =>
 
 test('the day picker spans the days there are prices for', () => {
   const onDate = vi.fn()
-  render(<TimeBar date="2026-09-26" days={days} slot={1} now={now} onDate={onDate} onSlot={vi.fn()} />)
+  render(
+    <TimeBar
+      date="2026-09-26"
+      days={days}
+      slot={1}
+      now={now}
+      playing={false}
+      onDate={onDate}
+      onSlot={vi.fn()}
+      onPlay={vi.fn()}
+    />,
+  )
   const picker = screen.getByLabelText('Delivery day')
   expect(picker).toHaveAttribute('min', '2026-09-22')
   expect(picker).toHaveAttribute('max', '2026-09-26')
@@ -24,20 +46,51 @@ test('the day picker spans the days there are prices for', () => {
 })
 
 test('before the data arrives the picker is disabled', () => {
-  render(<TimeBar date={null} days={[]} slot={1} now={now} onDate={vi.fn()} onSlot={vi.fn()} />)
+  render(
+    <TimeBar
+      date={null}
+      days={[]}
+      slot={1}
+      now={now}
+      playing={false}
+      onDate={vi.fn()}
+      onSlot={vi.fn()}
+      onPlay={vi.fn()}
+    />,
+  )
   expect(screen.getByLabelText('Delivery day')).toBeDisabled()
 })
 
 test('the day steps to the priced day before and after, and stops at the ends', async () => {
   const onDate = vi.fn()
   const { rerender } = render(
-    <TimeBar date="2026-09-25" days={days} slot={1} now={now} onDate={onDate} onSlot={vi.fn()} />,
+    <TimeBar
+      date="2026-09-25"
+      days={days}
+      slot={1}
+      now={now}
+      playing={false}
+      onDate={onDate}
+      onSlot={vi.fn()}
+      onPlay={vi.fn()}
+    />,
   )
   await userEvent.click(screen.getByRole('button', { name: 'Previous day' }))
   expect(onDate).toHaveBeenLastCalledWith('2026-09-23')
   await userEvent.click(screen.getByRole('button', { name: 'Next day' }))
   expect(onDate).toHaveBeenLastCalledWith('2026-09-26')
-  rerender(<TimeBar date="2026-09-26" days={days} slot={1} now={now} onDate={onDate} onSlot={vi.fn()} />)
+  rerender(
+    <TimeBar
+      date="2026-09-26"
+      days={days}
+      slot={1}
+      now={now}
+      playing={false}
+      onDate={onDate}
+      onSlot={vi.fn()}
+      onPlay={vi.fn()}
+    />,
+  )
   expect(screen.getByRole('button', { name: 'Next day' })).toBeDisabled()
   expect(screen.getByRole('button', { name: 'Previous day' })).toBeEnabled()
 })
@@ -46,20 +99,93 @@ test('the half hour under way is a jump away, and today reads as past, now or ah
   const onDate = vi.fn()
   const onSlot = vi.fn()
   const { rerender } = render(
-    <TimeBar date="2026-09-25" days={days} slot={30} now={now} onDate={onDate} onSlot={onSlot} />,
+    <TimeBar
+      date="2026-09-25"
+      days={days}
+      slot={30}
+      now={now}
+      playing={false}
+      onDate={onDate}
+      onSlot={onSlot}
+      onPlay={vi.fn()}
+    />,
   )
   await userEvent.click(screen.getByRole('button', { name: 'Now' }))
   expect(onDate).toHaveBeenLastCalledWith('2026-09-26')
   expect(onSlot).toHaveBeenLastCalledWith(21)
-  rerender(<TimeBar date="2026-09-26" days={days} slot={21} now={now} onDate={onDate} onSlot={vi.fn()} />)
+  rerender(
+    <TimeBar
+      date="2026-09-26"
+      days={days}
+      slot={21}
+      now={now}
+      playing={false}
+      onDate={onDate}
+      onSlot={vi.fn()}
+      onPlay={vi.fn()}
+    />,
+  )
   expect(screen.getByRole('button', { name: 'Now' })).toBeDisabled()
   expect(screen.getByRole('status')).toHaveTextContent('Today 10:00–10:30 JST · now')
-  rerender(<TimeBar date="2026-09-26" days={days} slot={30} now={now} onDate={onDate} onSlot={vi.fn()} />)
+  rerender(
+    <TimeBar
+      date="2026-09-26"
+      days={days}
+      slot={30}
+      now={now}
+      playing={false}
+      onDate={onDate}
+      onSlot={vi.fn()}
+      onPlay={vi.fn()}
+    />,
+  )
   expect(screen.getByRole('status')).toHaveTextContent('Today 14:30–15:00 JST · ahead')
 })
 
 test('tomorrow says only tomorrow: the whole day is ahead', () => {
   const tomorrow = new Date('2026-09-25T10:10:00+09:00')
-  render(<TimeBar date="2026-09-26" days={days} slot={30} now={tomorrow} onDate={vi.fn()} onSlot={vi.fn()} />)
+  render(
+    <TimeBar
+      date="2026-09-26"
+      days={days}
+      slot={30}
+      now={tomorrow}
+      playing={false}
+      onDate={vi.fn()}
+      onSlot={vi.fn()}
+      onPlay={vi.fn()}
+    />,
+  )
   expect(screen.getByRole('status')).toHaveTextContent(/^Tomorrow 14:30–15:00 JST$/)
+})
+
+test('play and pause', async () => {
+  const onPlay = vi.fn()
+  const { rerender } = render(
+    <TimeBar
+      date="2026-09-25"
+      days={days}
+      slot={1}
+      now={now}
+      playing={false}
+      onDate={vi.fn()}
+      onSlot={vi.fn()}
+      onPlay={onPlay}
+    />,
+  )
+  await userEvent.click(screen.getByRole('button', { name: 'Play' }))
+  expect(onPlay).toHaveBeenCalled()
+  rerender(
+    <TimeBar
+      date="2026-09-25"
+      days={days}
+      slot={1}
+      now={now}
+      playing={true}
+      onDate={vi.fn()}
+      onSlot={vi.fn()}
+      onPlay={onPlay}
+    />,
+  )
+  expect(screen.getByRole('button', { name: 'Pause' })).toBeInTheDocument()
 })
