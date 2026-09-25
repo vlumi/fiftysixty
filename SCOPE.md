@@ -42,7 +42,7 @@ Toolchain, CI, a map of Japan under the name, the data fetcher for JEPX and TEPC
 ### M2 — what ran (done 2026-09-25)
 
 - TEPCO's supply-demand record parsed and drawn for its region: the supply stack under the demand line for the displayed day, and the mix for the displayed slot beside the region on the map.
-- A second transmission company (Kyushu, for curtailment) through the same interface; the other seven follow as their adapters are written, which is ongoing work rather than a milestone.
+- A second transmission company (Kyushu, for curtailment) through the same interface, then the other seven the same day: all nine publish OCCTO's layout, Kyushu with two departures.
 - Solar and wind curtailment shown distinctly, since it is the most visible thing the market does.
 
 ### M3 — the flows

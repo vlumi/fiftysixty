@@ -41,7 +41,7 @@ export interface RecordAdapter {
 export async function loadRecord(adapter: RecordAdapter, month: string, base = '/data'): Promise<RecordDays | null> {
   const url = `${base}/${adapter.file(month)}`
   const response = await fetch(url)
-  if (response.status === 404) return null
+  if (response.status === 404 || response.headers.get('content-type')?.includes('text/html')) return null
   if (!response.ok) throw new Error(`${url}: ${response.status}`)
   return adapter.parse(await response.text())
 }

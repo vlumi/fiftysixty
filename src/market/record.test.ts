@@ -11,8 +11,12 @@ test('a month is fetched by the adapter file name and parsed by it', async () =>
   expect(fetch).toHaveBeenCalledWith('/data/x-202609.csv')
 })
 
-test('a month not on the host is no record, other failures are errors', async () => {
+test('a month not on the host is no record, as is a host answering with a page, and other failures are errors', async () => {
   vi.stubGlobal('fetch', () => Promise.resolve(new Response('', { status: 404 })))
+  expect(await loadRecord(adapter, '202608')).toBeNull()
+  vi.stubGlobal('fetch', () =>
+    Promise.resolve(new Response('<!doctype html>', { headers: { 'content-type': 'text/html' } })),
+  )
   expect(await loadRecord(adapter, '202608')).toBeNull()
   vi.stubGlobal('fetch', () => Promise.resolve(new Response('', { status: 500 })))
   await expect(loadRecord(adapter, '202608')).rejects.toThrow('500')

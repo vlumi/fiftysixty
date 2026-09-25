@@ -49,7 +49,8 @@ export function parseJukyu(csv: string, layout: Layout): RecordDays {
 
   const days: RecordDays = new Map()
   for (const cells of rows.slice(headerAt + 1)) {
-    if (cells.length < columns.length) continue
+    // Some companies lay the whole month out in advance, the half hours to come left blank.
+    if (cells.length < columns.length || cells[demand] === '') continue
     const day = isoDate(cells[0])
     const slots = days.get(day) ?? []
     days.set(day, slots)
