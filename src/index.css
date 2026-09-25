@@ -12,6 +12,17 @@
   --hz50: #00c6e6;
   --hz60: #eedd66;
 
+  /* The supply stack's series, bottom to top, an order that stays telling apart under color-blindness. */
+  --src-coal: #e66767;
+  --src-nuclear: #9085e9;
+  --src-renewables: #008300;
+  --src-otherThermal: #d55181;
+  --src-solar: #c98500;
+  --src-wind: #199e70;
+  --src-gas: #d95926;
+  --src-hydro: #3987e5;
+  --src-exchange: #8a90a0;
+
   font:
     16px/1.5 system-ui,
     'Segoe UI',
@@ -34,6 +45,15 @@
   --fill-soft: rgb(0 0 0 / 0.1);
   --hz50: #007a90;
   --hz60: #8f5f00;
+  --src-coal: #e34948;
+  --src-nuclear: #4a3aa7;
+  --src-renewables: #008300;
+  --src-otherThermal: #e87ba4;
+  --src-solar: #eda100;
+  --src-wind: #1baf7a;
+  --src-gas: #eb6834;
+  --src-hydro: #2a78d6;
+  --src-exchange: #5b6270;
   color-scheme: light;
 }
 

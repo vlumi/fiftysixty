@@ -5,20 +5,24 @@ import { AREA_BY_ID, PRICED_AREAS, type Area } from '../regions/areas'
 import { neighbors } from '../regions/interconnectors'
 import { mw, signed, yen } from '../shared/format'
 import styles from './Readout.module.css'
+import SupplyChart from './SupplyChart'
 
 interface Props {
   slot: SpotSlot | undefined
   /** The picked area's balance for the slot, where its transmission company is wired and has published it. */
   record: RecordSlot | undefined
+  /** The same for the whole displayed day, as far as it is published. */
+  day: readonly RecordSlot[] | undefined
   area: Area | null
   onClose: () => void
+  onSlot: (slot: number) => void
 }
 
 /**
  * The displayed slot in numbers: the system price and the spread across the areas, or a picked area against its
  * neighbors and what ran in it.
  */
-export default function Readout({ slot, record, area, onClose }: Props) {
+export default function Readout({ slot, record, day, area, onClose, onSlot }: Props) {
   if (!slot) return null
   const picked = area && area !== 'okinawa' ? (area as PricedArea) : null
   return (
@@ -26,6 +30,7 @@ export default function Readout({ slot, record, area, onClose }: Props) {
       {picked ? (
         <>
           <AreaReadout area={picked} slot={slot} onClose={onClose} />
+          {day?.length ? <SupplyChart day={day} slot={slot.slot} onSlot={onSlot} /> : null}
           <Mix area={picked} record={record} />
         </>
       ) : (
