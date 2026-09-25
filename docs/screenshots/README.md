@@ -6,11 +6,11 @@ One capture per milestone, taken with [`scripts/screenshot.mjs`](../../scripts/s
 
 ![What ran](002-what-ran.png)
 
-Kyushu picked on 2026-09-22 at 11:00, a curtailed noon: the area cleared at 0.01 ¥/kWh against a system price of 1.00, and the readout draws the day's supply stack under the demand line with the solar hump in yellow and the curtailed part hatched on top of it, pumping and exports in gray below zero. The numbers for the half hour follow. On the map, a column beside each recorded area, Tokyo and Kyushu so far, shows the same mix with the demand as its height.
+Noon on 2026-09-23, with every area's record in: a column beside each of the nine shows what ran in that half hour, the chart's bands stacked with the demand as the height, 29.0 GW in Tokyo down to 2.7 GW in Shikoku. Kansai is picked: it cleared at 9.92 ¥/kWh while Chugoku and Shikoku next door sat at 0.01 and Chubu at 20.00, the west split three ways by the lines between them. The readout draws Kansai's day as the supply stack under the demand line, the half hour marked, and lists the numbers below.
 
 <img src="002-what-ran-phone.png" alt="What ran, on a phone" width="260">
 
-The same on a phone (390×844): the readout takes the upper half and scrolls, the map and the clock stay below it.
+The same noon on a phone (390×844), nothing picked, so the nine columns stand on the map with the system price above and the clock at the foot.
 
 ## 2026-09-25 · M1, the price on the map
 
