@@ -1,6 +1,6 @@
 import csv from '../test/fixtures/jepx-spot.csv?raw'
 import { parseSpot } from '../market/jepx'
-import { jstDate, openingDay, relation, shiftDay, slotNow } from './days'
+import { formatDay, jstDate, openingDay, relation, shiftDay, slotNow } from './days'
 
 test('the day in Japan turns at 15:00 UTC', () => {
   expect(jstDate(new Date('2026-09-25T14:59:00Z'))).toBe('2026-09-25')
@@ -34,4 +34,9 @@ test('the half hour under way in Japan', () => {
   expect(slotNow(new Date('2026-09-26T00:10:00+09:00'))).toBe(1)
   expect(slotNow(new Date('2026-09-26T10:10:00+09:00'))).toBe(21)
   expect(slotNow(new Date('2026-09-26T23:45:00+09:00'))).toBe(48)
+})
+
+test('the day in words carries its weekday in either language', () => {
+  expect(formatDay('2026-09-24', 'en')).toBe('Thu, 24 Sept 2026')
+  expect(formatDay('2026-09-24', 'ja')).toBe('2026年9月24日(木)')
 })
