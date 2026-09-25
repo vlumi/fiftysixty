@@ -21,13 +21,13 @@ test('the site opens on yesterday in Japan when priced, else on the newest price
 
 test('a half hour stands past, now or ahead of the clock in Japan', () => {
   const now = new Date('2026-09-26T10:10:00+09:00')
-  expect(relation('2026-09-25', 40, now)).toEqual({ day: 'Yesterday', when: 'past' })
-  expect(relation('2026-09-27', 1, now)).toEqual({ day: 'Tomorrow', when: 'ahead' })
-  expect(relation('2026-09-22', 1, now)).toEqual({ day: '4 days ago', when: 'past' })
-  expect(relation('2026-09-29', 1, now)).toEqual({ day: 'In 3 days', when: 'ahead' })
-  expect(relation('2026-09-26', 20, now)).toEqual({ day: 'Today', when: 'past' })
-  expect(relation('2026-09-26', 21, now)).toEqual({ day: 'Today', when: 'now' })
-  expect(relation('2026-09-26', 22, now)).toEqual({ day: 'Today', when: 'ahead' })
+  expect(relation('2026-09-25', 40, now)).toEqual({ offset: -1, when: 'past' })
+  expect(relation('2026-09-27', 1, now)).toEqual({ offset: 1, when: 'ahead' })
+  expect(relation('2026-09-22', 1, now)).toEqual({ offset: -4, when: 'past' })
+  expect(relation('2026-09-29', 1, now)).toEqual({ offset: 3, when: 'ahead' })
+  expect(relation('2026-09-26', 20, now)).toEqual({ offset: 0, when: 'past' })
+  expect(relation('2026-09-26', 21, now)).toEqual({ offset: 0, when: 'now' })
+  expect(relation('2026-09-26', 22, now)).toEqual({ offset: 0, when: 'ahead' })
 })
 
 test('the half hour under way in Japan', () => {

@@ -27,24 +27,13 @@ export function openingDay(days: SpotDays | null, now: Date): string | null {
 
 export type When = 'past' | 'now' | 'ahead'
 
-/** Where a half hour of a day stands against the clock in Japan: the day in a word, and past, now or ahead. */
-export function relation(date: string, slot: number, now: Date): { day: string; when: When } {
-  const today = jstDate(now)
-  const offset = daysBetween(today, date)
-  const day =
-    offset === 0
-      ? 'Today'
-      : offset === -1
-        ? 'Yesterday'
-        : offset === 1
-          ? 'Tomorrow'
-          : offset < 0
-            ? `${-offset} days ago`
-            : `In ${offset} days`
-  if (offset !== 0) return { day, when: offset < 0 ? 'past' : 'ahead' }
+/** Where a half hour of a day stands against the clock in Japan: the day as days from today, and past, now or ahead. */
+export function relation(date: string, slot: number, now: Date): { offset: number; when: When } {
+  const offset = daysBetween(jstDate(now), date)
+  if (offset !== 0) return { offset, when: offset < 0 ? 'past' : 'ahead' }
   const minutes = jstMinutes(now)
   const start = (slot - 1) * 30
-  return { day, when: start + 30 <= minutes ? 'past' : start > minutes ? 'ahead' : 'now' }
+  return { offset, when: start + 30 <= minutes ? 'past' : start > minutes ? 'ahead' : 'now' }
 }
 
 function daysBetween(from: string, to: string): number {

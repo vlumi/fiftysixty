@@ -3,6 +3,7 @@ import type { Area } from './regions/areas'
 import { clampSlot } from './time/slots'
 import { SLOTS } from './market/jepx'
 import type { Series } from './market/stack'
+import { loadLang, saveLang, type Lang } from './i18n/strings'
 import { loadThemeChoice, saveThemeChoice, type ThemeChoice } from './shared/theme'
 
 /** What the reader has chosen: the delivery day (null for the opening day), the half hour, the area or a plant, and whether the day plays. */
@@ -16,6 +17,7 @@ interface State {
   /** The fuels whose plants are hidden from the map. */
   hiddenFuels: Series[]
   themeChoice: ThemeChoice
+  lang: Lang
 }
 
 interface Actions {
@@ -26,6 +28,7 @@ interface Actions {
   toggleFuel: (fuel: Series) => void
   setHiddenFuels: (fuels: Series[]) => void
   setThemeChoice: (choice: ThemeChoice) => void
+  setLang: (lang: Lang) => void
   togglePlay: () => void
   /** One half hour on from the displayed day; past the last, on to the next priced day, or a stop at the end of the data. */
   step: (days: readonly string[], displayed: string | null) => void
@@ -39,6 +42,7 @@ const initial = (): State => ({
   playing: false,
   hiddenFuels: [],
   themeChoice: loadThemeChoice(),
+  lang: loadLang(),
 })
 
 export const useApp = create<State & Actions>((set) => ({
@@ -49,6 +53,7 @@ export const useApp = create<State & Actions>((set) => ({
   pickPlant: (plant) => set({ plant, area: null }),
   setHiddenFuels: (hiddenFuels) => set({ hiddenFuels }),
   setThemeChoice: (themeChoice) => set({ themeChoice }),
+  setLang: (lang) => set({ lang }),
   toggleFuel: (fuel) =>
     set((s) => ({
       hiddenFuels: s.hiddenFuels.includes(fuel) ? s.hiddenFuels.filter((f) => f !== fuel) : [...s.hiddenFuels, fuel],
@@ -65,6 +70,7 @@ export const useApp = create<State & Actions>((set) => ({
 
 useApp.subscribe((s, previous) => {
   if (s.themeChoice !== previous.themeChoice) saveThemeChoice(s.themeChoice)
+  if (s.lang !== previous.lang) saveLang(s.lang)
 })
 
 export const resetApp = () => useApp.setState(initial())

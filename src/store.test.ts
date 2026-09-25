@@ -69,3 +69,9 @@ test('the theme choice is kept for the next visit', () => {
   useApp.getState().setThemeChoice('system')
   expect(localStorage.getItem('fiftysixty.theme')).toBeNull()
 })
+
+test('the language is kept for the next visit', () => {
+  useApp.getState().setLang('ja')
+  expect(localStorage.getItem('fiftysixty.lang')).toBe('ja')
+  useApp.getState().setLang('en')
+})
