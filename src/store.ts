@@ -22,6 +22,7 @@ interface Actions {
   selectArea: (area: Area | null) => void
   pickPlant: (plant: string | null) => void
   toggleFuel: (fuel: Series) => void
+  setHiddenFuels: (fuels: Series[]) => void
   togglePlay: () => void
   /** One half hour on from the displayed day; past the last, on to the next priced day, or a stop at the end of the data. */
   step: (days: readonly string[], displayed: string | null) => void
@@ -35,6 +36,7 @@ export const useApp = create<State & Actions>((set) => ({
   setSlot: (slot) => set({ slot: clampSlot(slot) }),
   selectArea: (area) => set({ area, plant: null }),
   pickPlant: (plant) => set({ plant, area: null }),
+  setHiddenFuels: (hiddenFuels) => set({ hiddenFuels }),
   toggleFuel: (fuel) =>
     set((s) => ({
       hiddenFuels: s.hiddenFuels.includes(fuel) ? s.hiddenFuels.filter((f) => f !== fuel) : [...s.hiddenFuels, fuel],

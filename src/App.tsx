@@ -5,7 +5,7 @@ import { fiscalYear, loadSpotYears, slotOf, type SpotDays } from './market/jepx'
 import { stories } from './market/stories'
 import { loadRecord, monthOf, recordSlot, type RecordDays, type RecordSlot } from './market/record'
 import type { Area } from './regions/areas'
-import Legend from './panels/Legend'
+import Corner from './panels/Corner'
 import Readout from './panels/Readout'
 import { loadRegions, type Regions } from './regions/geometry'
 import { loadPlants, type Plants } from './regions/plants'
@@ -43,6 +43,7 @@ export default function App() {
   const pickPlant = useApp((s) => s.pickPlant)
   const hiddenFuels = useApp((s) => s.hiddenFuels)
   const toggleFuel = useApp((s) => s.toggleFuel)
+  const setHiddenFuels = useApp((s) => s.setHiddenFuels)
   const plant = useMemo(
     () => plants?.features.find((f) => f.properties.id === plantId)?.properties ?? null,
     [plants, plantId],
@@ -144,7 +145,13 @@ export default function App() {
           onSlot={setSlot}
           onPlay={togglePlay}
         />
-        <Legend hiddenFuels={hiddenFuels} onToggleFuel={toggleFuel} plantsShown={zoom >= PLANTS_FROM_ZOOM} />
+        <Corner
+          plants={plants}
+          hiddenFuels={hiddenFuels}
+          onToggleFuel={toggleFuel}
+          onHideFuels={setHiddenFuels}
+          plantsShown={zoom >= PLANTS_FROM_ZOOM}
+        />
       </main>
     </>
   )

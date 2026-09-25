@@ -16,6 +16,18 @@ export const SERIES_NAMES: Record<Series, string> = {
   hydro: 'Hydro',
 }
 
+/** The series in a word or two, for where the long names would not fit. */
+export const SERIES_SHORT: Record<Series, string> = {
+  coal: 'Coal',
+  nuclear: 'Nuclear',
+  renewables: 'Geo, bio',
+  otherThermal: 'Oil, other',
+  solar: 'Solar',
+  wind: 'Wind',
+  gas: 'Gas',
+  hydro: 'Hydro',
+}
+
 export function seriesMW(slot: RecordSlot): Record<Series, number> {
   const s = slot.bySource
   return {

@@ -1,0 +1,80 @@
+.panel {
+  padding: 0.5rem;
+  width: 13rem;
+  background: var(--panel);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.all {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.35rem;
+}
+
+.all button {
+  padding: 0.2rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.all button:disabled {
+  color: var(--muted);
+  cursor: default;
+}
+
+.hint {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-style: italic;
+}
+
+.fuel {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.45rem 0.5rem;
+  border: 0;
+  border-radius: 0.35rem;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.fuel:hover {
+  background: var(--hover);
+}
+
+.fuel[aria-pressed='false'] {
+  color: var(--muted);
+}
+
+.fuel[aria-pressed='false'] .swatch {
+  opacity: 0.25;
+}
+
+.swatch {
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 3px;
+  flex: none;
+}
+
+.name {
+  flex: 1;
+}
+
+.count {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
