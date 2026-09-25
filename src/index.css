@@ -54,11 +54,25 @@ header {
   gap: 1rem;
 }
 
+/* The name in the colors of the two halves of the grid, as the map draws them. */
 header h1 {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--accent);
+}
+
+header h1 .hz50 {
+  color: var(--hz50);
+}
+
+header h1 .hz60 {
+  color: var(--hz60);
+}
+
+header h1 .slash {
+  color: var(--muted);
+  font-weight: 400;
+  margin: 0 0.05em;
 }
 
 header p {
