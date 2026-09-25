@@ -12,6 +12,8 @@ export interface AreaInfo {
   hz: Hz
   /** JIS X 0401 prefecture codes; the areas follow the prefecture lines, see PREFECTURES. */
   prefectures: readonly number[]
+  /** A point inside the area, clear of the big city labels, where its glyph stands. */
+  anchor: readonly [number, number]
 }
 
 /**
@@ -20,16 +22,30 @@ export interface AreaInfo {
  * three are drawn whole in the area that holds most of them.
  */
 export const AREAS: readonly AreaInfo[] = [
-  { id: 'hokkaido', name: 'Hokkaido', ja: '北海道', hz: 50, prefectures: [1] },
-  { id: 'tohoku', name: 'Tohoku', ja: '東北', hz: 50, prefectures: [2, 3, 4, 5, 6, 7, 15] },
-  { id: 'tokyo', name: 'Tokyo', ja: '東京', hz: 50, prefectures: [8, 9, 10, 11, 12, 13, 14, 19] },
-  { id: 'chubu', name: 'Chubu', ja: '中部', hz: 60, prefectures: [20, 21, 22, 23, 24] },
-  { id: 'hokuriku', name: 'Hokuriku', ja: '北陸', hz: 60, prefectures: [16, 17, 18] },
-  { id: 'kansai', name: 'Kansai', ja: '関西', hz: 60, prefectures: [25, 26, 27, 28, 29, 30] },
-  { id: 'chugoku', name: 'Chugoku', ja: '中国', hz: 60, prefectures: [31, 32, 33, 34, 35] },
-  { id: 'shikoku', name: 'Shikoku', ja: '四国', hz: 60, prefectures: [36, 37, 38, 39] },
-  { id: 'kyushu', name: 'Kyushu', ja: '九州', hz: 60, prefectures: [40, 41, 42, 43, 44, 45, 46] },
-  { id: 'okinawa', name: 'Okinawa', ja: '沖縄', hz: 60, prefectures: [47] },
+  { id: 'hokkaido', name: 'Hokkaido', ja: '北海道', hz: 50, prefectures: [1], anchor: [142.8, 43.4] },
+  { id: 'tohoku', name: 'Tohoku', ja: '東北', hz: 50, prefectures: [2, 3, 4, 5, 6, 7, 15], anchor: [140.6, 38.9] },
+  {
+    id: 'tokyo',
+    name: 'Tokyo',
+    ja: '東京',
+    hz: 50,
+    prefectures: [8, 9, 10, 11, 12, 13, 14, 19],
+    anchor: [140.0, 36.7],
+  },
+  { id: 'chubu', name: 'Chubu', ja: '中部', hz: 60, prefectures: [20, 21, 22, 23, 24], anchor: [137.4, 35.5] },
+  { id: 'hokuriku', name: 'Hokuriku', ja: '北陸', hz: 60, prefectures: [16, 17, 18], anchor: [136.7, 36.6] },
+  { id: 'kansai', name: 'Kansai', ja: '関西', hz: 60, prefectures: [25, 26, 27, 28, 29, 30], anchor: [135.4, 34.9] },
+  { id: 'chugoku', name: 'Chugoku', ja: '中国', hz: 60, prefectures: [31, 32, 33, 34, 35], anchor: [132.8, 34.9] },
+  { id: 'shikoku', name: 'Shikoku', ja: '四国', hz: 60, prefectures: [36, 37, 38, 39], anchor: [133.6, 33.7] },
+  {
+    id: 'kyushu',
+    name: 'Kyushu',
+    ja: '九州',
+    hz: 60,
+    prefectures: [40, 41, 42, 43, 44, 45, 46],
+    anchor: [131.5, 32.9],
+  },
+  { id: 'okinawa', name: 'Okinawa', ja: '沖縄', hz: 60, prefectures: [47], anchor: [127.8, 26.5] },
 ]
 
 /** The areas with a JEPX price, in JEPX's column order. */

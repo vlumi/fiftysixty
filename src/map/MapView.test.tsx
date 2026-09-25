@@ -1,10 +1,14 @@
 import { render } from '@testing-library/react'
+import csv from '../test/fixtures/tepco-jukyu.csv?raw'
+import { recordSlot } from '../market/record'
+import { TEPCO } from '../market/tepco'
 import type { Regions } from '../regions/geometry'
 import MapView from './MapView'
 
-const { mapInstance, overlayInstance } = vi.hoisted(() => ({
+const { mapInstance, overlayInstance, markers } = vi.hoisted(() => ({
   mapInstance: { addControl: vi.fn(), remove: vi.fn() },
   overlayInstance: { setProps: vi.fn() },
+  markers: [] as { lngLat: unknown; element: HTMLElement; remove: () => void }[],
 }))
 
 vi.mock('maplibre-gl', () => ({
@@ -12,6 +16,20 @@ vi.mock('maplibre-gl', () => ({
     return mapInstance
   }),
   NavigationControl: vi.fn(),
+  Marker: vi.fn(function (this: unknown, { element }: { element: HTMLElement }) {
+    const marker = { element, lngLat: null as unknown, remove: vi.fn() }
+    markers.push(marker)
+    return {
+      setLngLat(lngLat: unknown) {
+        marker.lngLat = lngLat
+        return this
+      },
+      addTo() {
+        return this
+      },
+      remove: marker.remove,
+    }
+  }),
   setWorkerUrl: vi.fn(),
 }))
 vi.mock('maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url', () => ({ default: '/worker.js' }))
@@ -49,4 +67,18 @@ test('a click reports the area under it, or none for the sea', () => {
   expect(onPick).toHaveBeenLastCalledWith('kyushu')
   onClick({ object: undefined })
   expect(onPick).toHaveBeenLastCalledWith(null)
+})
+
+test('a recorded area gets a glyph on its anchor, which picks the area, and loses it when the record goes', () => {
+  const onPick = vi.fn()
+  const record = recordSlot(TEPCO.parse(csv), '2026-09-24', 25)!
+  const { rerender } = render(<MapView regions={regions} mixes={{ tokyo: record }} onPick={onPick} />)
+  expect(markers).toHaveLength(1)
+  expect(markers[0].lngLat).toEqual([140.0, 36.7])
+  const glyph = markers[0].element.querySelector('button')!
+  expect(glyph).toHaveAccessibleName('Tokyo mix')
+  glyph.click()
+  expect(onPick).toHaveBeenCalledWith('tokyo')
+  rerender(<MapView regions={regions} mixes={{}} onPick={onPick} />)
+  expect(markers[0].remove).toHaveBeenCalled()
 })

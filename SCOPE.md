@@ -4,7 +4,7 @@ The Japanese power market on a map, from public data. A sibling of [nebulosa](ht
 
 **The name:** 50 Hz east, 60 Hz west, and the three converter stations between them that cap the flow across the middle of the country; also Nykänen's *fifty-sixty*, "more or less", which is what a day-ahead price is. Styled 50/60.
 
-**Status:** unofficial demo project, not affiliated with JEPX, OCCTO or any utility. Bootstrapped 2026-09-25 with the toolchain and a map of Japan; the same day, the day-ahead price on the map. The milestones below are in the order they are meant to land; the first one alone makes the point.
+**Status:** unofficial demo project, not affiliated with JEPX, OCCTO or any utility. Bootstrapped 2026-09-25 with the toolchain and a map of Japan; the same day, the day-ahead price on the map and what ran in Tokyo and Kyushu. The milestones below are in the order they are meant to land; the first one alone makes the point.
 
 ## Data
 
@@ -39,10 +39,10 @@ Toolchain, CI, a map of Japan under the name, the data fetcher for JEPX and TEPC
 - A readout for the selected region: its price, the system price, the spread to its neighbors.
 - The 50/60 line drawn across the middle, since it is the name.
 
-### M2 — what ran
+### M2 — what ran (done 2026-09-25)
 
 - TEPCO's supply-demand record parsed and drawn for its region: the supply stack under the demand line for the displayed day, and the mix for the displayed slot beside the region on the map.
-- A second transmission company (Kyushu, for curtailment) through the same interface, then the rest as their adapters are written.
+- A second transmission company (Kyushu, for curtailment) through the same interface; the other seven follow as their adapters are written, which is ongoing work rather than a milestone.
 - Solar and wind curtailment shown distinctly, since it is the most visible thing the market does.
 
 ### M3 — the flows

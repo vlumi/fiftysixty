@@ -1,7 +1,8 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { ADAPTERS } from './market/adapters'
 import { fiscalYear, latestDay, loadSpot, slotOf, type SpotDays } from './market/jepx'
-import { loadRecord, monthOf, recordSlot, type RecordDays } from './market/record'
+import { loadRecord, monthOf, recordSlot, type RecordDays, type RecordSlot } from './market/record'
+import type { Area } from './regions/areas'
 import Legend from './panels/Legend'
 import Readout from './panels/Readout'
 import { loadRegions, type Regions } from './regions/geometry'
@@ -29,17 +30,26 @@ export default function App() {
   const days = spot ? [...spot.keys()].sort() : []
   const displayed = slotOf(spot, date, slot)
 
-  const adapter = area ? ADAPTERS[area] : undefined
-  const recordKey = adapter && date ? `${adapter.area}/${monthOf(date)}` : null
+  const month = date ? monthOf(date) : null
+  const requested = useRef(new Set<string>())
   useEffect(() => {
-    if (!adapter || !recordKey || records.has(recordKey)) return
-    loadRecord(adapter, recordKey.slice(-6)).then(
-      (days) => setRecords((r) => new Map(r).set(recordKey, days)),
-      console.error,
-    )
-  }, [adapter, recordKey, records])
-  const record = recordKey ? recordSlot(records.get(recordKey), date, slot) : undefined
-  const recordedDay = recordKey && date ? records.get(recordKey)?.get(date) : undefined
+    if (!month) return
+    for (const adapter of Object.values(ADAPTERS)) {
+      const key = `${adapter.area}/${month}`
+      if (requested.current.has(key)) continue
+      requested.current.add(key)
+      loadRecord(adapter, month).then((days) => setRecords((r) => new Map(r).set(key, days)), console.error)
+    }
+  }, [month])
+  const recordFor = (a: Area | null) => (a && month ? records.get(`${a}/${month}`) : undefined)
+  const record = recordSlot(recordFor(area), date, slot)
+  const recordedDay = date ? recordFor(area)?.get(date) : undefined
+  const mixes = Object.fromEntries(
+    Object.keys(ADAPTERS).flatMap((a) => {
+      const at = recordSlot(recordFor(a as Area), date, slot)
+      return at ? [[a, at]] : []
+    }),
+  ) as Partial<Record<Area, RecordSlot>>
 
   return (
     <>
@@ -53,7 +63,7 @@ export default function App() {
       </header>
       <main>
         <Suspense fallback={null}>
-          <MapView regions={regions} prices={displayed?.areaPrice} selected={area} onPick={selectArea} />
+          <MapView regions={regions} prices={displayed?.areaPrice} selected={area} mixes={mixes} onPick={selectArea} />
         </Suspense>
         <Readout
           slot={displayed}
