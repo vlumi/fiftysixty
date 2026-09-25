@@ -18,6 +18,8 @@ How fiftysixty works, as built. Everything under *Planned* is intent, kept apart
 
 **The price on the map.** With prices, the areas are filled through `shared/scale.ts`: one warm hue from near the surface to bright over a fixed 0 to 50 yen domain, so one day's colors mean the same as another's; Okinawa, which has no price, is muted. `panels/Legend.tsx` draws the same ramp with its ends.
 
+**The readout.** `panels/Readout.tsx` shows the displayed slot in numbers: with nothing picked, the system price and the spread across the areas; with an area picked by a click on the map, its price against the system price and against each neighbor across an interconnector. `regions/interconnectors.ts` is the hand-written list of the ten lines with their ends and kind, AC, HVDC or the frequency converters; the capacities come with OCCTO's data in M3. The picked area is outlined on the map.
+
 **Tests.** Unit tests on real rows cut from the JEPX file, which also feed the browser tests; component tests with the map mocked; Playwright against the built app in headless Chromium with the basemap's tile requests answered empty and the price file served from the fixture, so nothing depends on a third party but the style.
 
 ## Planned
@@ -28,4 +30,4 @@ How fiftysixty works, as built. Everything under *Planned* is intent, kept apart
 
 **Layers.** `LineLayer` or `ArcLayer` for the interconnectors with width from flow and color from load, `ScatterplotLayer` for plants later; all fed from the store's per-slot selectors, as nebulosa's `layers.ts` is.
 
-**Readouts.** A panel for the selected region with the price, the supply stack for the day as a chart, and the mix for the slot; a legend for price and for sources.
+**Readouts.** The supply stack for the day as a chart and the mix for the slot beside the price; a legend for sources.

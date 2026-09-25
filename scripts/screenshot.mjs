@@ -5,6 +5,7 @@
 //   CHROME=/usr/bin/google-chrome WAIT_MS=30000 node scripts/screenshot.mjs out.png
 //   EVAL="document.querySelector('[aria-label=Constellation] li button').click()" node scripts/screenshot.mjs out.png  # act first
 //   HOVER=1 node scripts/screenshot.mjs out.png    # sweep the pointer across the map first (surfaces hover errors)
+//   CLICK=812,600 node scripts/screenshot.mjs out.png   # click the page at a point first, e.g. an area on the map
 //   WIDTH=390 HEIGHT=844 node scripts/screenshot.mjs phone.png   # phone-sized viewport
 //   DPR=2 node scripts/screenshot.mjs retina.png                  # high-DPI rendering
 //   TOUCH=1 node scripts/screenshot.mjs phone.png                 # a touch screen: no hover, coarse pointer
@@ -20,6 +21,7 @@ const chrome = process.env.CHROME ?? '/Applications/Google Chrome.app/Contents/M
 const waitMs = Number(process.env.WAIT_MS ?? 15_000)
 const evalJs = process.env.EVAL
 const hover = process.env.HOVER === '1'
+const click = process.env.CLICK?.split(',').map(Number)
 const width = Number(process.env.WIDTH ?? 1400)
 const height = Number(process.env.HEIGHT ?? 900)
 const dpr = Number(process.env.DPR ?? 1)
@@ -84,6 +86,13 @@ try {
   await new Promise((resolve) => setTimeout(resolve, waitMs))
   if (evalJs) {
     await send('Runtime.evaluate', { expression: evalJs, awaitPromise: true })
+    await new Promise((resolve) => setTimeout(resolve, 1500))
+  }
+  if (click) {
+    const [x, y] = click
+    await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x, y })
+    await send('Input.dispatchMouseEvent', { type: 'mousePressed', x, y, button: 'left', clickCount: 1 })
+    await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x, y, button: 'left', clickCount: 1 })
     await new Promise((resolve) => setTimeout(resolve, 1500))
   }
   if (hover) {
