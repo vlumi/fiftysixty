@@ -1,4 +1,5 @@
 import type { Area } from '../regions/areas'
+import { fetchText } from './fetch'
 
 /** The sources in the transmission companies' records, in their column order. */
 export const SOURCES = [
@@ -39,11 +40,8 @@ export interface RecordAdapter {
 }
 
 export async function loadRecord(adapter: RecordAdapter, month: string, base = '/data'): Promise<RecordDays | null> {
-  const url = `${base}/${adapter.file(month)}`
-  const response = await fetch(url)
-  if (response.status === 404 || response.headers.get('content-type')?.includes('text/html')) return null
-  if (!response.ok) throw new Error(`${url}: ${response.status}`)
-  return adapter.parse(await response.text())
+  const text = await fetchText(`${base}/${adapter.file(month)}`)
+  return text === null ? null : adapter.parse(text)
 }
 
 /** The month a day belongs to, as the files are named. */

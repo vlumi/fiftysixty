@@ -1,4 +1,3 @@
-import { SLOTS } from './jepx'
 import type { RecordSlot } from './record'
 
 /** The record's sources grouped for the chart, in stack order from the bottom; the order keeps neighbors apart under color-blindness. */
@@ -81,5 +80,3 @@ export function stackDay(day: readonly RecordSlot[]): DayStack {
     maxMW: Math.ceil(Math.max(GW, ...tops) / GW) * GW,
   }
 }
-
-export { SLOTS }
