@@ -1,8 +1,30 @@
-.legend {
+.corner {
   position: absolute;
   z-index: 5;
   right: 0.75rem;
   bottom: 2.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+}
+
+.toggle {
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--panel);
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.toggle[aria-expanded='true'] {
+  color: var(--text);
+}
+
+.legend {
   margin: 0;
   padding: 0.5rem 0.75rem;
   width: 15rem;
@@ -17,33 +39,6 @@
   border-radius: 0.25rem;
 }
 
-.lines {
-  margin-top: 0.4rem;
-  line-height: 1.5;
-}
-
-.arrow {
-  display: inline-block;
-  width: 1.4rem;
-  height: 0;
-  vertical-align: middle;
-  border-top: 3px solid var(--accent);
-}
-
-.dot {
-  display: inline-block;
-  width: 0.7rem;
-  height: 0.7rem;
-  vertical-align: middle;
-  border-radius: 50%;
-  background: var(--src-gas);
-  border: 1px solid var(--bg);
-}
-
-.rimmed {
-  box-shadow: 0 0 0 2px var(--text);
-}
-
 .ticks {
   display: flex;
   justify-content: space-between;
@@ -51,8 +46,42 @@
   font-variant-numeric: tabular-nums;
 }
 
-@media (max-width: 720px) {
-  .legend {
+.arrows {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.1rem 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.arrowKey {
+  display: block;
+}
+
+.fuels {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.1rem 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.fuel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+.swatch {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 2px;
+  flex: none;
+}
+
+@media (max-width: 720px), (max-height: 560px) {
+  .corner {
     right: 0.5rem;
     bottom: 9rem;
   }

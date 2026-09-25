@@ -26,7 +26,7 @@ test('the clock opens on yesterday, plays into the next day, jumps to now and sc
   await expect(page.getByRole('status')).toHaveText('Today 10:00–10:30 JST · now')
   await expect(page.getByRole('button', { name: 'Next day' })).toBeDisabled()
   await expect(page.getByRole('button', { name: 'Now' })).toBeDisabled()
-  await expect(page.getByRole('figure', { name: 'Price scale' })).toBeVisible()
+  await expect(page.getByRole('figure', { name: 'Key' })).toBeVisible()
   await expect(page.getByRole('complementary', { name: 'Readout' })).toContainText('18.00')
 })
 
