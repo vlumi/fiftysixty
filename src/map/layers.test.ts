@@ -35,11 +35,20 @@ test('the areas are filled by their frequency and the split line drawn in the ac
 
 test('with prices the areas take the price scale and Okinawa, which has none, is muted', () => {
   const prices = { tokyo: 30, kansai: 5 } as AreaPrices
-  const [areas] = buildLayers(regions, DARK, prices) as GeoJsonLayer<AreaProps, Interleaved>[]
+  const [areas] = buildLayers(regions, DARK, { prices }) as GeoJsonLayer<AreaProps, Interleaved>[]
   const fill = areas.props.getFillColor
   if (typeof fill !== 'function') throw new Error('the fill is an accessor')
   const context = { index: 0, data: regions.areas.features, target: [] }
   expect(fill(regions.areas.features[0], context)).toEqual([...priceColor(30, DARK.price), 170])
   expect(fill(regions.areas.features[1], context)).toEqual([...priceColor(5, DARK.price), 170])
   expect(fill(regions.areas.features[2], context)).toEqual([...DARK.muted, 40])
+})
+
+test('the selected area is outlined strongly', () => {
+  const [areas] = buildLayers(regions, DARK, { selected: 'kansai' }) as GeoJsonLayer<AreaProps, Interleaved>[]
+  const width = areas.props.getLineWidth
+  if (typeof width !== 'function') throw new Error('the width is an accessor')
+  const context = { index: 0, data: regions.areas.features, target: [] }
+  expect(width(regions.areas.features[0], context)).toBe(1)
+  expect(width(regions.areas.features[1], context)).toBe(2.5)
 })

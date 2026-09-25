@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { fiscalYear, latestDay, loadSpot, slotOf, type SpotDays } from './market/jepx'
 import Legend from './panels/Legend'
+import Readout from './panels/Readout'
 import { loadRegions, type Regions } from './regions/geometry'
 import { useApp } from './store'
 import TimeBar from './time/TimeBar'
@@ -19,9 +20,11 @@ export default function App() {
   const slot = useApp((s) => s.slot)
   const setDate = useApp((s) => s.setDate)
   const setSlot = useApp((s) => s.setSlot)
+  const area = useApp((s) => s.area)
+  const selectArea = useApp((s) => s.selectArea)
   const date = chosenDate ?? latestDay(spot)
   const days = spot ? [...spot.keys()].sort() : []
-  const prices = slotOf(spot, date, slot)?.areaPrice
+  const displayed = slotOf(spot, date, slot)
 
   return (
     <>
@@ -31,8 +34,9 @@ export default function App() {
       </header>
       <main>
         <Suspense fallback={null}>
-          <MapView regions={regions} prices={prices} />
+          <MapView regions={regions} prices={displayed?.areaPrice} selected={area} onPick={selectArea} />
         </Suspense>
+        <Readout slot={displayed} area={area} onClose={() => selectArea(null)} />
         <TimeBar date={date} days={days} slot={slot} onDate={setDate} onSlot={setSlot} />
         <Legend />
       </main>

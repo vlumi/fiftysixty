@@ -29,7 +29,8 @@ test('the page is the name, the line under it, the map, the clock and the price 
   expect(screen.getByRole('status')).toHaveTextContent('12:00–12:30 JST')
 })
 
-test('the clock opens on the newest day the auction has priced', async () => {
+test('the clock opens on the newest day the auction has priced, with the system price read out', async () => {
   render(<App />)
   expect(await screen.findByDisplayValue('2026-09-26')).toBeInTheDocument()
+  expect(screen.getByRole('complementary', { name: 'Readout' })).toHaveTextContent('System price')
 })
