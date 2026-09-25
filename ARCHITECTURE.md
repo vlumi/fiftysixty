@@ -4,7 +4,7 @@ How fiftysixty works, as built. Everything under *Planned* is intent, kept apart
 
 ## Built
 
-**The page.** A header with the name and a map that fills the rest, the same skeleton as nebulosa: `App.tsx` lazy-loads the map view so MapLibre is a chunk of its own, cached across deploys. The map is MapLibre over OpenFreeMap's `fiord` style, bounded to Japan, with the navigation control and nothing drawn on it yet.
+**The page.** A header with the name and a map that fills the rest, the same skeleton as nebulosa: `App.tsx` lazy-loads the map view so MapLibre is a chunk of its own, cached across deploys. The map is MapLibre over OpenFreeMap's `fiord` style, bounded to Japan, with the navigation control and nothing drawn on it yet. MapLibre 6 loads its web worker from a file next to its own script, which a bundled app does not have, so the worker is bundled explicitly and registered at startup, and the browser test waits for a tile request, which only the worker makes.
 
 **The data.** `scripts/fetch-data.mjs` fetches JEPX's spot-market CSV for the current fiscal year and TEPCO's supply-demand record for the current month into `public/data/` in development and the web root's `data/` in deployment, where a cron job installed by `deploy.sh` refreshes them daily. Both sources are CSV with Japanese headers; JEPX is UTF-8 and TEPCO's files vary by month, so the fetcher decodes each as UTF-8 when valid and Shift_JIS otherwise, and writes UTF-8. JEPX serves its file only with its market page as the referer.
 
