@@ -26,3 +26,10 @@ test('the plants show from zoom 6, colored by fuel, sized by the root of the cap
   expect(line(plants.features[1], context)).toBe(2)
   expect(line(plants.features[0], context)).toBe(1)
 })
+
+test('hidden fuels leave the map', () => {
+  const [layer] = buildPlantLayers(plants, DARK, 8, null, ['coal', 'hydro']) as [
+    ScatterplotLayer<Feature<Point, PlantProps>>,
+  ]
+  expect((layer.props.data as Feature<Point, PlantProps>[]).map((f) => f.properties.fuel)).toEqual(['nuclear', 'solar'])
+})

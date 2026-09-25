@@ -52,3 +52,11 @@ test('a plant and an area are picked in turn, each letting the other go', () => 
   useApp.getState().selectArea('tokyo')
   expect(useApp.getState()).toMatchObject({ area: 'tokyo', plant: null })
 })
+
+test('a fuel is hidden and shown again', () => {
+  useApp.getState().toggleFuel('coal')
+  useApp.getState().toggleFuel('gas')
+  expect(useApp.getState().hiddenFuels).toEqual(['coal', 'gas'])
+  useApp.getState().toggleFuel('coal')
+  expect(useApp.getState().hiddenFuels).toEqual(['gas'])
+})

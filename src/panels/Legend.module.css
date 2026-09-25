@@ -69,7 +69,23 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
   white-space: nowrap;
+  cursor: pointer;
+}
+
+.fuel[aria-pressed='false'] {
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+
+.hint {
+  margin-top: 0.3rem;
+  font-style: italic;
 }
 
 .swatch {

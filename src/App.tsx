@@ -9,6 +9,7 @@ import Legend from './panels/Legend'
 import Readout from './panels/Readout'
 import { loadRegions, type Regions } from './regions/geometry'
 import { loadPlants, type Plants } from './regions/plants'
+import { PLANTS_FROM_ZOOM } from './map/plantLayers'
 import { useApp } from './store'
 import { jstDate, openingDay } from './time/days'
 import TimeBar from './time/TimeBar'
@@ -22,6 +23,7 @@ const REFRESH_MS = 30 * 60_000
 export default function App() {
   const [regions, setRegions] = useState<Regions | null>(null)
   const [plants, setPlants] = useState<Plants | null>(null)
+  const [zoom, setZoom] = useState(5)
   const [spot, setSpot] = useState<SpotDays | null>(null)
   const [records, setRecords] = useState<ReadonlyMap<string, RecordDays | null>>(new Map())
   const [flowMonths, setFlowMonths] = useState<ReadonlyMap<string, FlowDays | null>>(new Map())
@@ -39,6 +41,8 @@ export default function App() {
   const selectArea = useApp((s) => s.selectArea)
   const plantId = useApp((s) => s.plant)
   const pickPlant = useApp((s) => s.pickPlant)
+  const hiddenFuels = useApp((s) => s.hiddenFuels)
+  const toggleFuel = useApp((s) => s.toggleFuel)
   const plant = useMemo(
     () => plants?.features.find((f) => f.properties.id === plantId)?.properties ?? null,
     [plants, plantId],
@@ -112,9 +116,11 @@ export default function App() {
             flows={flows}
             plants={plants}
             selectedPlant={plantId}
+            hiddenFuels={hiddenFuels}
             mixes={mixes}
             onPick={selectArea}
             onPickPlant={pickPlant}
+            onZoom={setZoom}
           />
         </Suspense>
         <Readout
@@ -138,7 +144,7 @@ export default function App() {
           onSlot={setSlot}
           onPlay={togglePlay}
         />
-        <Legend />
+        <Legend hiddenFuels={hiddenFuels} onToggleFuel={toggleFuel} plantsShown={zoom >= PLANTS_FROM_ZOOM} />
       </main>
     </>
   )

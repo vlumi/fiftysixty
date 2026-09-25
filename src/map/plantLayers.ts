@@ -1,6 +1,7 @@
 import type { Layer } from '@deck.gl/core'
 import { ScatterplotLayer } from '@deck.gl/layers'
 import type { Feature, Point } from 'geojson'
+import type { Series } from '../market/stack'
 import type { PlantProps, Plants } from '../regions/plants'
 import type { Palette, Rgba } from '../shared/palette'
 import { BELOW_LABELS } from './basemap'
@@ -20,13 +21,14 @@ export function buildPlantLayers(
   palette: Palette,
   zoom: number,
   selected: string | null,
+  hiddenFuels: readonly Series[] = [],
 ): Layer[] {
   if (!plants || zoom < PLANTS_FROM_ZOOM) return []
   return [
     new ScatterplotLayer<PlantFeature, Interleaved>({
       id: 'plants',
       beforeId: BELOW_LABELS,
-      data: plants.features,
+      data: plants.features.filter((f) => !hiddenFuels.includes(f.properties.fuel)),
       getPosition: (f) => f.geometry.coordinates as [number, number],
       getRadius: (f) => plantRadius(f.properties.mw),
       radiusUnits: 'pixels',
