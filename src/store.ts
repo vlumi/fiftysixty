@@ -31,7 +31,8 @@ export const useApp = create<State & Actions>((set) => ({
   step: (days, displayed) =>
     set((s) => {
       if (s.slot < SLOTS) return { slot: s.slot + 1 }
-      const next = displayed ? days[days.indexOf(displayed) + 1] : undefined
+      const at = displayed ? days.indexOf(displayed) : -1
+      const next = at >= 0 ? days[at + 1] : undefined
       return next ? { date: next, slot: 1 } : { playing: false }
     }),
 }))

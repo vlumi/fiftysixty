@@ -36,3 +36,11 @@ test('play steps the half hours, runs on into the next priced day, and stops at 
   useApp.getState().step(days, '2026-09-26')
   expect(useApp.getState()).toMatchObject({ date: '2026-09-26', slot: 48, playing: false })
 })
+
+test('play from a day the data does not hold stops at its end rather than jumping to the oldest day', () => {
+  useApp.getState().setDate('2026-09-24')
+  useApp.getState().setSlot(48)
+  useApp.getState().togglePlay()
+  useApp.getState().step(['2026-09-22', '2026-09-25'], '2026-09-24')
+  expect(useApp.getState()).toMatchObject({ date: '2026-09-24', slot: 48, playing: false })
+})

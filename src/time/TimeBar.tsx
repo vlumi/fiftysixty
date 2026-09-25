@@ -42,7 +42,7 @@ export default function TimeBar({ date, days, slot, now, playing, stories, onDat
         min={days[0]}
         max={days.at(-1)}
         disabled={!date}
-        onChange={(e) => e.target.value && onDate(e.target.value)}
+        onChange={(e) => days.includes(e.target.value) && onDate(e.target.value)}
       />
       <button aria-label="Next day" disabled={!next} onClick={() => next && onDate(next)}>
         ›

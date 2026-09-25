@@ -67,6 +67,8 @@ test('a click reports the area under it, or none for the sea', () => {
   expect(onPick).toHaveBeenLastCalledWith('kyushu')
   onClick({ object: undefined })
   expect(onPick).toHaveBeenLastCalledWith(null)
+  onClick({ object: { id: 'kitahon', path: [] } })
+  expect(onPick).toHaveBeenLastCalledWith(null)
 })
 
 test('a recorded area gets a glyph on its anchor, which picks the area, and loses it when the record goes', () => {

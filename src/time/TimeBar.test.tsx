@@ -45,6 +45,8 @@ test('the day picker spans the days there are prices for', () => {
   expect(picker).toHaveAttribute('max', '2026-09-26')
   fireEvent.change(picker, { target: { value: '2026-09-25' } })
   expect(onDate).toHaveBeenCalledWith('2026-09-25')
+  fireEvent.change(picker, { target: { value: '2026-09-24' } })
+  expect(onDate).not.toHaveBeenCalledWith('2026-09-24')
 })
 
 test('before the data arrives the picker is disabled', () => {
