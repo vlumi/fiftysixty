@@ -15,7 +15,7 @@ All public, all fetched by `scripts/fetch-data.mjs` on the host into `data/` and
 - **OCCTO.** Interconnector capacities and flows from the public 広域予備率 site (`https://web-kohyo.occto.or.jp/kks-web-public/download`, CSV) and the 系統情報サービス; the exact files are settled in M3.
 - **Region geometry.** Nine areas as unions of prefectures. Prefecture polygons from `dataofjapan/land` (derived from GSI's Global Map Japan; attribution to 地球地図日本 required, non-commercial) simplified with mapshaper to a few hundred kB and committed, or from 国土数値情報 N03 under its own open terms. The area-to-prefecture table is hand-written (Okinawa is its own area with no interconnector and no JEPX price; Shizuoka's Fuji river splits it between Tokyo and Chubu, drawn on the prefecture line for now).
 - **Interconnectors.** A hand-written list of the lines with their endpoints and nominal capacities: Hokkaido–Tohoku (the Kitahon HVDC), Tohoku–Tokyo, the three frequency converters (Sakuma, Shin-Shinano, Higashi-Shimizu) between Tokyo and Chubu, Chubu–Hokuriku, Chubu–Kansai, Hokuriku–Kansai, Kansai–Chugoku, Kansai–Shikoku, Chugoku–Shikoku, Chugoku–Kyushu. Capacities from OCCTO's published values.
-- **Plants**, later: METI's licensed-generation list and OCCTO's plant registry for the big units by fuel and capacity; the feed-in-tariff registrations for solar and wind locations. Output per plant is not public.
+- **Plants.** OpenStreetMap's power plants with an electric output tagged, `power=plant` with `plant:source` and `plant:output:electricity`, via Overpass; the big units are well mapped, solar and wind thinly. Committed as a small GeoJSON, © OpenStreetMap contributors under the ODbL. Output per plant is not public.
 
 ## Tech
 
@@ -57,7 +57,7 @@ Toolchain, CI, a map of Japan under the name, the data fetcher for JEPX and TEPC
 
 ### M5 — closer in
 
-- The plants by fuel and capacity at higher zoom, honest about showing capacity and not output.
+- The plants by fuel and capacity at higher zoom, honest about showing capacity and not output: from OpenStreetMap, the 408 tagged with an output of 10 MW or more (done 2026-09-25).
 - Phone layout, light theme, English and Japanese interfaces, following the nebulosa patterns.
 
 ## Non-goals

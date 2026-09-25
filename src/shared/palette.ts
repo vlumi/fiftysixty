@@ -1,3 +1,5 @@
+import type { Series } from '../market/stack'
+
 export type Rgb = [number, number, number]
 export type Rgba = [number, number, number, number]
 
@@ -12,6 +14,8 @@ export interface Palette {
   price: readonly Rgb[]
   /** A line's color from idle to full, the cool hue against the warm areas. */
   flow: { idle: Rgb; full: Rgb }
+  /** The chart's series, the `--src-*` tokens as numbers, for the plants. */
+  series: Record<Series, Rgb>
 }
 
 export const DARK: Palette = {
@@ -27,4 +31,14 @@ export const DARK: Palette = {
     [255, 190, 70],
   ],
   flow: { idle: [120, 150, 170], full: [0, 230, 255] },
+  series: {
+    coal: [230, 103, 103],
+    nuclear: [144, 133, 233],
+    renewables: [0, 131, 0],
+    otherThermal: [213, 81, 129],
+    solar: [201, 133, 0],
+    wind: [25, 158, 112],
+    gas: [217, 89, 38],
+    hydro: [57, 135, 229],
+  },
 }

@@ -127,3 +127,23 @@ test("a picked area's lines: flow in or out against the limit, and where the mar
   const values = [...lines.querySelectorAll('dd')].map((d) => d.textContent)
   expect(values).toEqual(['out 1,290 of 1,830', 'in 6,580 of 6,580', 'in 550 of 550'])
 })
+
+test('a picked plant: its capacity and fuel, and that its output is not public', () => {
+  render(
+    <Readout
+      slot={slot}
+      record={undefined}
+      day={undefined}
+      flows={none}
+      area={null}
+      plant={{ id: 'way/1', name: 'Kashiwazaki-Kariwa Nuclear Power Plant', fuel: 'nuclear', mw: 8212 }}
+      onClose={vi.fn()}
+      onSlot={vi.fn()}
+    />,
+  )
+  expect(screen.getByRole('heading', { name: 'Kashiwazaki-Kariwa Nuclear Power Plant' })).toBeInTheDocument()
+  expect(screen.getByText('8,212')).toBeInTheDocument()
+  expect(
+    screen.getByText(/Nuclear\. Capacity as mapped in OpenStreetMap; what it runs is not public\./),
+  ).toBeInTheDocument()
+})

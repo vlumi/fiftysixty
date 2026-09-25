@@ -5,10 +5,12 @@ import type { FlowSlot } from '../market/flows'
 import type { PricedArea } from '../market/jepx'
 import type { Area } from '../regions/areas'
 import type { AreaProps, Regions } from '../regions/geometry'
+import type { Plants } from '../regions/plants'
 import type { Palette, Rgba } from '../shared/palette'
 import { priceColor } from '../shared/scale'
 import { BELOW_LABELS } from './basemap'
 import { buildFlowLayers } from './flowLayers'
+import { buildPlantLayers } from './plantLayers'
 
 /** Read by the interleaved overlay to slot a layer into the basemap's order, but not typed by deck. */
 export interface Interleaved {
@@ -22,8 +24,10 @@ export interface LayerOptions {
   selected?: Area | null
   /** The interconnectors' forecast for the slot, by line id; drawn as arrows between the areas. */
   flows?: ReadonlyMap<string, FlowSlot>
-  /** The map's zoom, which sizes the arrows' shafts. */
+  /** The map's zoom, which sizes the arrows' shafts and shows the plants when close enough. */
   zoom?: number
+  plants?: Plants | null
+  selectedPlant?: string | null
 }
 
 /**
@@ -33,7 +37,7 @@ export interface LayerOptions {
 export function buildLayers(
   regions: Regions | null,
   palette: Palette,
-  { prices, selected, flows, zoom = 5 }: LayerOptions = {},
+  { prices, selected, flows, zoom = 5, plants = null, selectedPlant = null }: LayerOptions = {},
 ): Layer[] {
   if (!regions) return []
   const fill = (f: Feature<Geometry, AreaProps>): Rgba => {
@@ -66,5 +70,6 @@ export function buildLayers(
       getLineWidth: 2,
     }),
     ...buildFlowLayers(flows ?? new Map(), palette, zoom),
+    ...buildPlantLayers(plants, palette, zoom, selectedPlant),
   ]
 }

@@ -44,3 +44,11 @@ test('play from a day the data does not hold stops at its end rather than jumpin
   useApp.getState().step(['2026-09-22', '2026-09-25'], '2026-09-24')
   expect(useApp.getState()).toMatchObject({ date: '2026-09-24', slot: 48, playing: false })
 })
+
+test('a plant and an area are picked in turn, each letting the other go', () => {
+  useApp.getState().selectArea('kyushu')
+  useApp.getState().pickPlant('way/1')
+  expect(useApp.getState()).toMatchObject({ area: null, plant: 'way/1' })
+  useApp.getState().selectArea('tokyo')
+  expect(useApp.getState()).toMatchObject({ area: 'tokyo', plant: null })
+})
