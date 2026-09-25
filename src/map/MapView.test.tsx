@@ -6,7 +6,7 @@ import type { Regions } from '../regions/geometry'
 import MapView from './MapView'
 
 const { mapInstance, overlayInstance, markers } = vi.hoisted(() => ({
-  mapInstance: { addControl: vi.fn(), remove: vi.fn() },
+  mapInstance: { addControl: vi.fn(), remove: vi.fn(), on: vi.fn(), getZoom: () => 5 },
   overlayInstance: { setProps: vi.fn() },
   markers: [] as { lngLat: unknown; element: HTMLElement; remove: () => void }[],
 }))
