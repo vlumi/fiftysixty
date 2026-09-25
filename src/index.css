@@ -95,7 +95,7 @@ header h1 .slash {
   margin: 0 0.05em;
 }
 
-/* The subtitle gives way on a narrow screen; the buttons keep their width. */
+/* The subtitle shrinks on a narrow window and is left out on a phone; the buttons keep their width. */
 header p {
   flex: 1 1 auto;
   min-width: 0;
@@ -105,6 +105,12 @@ header p {
   font-size: 0.8rem;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+@media (max-width: 720px), (max-height: 560px) {
+  header p {
+    display: none;
+  }
 }
 
 header .lang {
