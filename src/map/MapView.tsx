@@ -78,11 +78,11 @@ export default function MapView({ regions, prices, selected, mixes = {}, onPick 
   )
 }
 
-/** A MapLibre marker standing on the area's anchor, its content rendered by React through a portal. */
+/** A MapLibre marker centered on the area's anchor, its content rendered by React through a portal. */
 function AreaMarker({ map, area, children }: { map: MapLibre; area: Area; children: React.ReactNode }) {
   const [element] = useState(() => document.createElement('div'))
   useEffect(() => {
-    const marker = new Marker({ element, anchor: 'bottom' }).setLngLat([...AREA_BY_ID[area].anchor]).addTo(map)
+    const marker = new Marker({ element, anchor: 'center' }).setLngLat([...AREA_BY_ID[area].anchor]).addTo(map)
     return () => {
       marker.remove()
     }
