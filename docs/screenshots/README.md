@@ -2,6 +2,16 @@
 
 One capture per milestone, taken with [`scripts/screenshot.mjs`](../../scripts/screenshot.mjs), newest first. The files carry a running number so they sort in order, then a name for what they show; the headings carry the dates. The README shows the latest desktop and phone captures; the rest stay here as a record of how the site grew.
 
+## 2026-09-25 · M5, closer in
+
+![Closer in](005-closer-in.png)
+
+Three of M5's four at once: the light theme on the positron basemap, the interface in Japanese with the basemap's labels following, and the map zoomed to zoom 7 over the Sea of Japan coast, where the plants show as dots in the fuels' colors sized by capacity, Kashiwazaki-Kariwa picked with its 8,212 MW in the readout and the note that what it runs is not public. The Plants panel lists the fuels with their counts and filters the dots; the Key and the theme and language buttons sit where they did.
+
+<img src="005-closer-in-phone.png" alt="Closer in, on a phone" width="260">
+
+The same in the light theme and Japanese on a phone (390×844), the fourth item of M5: the readout folded to its headline, the key and the plants behind their buttons, the time bar wrapped at the foot.
+
 ## 2026-09-25 · M4, play and the story days
 
 ![The summer peak](004-story-days.png)

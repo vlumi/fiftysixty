@@ -104,3 +104,12 @@ test('the light theme is a click away and is kept across a reload', async ({ pag
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
   await expect(page.locator('.maplibregl-canvas')).toBeVisible()
 })
+
+test('Japanese is a click away and is kept across a reload', async ({ page }) => {
+  await open(page)
+  await page.getByRole('button', { name: 'Language' }).click()
+  await expect(page.locator('html')).toHaveAttribute('lang', 'ja')
+  await expect(page.getByRole('status')).toHaveText('昨日 12:00–12:30 JST')
+  await page.reload()
+  await expect(page.getByText('地図で見る日本の電力市場')).toBeVisible()
+})

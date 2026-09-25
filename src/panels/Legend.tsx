@@ -1,13 +1,15 @@
+import { useStrings } from '../i18n/useStrings'
 import type { Palette } from '../shared/palette'
 import { cssRgb, PRICE_DOMAIN } from '../shared/scale'
 import styles from './Legend.module.css'
 
 /** The key: the price ramp with its ends, and the arrows as the map draws them, in the theme's palette. */
 export default function Legend({ palette }: { palette: Palette }) {
+  const s = useStrings()
   const [lo, hi] = PRICE_DOMAIN
   const gradient = `linear-gradient(to right, ${palette.price.map(cssRgb).join(', ')})`
   return (
-    <figure className={styles.legend} aria-label="Key">
+    <figure className={styles.legend} aria-label={s.key.key}>
       <div className={styles.ramp} style={{ background: gradient }} />
       <div className={styles.ticks}>
         <span>{lo}</span>
@@ -15,9 +17,9 @@ export default function Legend({ palette }: { palette: Palette }) {
         <span>{hi}+ ¥/kWh</span>
       </div>
       <div className={styles.arrows}>
-        <Arrow width={2} color={cssRgb(palette.flow.idle)} /> flow
-        <Arrow width={6} color={cssRgb(palette.flow.full)} /> at the limit
-        <Arrow width={6} color={cssRgb(palette.flow.full)} rim /> split
+        <Arrow width={2} color={cssRgb(palette.flow.idle)} /> {s.key.flow}
+        <Arrow width={6} color={cssRgb(palette.flow.full)} /> {s.key.atLimit}
+        <Arrow width={6} color={cssRgb(palette.flow.full)} rim /> {s.key.split}
       </div>
     </figure>
   )

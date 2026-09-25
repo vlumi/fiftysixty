@@ -1,11 +1,12 @@
 import { Fragment, useState } from 'react'
+import { useStrings } from '../i18n/useStrings'
+import { useApp } from '../store'
 import type { PricedArea, SpotSlot } from '../market/jepx'
 import { capacityOf, type FlowSlot } from '../market/flows'
-import { SOURCES, type RecordSlot, type Source } from '../market/record'
+import { SOURCES, type RecordSlot } from '../market/record'
 import { AREA_BY_ID, PRICED_AREAS, type Area } from '../regions/areas'
 import { linesOf, neighbors } from '../regions/interconnectors'
 import type { PlantProps } from '../regions/plants'
-import { SERIES_NAMES } from '../market/stack'
 import { mw, signed, yen } from '../shared/format'
 import { useNarrow } from '../shared/useNarrow'
 import styles from './Readout.module.css'
@@ -31,6 +32,7 @@ interface Props {
  * neighbors and what ran in it.
  */
 export default function Readout({ slot, record, day, flows, area, plant, onClose, onSlot }: Props) {
+  const s = useStrings()
   const narrow = useNarrow()
   // On a phone the panel opens on its headline alone, since the map is what the screen is for; the rest is
   // remembered for the area it was asked for, so another area opens folded again.
@@ -39,22 +41,22 @@ export default function Readout({ slot, record, day, flows, area, plant, onClose
   if (!slot) return null
   if (plant) {
     return (
-      <aside className={styles.panel} aria-label="Readout">
-        <button className={styles.close} aria-label="Close" onClick={onClose}>
+      <aside className={styles.panel} aria-label={s.readout.label}>
+        <button className={styles.close} aria-label={s.readout.close} onClick={onClose}>
           ×
         </button>
-        <h2>{plant.name || 'A plant'}</h2>
+        <h2>{plant.name || s.readout.aPlant}</h2>
         <p className={styles.price}>
-          {mw(plant.mw)} <span className="muted">MW</span>{' '}
-          <span className={`${styles.pill} ${styles[plant.fuel]}`}>{SERIES_NAMES[plant.fuel]}</span>
+          {mw(plant.mw)} <span className="muted">{s.readout.mw}</span>{' '}
+          <span className={`${styles.pill} ${styles[plant.fuel]}`}>{s.chart.series[plant.fuel]}</span>
         </p>
-        <p className="muted">Capacity as mapped in OpenStreetMap; what it runs is not public.</p>
+        <p className="muted">{s.readout.plantNote}</p>
       </aside>
     )
   }
   const picked = area && area !== 'okinawa' ? (area as PricedArea) : null
   return (
-    <aside className={styles.panel} aria-label="Readout">
+    <aside className={styles.panel} aria-label={s.readout.label}>
       {picked ? (
         <>
           <AreaReadout area={picked} slot={slot} onClose={onClose} brief={narrow && !expanded} />
@@ -64,7 +66,7 @@ export default function Readout({ slot, record, day, flows, area, plant, onClose
               aria-expanded={expanded}
               onClick={() => setExpandedFor(expanded ? null : area)}
             >
-              {expanded ? 'Less' : 'More'}
+              {expanded ? s.readout.less : s.readout.more}
             </button>
           )}
           {(!narrow || expanded) && (
@@ -83,18 +85,19 @@ export default function Readout({ slot, record, day, flows, area, plant, onClose
 }
 
 function SystemReadout({ slot, okinawa }: { slot: SpotSlot; okinawa: boolean }) {
+  const s = useStrings()
   const prices = PRICED_AREAS.map((a) => slot.areaPrice[a.id as PricedArea])
   const low = Math.min(...prices)
   const high = Math.max(...prices)
   return (
     <>
-      <h2>System price</h2>
+      <h2>{s.readout.systemPrice}</h2>
       <p className={styles.price}>
-        {yen(slot.systemPrice)} <span className="muted">¥/kWh</span>
+        {yen(slot.systemPrice)} <span className="muted">{s.readout.yenPerKwh}</span>
       </p>
       <p className="muted">
-        {low === high ? 'Every area at the system price.' : `Areas from ${yen(low)} to ${yen(high)}.`}
-        {okinawa ? ' Okinawa is not on the exchange.' : ' Pick an area for its price.'}
+        {low === high ? s.readout.everyAreaSystem : s.readout.spread(yen(low), yen(high))}{' '}
+        {okinawa ? s.readout.okinawa : s.readout.pickArea}
       </p>
     </>
   )
@@ -112,21 +115,23 @@ function AreaReadout({
   /** The name and the price alone, without the neighbors. */
   brief?: boolean
 }) {
+  const s = useStrings()
+  const lang = useApp((x) => x.lang)
   const info = AREA_BY_ID[area]
   const price = slot.areaPrice[area]
   return (
     <>
-      <button className={styles.close} aria-label="Close" onClick={onClose}>
+      <button className={styles.close} aria-label={s.readout.close} onClick={onClose}>
         ×
       </button>
       <h2>
-        {info.name} <span className="muted">{info.hz} Hz</span>
+        {lang === 'ja' ? info.ja : info.name} <span className="muted">{s.readout.hz(info.hz)}</span>
       </h2>
       <p className={styles.price}>
-        {yen(price)} <span className="muted">¥/kWh</span>
+        {yen(price)} <span className="muted">{s.readout.yenPerKwh}</span>
       </p>
       <dl className={styles.rows}>
-        <dt>System</dt>
+        <dt>{s.readout.system}</dt>
         <dd>
           {yen(slot.systemPrice)} <span className="muted">{signed(slot.systemPrice - price)}</span>
         </dd>
@@ -140,9 +145,10 @@ function AreaReadout({
 }
 
 function Neighbor({ area, price, against }: { area: PricedArea; price: number; against: number }) {
+  const lang = useApp((x) => x.lang)
   return (
     <>
-      <dt>{AREA_BY_ID[area].name}</dt>
+      <dt>{lang === 'ja' ? AREA_BY_ID[area].ja : AREA_BY_ID[area].name}</dt>
       <dd>
         {yen(price)} <span className="muted">{signed(price - against)}</span>
       </dd>
@@ -150,38 +156,22 @@ function Neighbor({ area, price, against }: { area: PricedArea; price: number; a
   )
 }
 
-const SOURCE_NAMES: Record<Source, string> = {
-  nuclear: 'Nuclear',
-  lng: 'Gas',
-  coal: 'Coal',
-  oil: 'Oil',
-  otherThermal: 'Other thermal',
-  hydro: 'Hydro',
-  geothermal: 'Geothermal',
-  biomass: 'Biomass',
-  solar: 'Solar',
-  wind: 'Wind',
-  pumped: 'Pumped storage',
-  battery: 'Batteries',
-  interconnector: 'Interconnectors',
-  other: 'Other',
-}
-
 /** What ran in the area for the slot, in MW, the sources that were idle left out; curtailment when there was any. */
 function Mix({ record }: { record: RecordSlot | undefined }) {
-  if (!record) return <p className="muted">No record for this half hour yet.</p>
-  const ran = SOURCES.filter((s) => record.bySource[s] !== 0)
+  const s = useStrings()
+  if (!record) return <p className="muted">{s.readout.noRecord}</p>
+  const ran = SOURCES.filter((x) => record.bySource[x] !== 0)
   return (
-    <section aria-label="What ran">
+    <section aria-label={s.readout.whatRan}>
       <h3>
-        Demand {mw(record.demandMW)} <span className="muted">MW</span>
+        {s.readout.demand} {mw(record.demandMW)} <span className="muted">{s.readout.mw}</span>
       </h3>
       <dl className={styles.rows}>
-        {ran.map((s) => (
-          <Row key={s} name={SOURCE_NAMES[s]} value={record.bySource[s]} />
+        {ran.map((x) => (
+          <Row key={x} name={s.readout.sources[x]} value={record.bySource[x]} />
         ))}
-        {record.curtailedMW.solar > 0 && <Row name="Solar curtailed" value={record.curtailedMW.solar} />}
-        {record.curtailedMW.wind > 0 && <Row name="Wind curtailed" value={record.curtailedMW.wind} />}
+        {record.curtailedMW.solar > 0 && <Row name={s.readout.solarCurtailed} value={record.curtailedMW.solar} />}
+        {record.curtailedMW.wind > 0 && <Row name={s.readout.windCurtailed} value={record.curtailedMW.wind} />}
       </dl>
     </section>
   )
@@ -198,28 +188,39 @@ function Row({ name, value }: { name: string; value: number }) {
 
 /** The area's lines for the slot as OCCTO forecast them: the flow toward or away from the area against the limit, and a split. */
 function Lines({ area, flows }: { area: PricedArea; flows: ReadonlyMap<string, FlowSlot> }) {
+  const s = useStrings()
+  const lang = useApp((x) => x.lang)
   const rows = linesOf(area).flatMap((line) => {
     const at = flows.get(line.id)
     if (!at) return []
     const forward = at.flowMW >= 0
     const inward = (line.to === area) === forward
     return [
-      { id: line.id, label: line.label, inward, mw: Math.abs(at.flowMW), capacity: capacityOf(at), split: at.split },
+      {
+        id: line.id,
+        label: lang === 'ja' ? line.name : line.label,
+        inward,
+        mw: Math.abs(at.flowMW),
+        capacity: capacityOf(at),
+        split: at.split,
+      },
     ]
   })
   if (!rows.length) return null
   return (
-    <section aria-label="Lines">
-      <h3>Lines</h3>
+    <section aria-label={s.readout.lines}>
+      <h3>{s.readout.lines}</h3>
       <dl className={styles.rows}>
         {rows.map((r) => (
           <Fragment key={r.id}>
             <dt>
-              {r.label} {r.split && <span className={styles.split}>split</span>}
+              {r.label} {r.split && <span className={styles.split}>{s.readout.split}</span>}
             </dt>
             <dd>
-              <span className="muted">{r.inward ? 'in' : 'out'}</span> {mw(r.mw)}{' '}
-              <span className="muted">of {mw(r.capacity)}</span>
+              <span className="muted">{r.inward ? s.readout.in : s.readout.out}</span> {mw(r.mw)}{' '}
+              <span className="muted">
+                {s.readout.of} {mw(r.capacity)}
+              </span>
             </dd>
           </Fragment>
         ))}

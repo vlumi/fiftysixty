@@ -9,6 +9,7 @@ import { AREA_BY_ID, type Area } from '../regions/areas'
 import type { PlantProps } from '../regions/plants'
 import type { AreaProps, Regions } from '../regions/geometry'
 import { PALETTES } from '../shared/palette'
+import type { Lang } from '../i18n/strings'
 import { BASEMAPS, BELOW_LABELS, type Theme } from '../shared/theme'
 import { JAPAN_BOUNDS } from './basemap'
 import { buildLayers, type LayerOptions } from './layers'
@@ -22,6 +23,8 @@ const GEOMETRY_CREDIT =
 
 interface Props extends LayerOptions {
   theme: Theme
+  /** The basemap's labels and the areas' names come in this language. */
+  lang: Lang
   regions: Regions | null
   /** What ran in each recorded area for the displayed slot, drawn as a glyph beside it. */
   mixes?: Partial<Record<Area, RecordSlot>>
@@ -36,6 +39,7 @@ interface Props extends LayerOptions {
 /** The basemap over Japan with the market layers interleaved into it. */
 export default function MapView({
   theme,
+  lang,
   regions,
   prices,
   selected,
@@ -54,10 +58,10 @@ export default function MapView({
   const [zoom, setZoom] = useState(5)
   // The theme the basemap was styled for last; the map is created with it and restyled when it changes.
   const styled = useRef(theme)
-  const pick = useRef({ onPick, onPickPlant, onZoom })
+  const pick = useRef({ onPick, onPickPlant, onZoom, lang })
   useEffect(() => {
-    pick.current = { onPick, onPickPlant, onZoom }
-  }, [onPick, onPickPlant, onZoom])
+    pick.current = { onPick, onPickPlant, onZoom, lang }
+  }, [onPick, onPickPlant, onZoom, lang])
 
   useEffect(() => {
     if (!container.current) return
@@ -69,6 +73,7 @@ export default function MapView({
       canvasContextAttributes: { antialias: true },
     })
     map.addControl(new NavigationControl({ visualizePitch: false }), 'top-right')
+    map.on('style.load', () => labelLanguage(map, pick.current.lang))
     setMap(map)
     setZoom(map.getZoom())
     map.on('zoom', () => {
@@ -92,6 +97,10 @@ export default function MapView({
       map.remove()
     }
   }, [])
+
+  useEffect(() => {
+    if (map?.isStyleLoaded()) labelLanguage(map, lang)
+  }, [map, lang])
 
   // The basemap follows the theme; the overlay re-adds its layers when the new style has loaded.
   useEffect(() => {
@@ -121,7 +130,11 @@ export default function MapView({
       {map &&
         (Object.entries(mixes) as [Area, RecordSlot][]).map(([area, record]) => (
           <AreaMarker key={area} map={map} area={area}>
-            <MixGlyph name={AREA_BY_ID[area].name} record={record} onPick={() => pick.current.onPick(area)} />
+            <MixGlyph
+              name={lang === 'ja' ? AREA_BY_ID[area].ja : AREA_BY_ID[area].name}
+              record={record}
+              onPick={() => pick.current.onPick(area)}
+            />
           </AreaMarker>
         ))}
     </>
@@ -138,4 +151,21 @@ function AreaMarker({ map, area, children }: { map: MapLibre; area: Area; childr
     }
   }, [map, area, element])
   return createPortal(children, element)
+}
+
+/** The basemap's place names in the language, falling back to the latin name and then whatever the tile has. */
+function labelLanguage(map: MapLibre, lang: Lang): void {
+  const named = map
+    .getStyle()
+    .layers.filter(
+      (layer) => layer.type === 'symbol' && JSON.stringify(layer.layout?.['text-field'] ?? '').includes('name'),
+    )
+  for (const layer of named) {
+    map.setLayoutProperty(layer.id, 'text-field', [
+      'coalesce',
+      ['get', `name:${lang}`],
+      ['get', 'name:latin'],
+      ['get', 'name'],
+    ])
+  }
 }

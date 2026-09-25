@@ -1,4 +1,5 @@
-import { SERIES, SERIES_SHORT, type Series } from '../market/stack'
+import { useStrings } from '../i18n/useStrings'
+import { SERIES, type Series } from '../market/stack'
 import type { Plants } from '../regions/plants'
 import styles from './Plants.module.css'
 
@@ -13,31 +14,32 @@ interface Props {
 
 /** The plants' filter, a row a fuel with its count, the pressed ones on the map; and the fuels' key by the same token. */
 export default function PlantsPanel({ plants, hiddenFuels, onToggle, onHide, shown }: Props) {
+  const s = useStrings()
   const counts = new Map<Series, number>()
   for (const f of plants?.features ?? []) counts.set(f.properties.fuel, (counts.get(f.properties.fuel) ?? 0) + 1)
   return (
-    <section className={styles.panel} aria-label="Plants">
+    <section className={styles.panel} aria-label={s.key.plants}>
       <div className={styles.all}>
         <button onClick={() => onHide([])} disabled={hiddenFuels.length === 0}>
-          All
+          {s.key.all}
         </button>
         <button onClick={() => onHide([...SERIES])} disabled={hiddenFuels.length === SERIES.length}>
-          None
+          {s.key.none}
         </button>
-        {!shown && <span className={styles.hint}>zoom in to see them</span>}
+        {!shown && <span className={styles.hint}>{s.key.zoomIn}</span>}
       </div>
-      {[...SERIES].reverse().map((s) => {
-        const count = counts.get(s) ?? 0
+      {[...SERIES].reverse().map((x) => {
+        const count = counts.get(x) ?? 0
         return (
           <button
-            key={s}
+            key={x}
             className={styles.fuel}
-            aria-label={`${SERIES_SHORT[s]}, ${count} ${count === 1 ? 'plant' : 'plants'}`}
-            aria-pressed={!hiddenFuels.includes(s)}
-            onClick={() => onToggle(s)}
+            aria-label={`${s.key.fuel[x]}, ${s.key.count(count)}`}
+            aria-pressed={!hiddenFuels.includes(x)}
+            onClick={() => onToggle(x)}
           >
-            <span className={styles.swatch} style={{ background: `var(--src-${s})` }} />
-            <span className={styles.name}>{SERIES_SHORT[s]}</span>
+            <span className={styles.swatch} style={{ background: `var(--src-${x})` }} />
+            <span className={styles.name}>{s.key.fuel[x]}</span>
             <span className={styles.count}>{count}</span>
           </button>
         )
