@@ -5,6 +5,7 @@ test('on a phone the map fills the screen below the name, the key folded until a
   const map = page.locator('.maplibregl-canvas')
   const box = await map.boundingBox()
   expect(box?.width).toBeGreaterThan(300)
+  await expect(page.getByText('The Japanese power market on a map')).toBeHidden()
   await expect(page.getByRole('figure', { name: 'Key' })).toHaveCount(0)
   await page.getByRole('button', { name: 'Key' }).click()
   await expect(page.getByRole('figure', { name: 'Key' })).toBeVisible()
