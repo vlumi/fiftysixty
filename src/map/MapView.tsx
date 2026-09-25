@@ -6,7 +6,7 @@ import { useEffect, useRef } from 'react'
 import type { Regions } from '../regions/geometry'
 import { DARK } from '../shared/palette'
 import { JAPAN_BOUNDS, STYLE_URL } from './basemap'
-import { buildLayers } from './layers'
+import { buildLayers, type AreaPrices } from './layers'
 
 // MapLibre 6 resolves its worker relative to its own script URL, which a bundled app does not provide.
 setWorkerUrl(maplibreWorkerUrl)
@@ -15,7 +15,7 @@ const GEOMETRY_CREDIT =
   '<a href="https://www.gsi.go.jp/kankyochiri/gm_jpn.html">地球地図日本</a> (GSI) via dataofjapan/land'
 
 /** The basemap over Japan with the market layers interleaved into it. */
-export default function MapView({ regions }: { regions: Regions | null }) {
+export default function MapView({ regions, prices }: { regions: Regions | null; prices?: AreaPrices }) {
   const container = useRef<HTMLDivElement>(null)
   const overlay = useRef<MapLibreOverlay>(null)
 
@@ -38,8 +38,8 @@ export default function MapView({ regions }: { regions: Regions | null }) {
   }, [])
 
   useEffect(() => {
-    overlay.current?.setProps({ layers: buildLayers(regions, DARK) })
-  }, [regions])
+    overlay.current?.setProps({ layers: buildLayers(regions, DARK, prices) })
+  }, [regions, prices])
 
   return <div ref={container} className="map" role="region" aria-label="Map" />
 }

@@ -1,0 +1,20 @@
+import { DARK } from '../shared/palette'
+import { cssRgb, PRICE_DOMAIN } from '../shared/scale'
+import styles from './Legend.module.css'
+
+const gradient = `linear-gradient(to right, ${DARK.price.map(cssRgb).join(', ')})`
+
+/** The price scale: the ramp from the low end of the domain to the high, in yen per kWh. */
+export default function Legend() {
+  const [lo, hi] = PRICE_DOMAIN
+  return (
+    <figure className={styles.legend} aria-label="Price scale">
+      <div className={styles.ramp} style={{ background: gradient }} />
+      <div className={styles.ticks}>
+        <span>{lo}</span>
+        <span>{(lo + hi) / 2}</span>
+        <span>{hi}+ ¥/kWh</span>
+      </div>
+    </figure>
+  )
+}
