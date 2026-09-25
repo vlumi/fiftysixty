@@ -79,8 +79,11 @@ export function triangleFlows(flows: ReadonlyMap<string, FlowSlot>): FlowDatum[]
 const MW_PER_PX = 1000
 const MIN_PX = 1
 const RIM_PX = 4
-/** How far along the line the shaft ends and the head begins. */
+/** How far along the line the shaft starts, clear of the column it leaves, and where it ends and the head begins. */
+const SHAFT_FROM = 0.07
 const HEAD_AT = 0.78
+/** The shaft tapers from a hair at its start to its full width at the head, in this many steps. */
+const TAPER_STEPS = 12
 
 /** The line's width on screen, a pixel plus one per gigawatt. */
 export const widthOf = (d: FlowDatum) => MIN_PX + d.mw / MW_PER_PX
@@ -104,12 +107,35 @@ const HEAD_ICON = {
   },
 }
 
-/** The shaft, from the start to where the head begins. */
-export function shaft([[x1, y1], [x2, y2]]: FlowDatum['path']): FlowDatum['path'] {
-  return [
-    [x1, y1],
-    [x1 + (x2 - x1) * HEAD_AT, y1 + (y2 - y1) * HEAD_AT],
-  ]
+const along = ([[x1, y1], [x2, y2]]: FlowDatum['path'], t: number): [number, number] => [
+  x1 + (x2 - x1) * t,
+  y1 + (y2 - y1) * t,
+]
+
+/** The shaft, from a little off the start to where the head begins. */
+export function shaft(path: FlowDatum['path']): FlowDatum['path'] {
+  return [along(path, SHAFT_FROM), along(path, HEAD_AT)]
+}
+
+/** A piece of a tapering shaft: its own path and its width, a fraction of the whole shaft's. */
+export interface Taper {
+  flow: FlowDatum
+  path: FlowDatum['path']
+  width: number
+}
+
+/** The shaft cut into pieces of growing width, thin where the power leaves and full where the head begins. */
+export function tapered(d: FlowDatum, extra = 0): Taper[] {
+  const full = widthOf(d)
+  return Array.from({ length: TAPER_STEPS }, (_, i) => {
+    const from = SHAFT_FROM + ((HEAD_AT - SHAFT_FROM) * i) / TAPER_STEPS
+    const to = SHAFT_FROM + ((HEAD_AT - SHAFT_FROM) * (i + 1)) / TAPER_STEPS
+    return {
+      flow: d,
+      path: [along(d.path, from), along(d.path, to)],
+      width: MIN_PX + ((full - MIN_PX) * (i + 1)) / TAPER_STEPS + extra,
+    }
+  })
 }
 
 /** The arrow's heading in degrees counterclockwise from east, on the map's mercator plane. */
@@ -121,9 +147,9 @@ export function heading([[x1, y1], [x2, y2]]: FlowDatum['path']): number {
 const mix = (a: Rgb, b: Rgb, t: number): Rgb => [0, 1, 2].map((i) => Math.round(a[i] + (b[i] - a[i]) * t)) as Rgb
 
 /**
- * The flows as arrows: a path with the width from the flow and the color from the load, a bright rim under it where
- * the market split, the shaft stopping where a head in the same color, sized with the shaft, points on the way the
- * power goes.
+ * The flows as arrows: a shaft tapering from a hair where the power leaves to the flow's width where the head begins,
+ * colored by the load, with a bright rim under it where the market split, and a head in the same color, sized with
+ * the shaft, pointing on the way the power goes.
  */
 export function buildFlowLayers(flows: ReadonlyMap<string, FlowSlot>, palette: Palette): Layer[] {
   const data = flowData(flows)
@@ -131,24 +157,24 @@ export function buildFlowLayers(flows: ReadonlyMap<string, FlowSlot>, palette: P
   const color = (d: FlowDatum): Rgba => [...mix(palette.flow.idle, palette.flow.full, d.load), 230]
   const head = (d: FlowDatum): [number, number] => shaft(d.path)[1]
   return [
-    new PathLayer<FlowDatum, Interleaved>({
+    new PathLayer<Taper, Interleaved>({
       id: 'flow-splits',
       beforeId: BELOW_LABELS,
-      data: data.filter((d) => d.split),
-      getPath: (d) => shaft(d.path),
+      data: data.filter((d) => d.split).flatMap((d) => tapered(d, RIM_PX)),
+      getPath: (t) => t.path,
       getColor: [...palette.text, 200],
-      getWidth: (d) => widthOf(d) + RIM_PX,
+      getWidth: (t) => t.width,
       widthUnits: 'pixels',
       capRounded: true,
       updateTriggers: { getColor: palette },
     }),
-    new PathLayer<FlowDatum, Interleaved>({
+    new PathLayer<Taper, Interleaved>({
       id: 'flows',
       beforeId: BELOW_LABELS,
-      data,
-      getPath: (d) => shaft(d.path),
-      getColor: color,
-      getWidth: widthOf,
+      data: data.flatMap((d) => tapered(d)),
+      getPath: (t) => t.path,
+      getColor: (t) => color(t.flow),
+      getWidth: (t) => t.width,
       widthUnits: 'pixels',
       capRounded: true,
       pickable: true,

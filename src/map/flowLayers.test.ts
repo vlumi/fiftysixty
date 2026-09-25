@@ -9,9 +9,11 @@ import {
   headSize,
   heading,
   shaft,
+  tapered,
   triangleFlows,
   widthOf,
   type FlowDatum,
+  type Taper,
 } from './flowLayers'
 
 const noon = flowsAt(parseFlows(csv), '2026-09-23', 24)
@@ -60,7 +62,20 @@ test('with one sender and two receivers the flows fan out from it, and with a fe
   expect(triangleFlows(new Map([['chubu-fence', fence(1000)]]))).toEqual([])
 })
 
-test('the arrow heads along the path, the layers take width from the flow and color from the load, and split lines get a rim', () => {
+test('the shaft starts off the column and tapers to the flow width where the head begins', () => {
+  const kc = flowData(noon).find((d) => d.id === 'kansai-chugoku')!
+  const pieces = tapered(kc)
+  expect(pieces).toHaveLength(12)
+  expect(pieces[0].path[0]).toEqual(shaft(kc.path)[0])
+  expect(pieces.at(-1)!.path[1]).toEqual(shaft(kc.path)[1])
+  expect(pieces[0].path[0][0]).toBeCloseTo(kc.path[0][0] + (kc.path[1][0] - kc.path[0][0]) * 0.07)
+  expect(pieces.at(-1)!.width).toBeCloseTo(widthOf(kc))
+  expect(pieces[0].width).toBeLessThan(pieces.at(-1)!.width)
+  for (let i = 1; i < pieces.length; i++) expect(pieces[i].width).toBeGreaterThan(pieces[i - 1].width)
+  expect(tapered(kc, 4).at(-1)!.width).toBeCloseTo(widthOf(kc) + 4)
+})
+
+test('the arrow heads along the path, the pieces take color from the load, split lines get a rim, the head sits at the shaft end in the same color', () => {
   expect(
     heading([
       [130, 35],
@@ -73,35 +88,28 @@ test('the arrow heads along the path, the layers take width from the flow and co
       [135, 40],
     ]),
   ).toBeCloseTo(90)
-  const [rims, paths, heads] = buildFlowLayers(noon, DARK) as [
-    PathLayer<FlowDatum>,
-    PathLayer<FlowDatum>,
-    IconLayer<FlowDatum>,
-  ]
+  const [rims, paths, heads] = buildFlowLayers(noon, DARK) as [PathLayer<Taper>, PathLayer<Taper>, IconLayer<FlowDatum>]
   expect([rims.id, paths.id, heads.id]).toEqual(['flow-splits', 'flows', 'flow-heads'])
   const kc = flowData(noon).find((d) => d.id === 'kansai-chugoku')!
   expect(widthOf(kc)).toBeCloseTo(1 + 6.58)
+  const context = { index: 0, data: [], target: [] }
   const color = paths.props.getColor
   if (typeof color !== 'function') throw new Error('accessor')
-  expect(color(kc, { index: 0, data: [], target: [] })).toEqual([...DARK.flow.full, 230])
-  expect((rims.props.data as FlowDatum[]).map((d) => d.id)).toEqual(
+  expect(color(tapered(kc)[0], context)).toEqual([...DARK.flow.full, 230])
+  const rimIds = new Set((rims.props.data as Taper[]).map((t) => t.flow.id))
+  expect([...rimIds]).toEqual(
     flowData(noon)
       .filter((d) => d.split)
       .map((d) => d.id),
   )
-  expect((rims.props.data as FlowDatum[]).length).toBeGreaterThan(0)
-  const path = paths.props.getPath
-  if (typeof path !== 'function') throw new Error('accessor')
-  const end = shaft(kc.path)[1]
-  expect(path(kc, { index: 0, data: [], target: [] })).toEqual([kc.path[0], end])
-  expect(end[0]).toBeCloseTo(kc.path[0][0] + (kc.path[1][0] - kc.path[0][0]) * 0.78)
+  expect(rimIds.size).toBeGreaterThan(0)
   const position = heads.props.getPosition
   if (typeof position !== 'function') throw new Error('accessor')
-  expect(position(kc, { index: 0, data: [], target: [] })).toEqual(end)
+  expect(position(kc, context)).toEqual(shaft(kc.path)[1])
   expect(headSize(kc)).toBeCloseTo(8 + (1 + 6.58) * 3)
   const headColor = heads.props.getColor
   if (typeof headColor !== 'function') throw new Error('accessor')
-  expect(headColor(kc, { index: 0, data: [], target: [] })).toEqual(color(kc, { index: 0, data: [], target: [] }))
+  expect(headColor(kc, context)).toEqual([...DARK.flow.full, 230])
 })
 
 test('no flows, no layers', () => {
