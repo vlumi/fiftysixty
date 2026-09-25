@@ -10,9 +10,9 @@ Unofficial demo project, built from public data; not affiliated with any exchang
 
 Live at [fiftysixty.misaki.fi](https://fiftysixty.misaki.fi). [SCOPE.md](SCOPE.md) is the plan; [ARCHITECTURE.md](ARCHITECTURE.md) explains how it works.
 
-![Kyushu picked on a curtailed noon: the areas colored by price, the day's supply stack under the demand line with the curtailed solar hatched on top, the mix in numbers, and a column of the mix beside each recorded area on the map](docs/screenshots/002-what-ran.png)
+![Noon on a September day: the nine areas colored by price with a column beside each showing what ran, Kansai picked with its price against its neighbors, the day's supply stack under the demand line, and the mix in numbers](docs/screenshots/002-what-ran.png)
 
-<img src="docs/screenshots/002-what-ran-phone.png" alt="The same site on a phone: the readout over the upper half of the map, the clock at the foot" width="260">
+<img src="docs/screenshots/002-what-ran-phone.png" alt="The same site on a phone: the nine columns on the map, the system price above, the clock at the foot" width="260">
 
 Every capture, one per milestone, is shown in [docs/screenshots](docs/screenshots/README.md).
 
