@@ -1,9 +1,10 @@
 import type { Series } from '../market/stack'
+import type { Theme } from './theme'
 
 export type Rgb = [number, number, number]
 export type Rgba = [number, number, number, number]
 
-/** The CSS tokens of index.css as numbers, for the WebGL layers; kept by hand, one set per theme. */
+/** The CSS tokens of index.css as numbers, for the WebGL layers; kept by hand, one set per theme, see PALETTES. */
 export interface Palette {
   bg: Rgb
   text: Rgb
@@ -42,3 +43,30 @@ export const DARK: Palette = {
     hydro: [57, 135, 229],
   },
 }
+
+export const LIGHT: Palette = {
+  bg: [244, 245, 248],
+  text: [28, 31, 38],
+  muted: [91, 98, 112],
+  accent: [0, 122, 144],
+  hz: { 50: [0, 122, 144], 60: [143, 95, 0] },
+  price: [
+    [252, 234, 218],
+    [242, 168, 100],
+    [200, 84, 22],
+    [110, 36, 6],
+  ],
+  flow: { idle: [110, 122, 140], full: [0, 122, 144] },
+  series: {
+    coal: [227, 73, 72],
+    nuclear: [74, 58, 167],
+    renewables: [0, 131, 0],
+    otherThermal: [232, 123, 164],
+    solar: [237, 161, 0],
+    wind: [27, 175, 122],
+    gas: [235, 104, 52],
+    hydro: [42, 120, 214],
+  },
+}
+
+export const PALETTES: Record<Theme, Palette> = { dark: DARK, light: LIGHT }

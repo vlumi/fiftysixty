@@ -8,8 +8,9 @@ import type { RecordSlot } from '../market/record'
 import { AREA_BY_ID, type Area } from '../regions/areas'
 import type { PlantProps } from '../regions/plants'
 import type { AreaProps, Regions } from '../regions/geometry'
-import { DARK } from '../shared/palette'
-import { JAPAN_BOUNDS, STYLE_URL } from './basemap'
+import { PALETTES } from '../shared/palette'
+import { BASEMAPS, BELOW_LABELS, type Theme } from '../shared/theme'
+import { JAPAN_BOUNDS } from './basemap'
 import { buildLayers, type LayerOptions } from './layers'
 import MixGlyph from './MixGlyph'
 
@@ -20,6 +21,7 @@ const GEOMETRY_CREDIT =
   '<a href="https://www.gsi.go.jp/kankyochiri/gm_jpn.html">地球地図日本</a> (GSI) via dataofjapan/land'
 
 interface Props extends LayerOptions {
+  theme: Theme
   regions: Regions | null
   /** What ran in each recorded area for the displayed slot, drawn as a glyph beside it. */
   mixes?: Partial<Record<Area, RecordSlot>>
@@ -33,6 +35,7 @@ interface Props extends LayerOptions {
 
 /** The basemap over Japan with the market layers interleaved into it. */
 export default function MapView({
+  theme,
   regions,
   prices,
   selected,
@@ -49,6 +52,8 @@ export default function MapView({
   const overlay = useRef<MapLibreOverlay>(null)
   const [map, setMap] = useState<MapLibre | null>(null)
   const [zoom, setZoom] = useState(5)
+  // The theme the basemap was styled for last; the map is created with it and restyled when it changes.
+  const styled = useRef(theme)
   const pick = useRef({ onPick, onPickPlant, onZoom })
   useEffect(() => {
     pick.current = { onPick, onPickPlant, onZoom }
@@ -58,7 +63,7 @@ export default function MapView({
     if (!container.current) return
     const map = new MapLibre({
       container: container.current,
-      style: STYLE_URL,
+      style: BASEMAPS[styled.current],
       bounds: JAPAN_BOUNDS,
       attributionControl: { compact: true, customAttribution: GEOMETRY_CREDIT },
       canvasContextAttributes: { antialias: true },
@@ -88,11 +93,27 @@ export default function MapView({
     }
   }, [])
 
+  // The basemap follows the theme; the overlay re-adds its layers when the new style has loaded.
+  useEffect(() => {
+    if (!map || styled.current === theme) return
+    styled.current = theme
+    map.setStyle(BASEMAPS[theme])
+  }, [map, theme])
+
   useEffect(() => {
     overlay.current?.setProps({
-      layers: buildLayers(regions, DARK, { prices, selected, flows, zoom, plants, selectedPlant, hiddenFuels }),
+      layers: buildLayers(regions, PALETTES[theme], {
+        prices,
+        selected,
+        flows,
+        zoom,
+        plants,
+        selectedPlant,
+        hiddenFuels,
+        beforeId: BELOW_LABELS[theme],
+      }),
     })
-  }, [regions, prices, selected, flows, zoom, plants, selectedPlant, hiddenFuels])
+  }, [theme, regions, prices, selected, flows, zoom, plants, selectedPlant, hiddenFuels])
 
   return (
     <>

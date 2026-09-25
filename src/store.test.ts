@@ -62,3 +62,10 @@ test('a fuel is hidden and shown again', () => {
   useApp.getState().setHiddenFuels([])
   expect(useApp.getState().hiddenFuels).toEqual([])
 })
+
+test('the theme choice is kept for the next visit', () => {
+  useApp.getState().setThemeChoice('light')
+  expect(localStorage.getItem('fiftysixty.theme')).toBe('light')
+  useApp.getState().setThemeChoice('system')
+  expect(localStorage.getItem('fiftysixty.theme')).toBeNull()
+})

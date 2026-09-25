@@ -5,7 +5,6 @@ import { AREA_BY_ID, type Area } from '../regions/areas'
 import { OCCTO_LINE_IDS } from '../regions/interconnectors'
 import type { Palette, Rgba } from '../shared/palette'
 import { lerpRgb } from '../shared/scale'
-import { BELOW_LABELS } from './basemap'
 import type { Interleaved } from './layers'
 
 /** A line for the slot, laid from where the power comes to where it goes. */
@@ -153,7 +152,12 @@ export function heading([[x1, y1], [x2, y2]]: FlowDatum['path']): number {
  * begins, colored by the load, with a bright rim under it where the market split, and a head in the same color,
  * sized with the shaft, pointing on the way the power goes.
  */
-export function buildFlowLayers(flows: ReadonlyMap<string, FlowSlot>, palette: Palette, zoom: number): Layer[] {
+export function buildFlowLayers(
+  flows: ReadonlyMap<string, FlowSlot>,
+  palette: Palette,
+  zoom: number,
+  beforeId = 'water_name',
+): Layer[] {
   const data = flowData(flows)
   if (!data.length) return []
   const color = (d: FlowDatum): Rgba => [...lerpRgb(palette.flow.idle, palette.flow.full, d.load), 230]
@@ -161,7 +165,7 @@ export function buildFlowLayers(flows: ReadonlyMap<string, FlowSlot>, palette: P
   return [
     new SolidPolygonLayer<FlowDatum, Interleaved>({
       id: 'flow-splits',
-      beforeId: BELOW_LABELS,
+      beforeId,
       data: data.filter((d) => d.split),
       getPolygon: (d) => taperPolygon(d, zoom, RIM_PX),
       getFillColor: [...palette.text, 200],
@@ -169,7 +173,7 @@ export function buildFlowLayers(flows: ReadonlyMap<string, FlowSlot>, palette: P
     }),
     new SolidPolygonLayer<FlowDatum, Interleaved>({
       id: 'flows',
-      beforeId: BELOW_LABELS,
+      beforeId,
       data,
       getPolygon: (d) => taperPolygon(d, zoom),
       getFillColor: color,
@@ -177,7 +181,7 @@ export function buildFlowLayers(flows: ReadonlyMap<string, FlowSlot>, palette: P
     }),
     new IconLayer<FlowDatum, Interleaved>({
       id: 'flow-heads',
-      beforeId: BELOW_LABELS,
+      beforeId,
       data,
       iconAtlas: HEAD_ICON.head.url,
       iconMapping: HEAD_ICON,

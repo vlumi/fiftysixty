@@ -9,7 +9,6 @@ import type { Plants } from '../regions/plants'
 import type { Series } from '../market/stack'
 import type { Palette, Rgba } from '../shared/palette'
 import { priceColor } from '../shared/scale'
-import { BELOW_LABELS } from './basemap'
 import { buildFlowLayers } from './flowLayers'
 import { buildPlantLayers } from './plantLayers'
 
@@ -30,6 +29,8 @@ export interface LayerOptions {
   plants?: Plants | null
   selectedPlant?: string | null
   hiddenFuels?: readonly Series[]
+  /** The basemap layer to interleave beneath, the style's first label layer. */
+  beforeId?: string
 }
 
 /**
@@ -39,7 +40,16 @@ export interface LayerOptions {
 export function buildLayers(
   regions: Regions | null,
   palette: Palette,
-  { prices, selected, flows, zoom = 5, plants = null, selectedPlant = null, hiddenFuels = [] }: LayerOptions = {},
+  {
+    prices,
+    selected,
+    flows,
+    zoom = 5,
+    plants = null,
+    selectedPlant = null,
+    hiddenFuels = [],
+    beforeId = 'water_name',
+  }: LayerOptions = {},
 ): Layer[] {
   if (!regions) return []
   const fill = (f: Feature<Geometry, AreaProps>): Rgba => {
@@ -50,7 +60,7 @@ export function buildLayers(
   return [
     new GeoJsonLayer<AreaProps, Interleaved>({
       id: 'areas',
-      beforeId: BELOW_LABELS,
+      beforeId,
       data: regions.areas,
       getFillColor: fill,
       getLineColor: (f: Feature<Geometry, AreaProps>): Rgba => [
@@ -64,14 +74,14 @@ export function buildLayers(
     }),
     new GeoJsonLayer<unknown, Interleaved>({
       id: 'split',
-      beforeId: BELOW_LABELS,
+      beforeId,
       data: regions.split,
       filled: false,
       getLineColor: [...palette.accent, 255],
       lineWidthUnits: 'pixels',
       getLineWidth: 2,
     }),
-    ...buildFlowLayers(flows ?? new Map(), palette, zoom),
-    ...buildPlantLayers(plants, palette, zoom, selectedPlant, hiddenFuels),
+    ...buildFlowLayers(flows ?? new Map(), palette, zoom, beforeId),
+    ...buildPlantLayers(plants, palette, zoom, selectedPlant, hiddenFuels, beforeId),
   ]
 }
