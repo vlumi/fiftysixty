@@ -16,7 +16,8 @@
     "test:e2e": "playwright test",
     "preview": "vite preview",
     "data": "node scripts/fetch-data.mjs",
-    "regions": "npx --yes --package=mapshaper@0.7.67 node scripts/build-regions.mjs"
+    "regions": "npx --yes --package=mapshaper@0.7.67 node scripts/build-regions.mjs",
+    "plants": "node scripts/build-plants.mjs"
   },
   "dependencies": {
     "@deck.gl/core": "^9.4.0",
