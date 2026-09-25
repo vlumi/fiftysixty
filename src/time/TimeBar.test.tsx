@@ -42,15 +42,17 @@ test('the day steps to the priced day before and after, and stops at the ends', 
   expect(screen.getByRole('button', { name: 'Previous day' })).toBeEnabled()
 })
 
-test('today is a jump away, and its half hours read as past, now or ahead', async () => {
+test('the half hour under way is a jump away, and today reads as past, now or ahead', async () => {
   const onDate = vi.fn()
+  const onSlot = vi.fn()
   const { rerender } = render(
-    <TimeBar date="2026-09-25" days={days} slot={21} now={now} onDate={onDate} onSlot={vi.fn()} />,
+    <TimeBar date="2026-09-25" days={days} slot={30} now={now} onDate={onDate} onSlot={onSlot} />,
   )
-  await userEvent.click(screen.getByRole('button', { name: 'Today' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Now' }))
   expect(onDate).toHaveBeenLastCalledWith('2026-09-26')
+  expect(onSlot).toHaveBeenLastCalledWith(21)
   rerender(<TimeBar date="2026-09-26" days={days} slot={21} now={now} onDate={onDate} onSlot={vi.fn()} />)
-  expect(screen.getByRole('button', { name: 'Today' })).toBeDisabled()
+  expect(screen.getByRole('button', { name: 'Now' })).toBeDisabled()
   expect(screen.getByRole('status')).toHaveTextContent('Today 10:00–10:30 JST · now')
   rerender(<TimeBar date="2026-09-26" days={days} slot={30} now={now} onDate={onDate} onSlot={vi.fn()} />)
   expect(screen.getByRole('status')).toHaveTextContent('Today 14:30–15:00 JST · ahead')
