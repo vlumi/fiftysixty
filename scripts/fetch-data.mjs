@@ -7,7 +7,9 @@
 // transmission companies publishes its area's half-hourly supply-demand record, TEPCO as one CSV per
 // month. JEPX is UTF-8; TEPCO's files are UTF-8 some months and Shift_JIS others, so each file is
 // decoded as UTF-8 when it is valid UTF-8 and as Shift_JIS otherwise, and written as UTF-8 either way.
-// JEPX serves its file only with the market page as the referer.
+// JEPX serves its file only with the market page as the referer. Both sources move once a day, the
+// auction result by late morning and the previous day's balance by evening, so a daily fetch after both
+// is current; an intraday view would want its own, more frequent fetch of the hour-ahead and flow data.
 import { mkdir, rename, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
