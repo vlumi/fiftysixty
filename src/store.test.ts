@@ -21,3 +21,18 @@ test('a day and an area are chosen and cleared', () => {
   useApp.getState().selectArea(null)
   expect(useApp.getState()).toMatchObject({ date: null, area: null })
 })
+
+test('play steps the half hours, runs on into the next priced day, and stops at the end of the data', () => {
+  const days = ['2026-09-25', '2026-09-26']
+  useApp.getState().setDate('2026-09-25')
+  useApp.getState().setSlot(47)
+  useApp.getState().togglePlay()
+  expect(useApp.getState().playing).toBe(true)
+  useApp.getState().step(days, '2026-09-25')
+  expect(useApp.getState()).toMatchObject({ date: '2026-09-25', slot: 48, playing: true })
+  useApp.getState().step(days, '2026-09-25')
+  expect(useApp.getState()).toMatchObject({ date: '2026-09-26', slot: 1, playing: true })
+  useApp.getState().setSlot(48)
+  useApp.getState().step(days, '2026-09-26')
+  expect(useApp.getState()).toMatchObject({ date: '2026-09-26', slot: 48, playing: false })
+})

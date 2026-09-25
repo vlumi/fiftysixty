@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import App from './App'
 import { resetApp } from './store'
 import csv from './test/fixtures/jepx-spot.csv?raw'
@@ -37,4 +37,13 @@ test('the clock opens on yesterday in Japan, the newest complete day, with the s
   render(<App />)
   expect(await screen.findByDisplayValue('2026-09-25')).toBeInTheDocument()
   expect(screen.getByRole('complementary', { name: 'Readout' })).toHaveTextContent('System price')
+})
+
+test('play runs the half hours on', async () => {
+  vi.useFakeTimers({ toFake: ['Date', 'setInterval', 'clearInterval'], now: new Date('2026-09-26T10:00:00+09:00') })
+  render(<App />)
+  expect(await screen.findByDisplayValue('2026-09-25')).toBeInTheDocument()
+  act(() => screen.getByRole('button', { name: 'Play' }).click())
+  act(() => vi.advanceTimersByTime(1000))
+  expect(screen.getByRole('status')).toHaveTextContent('14:00–14:30 JST')
 })

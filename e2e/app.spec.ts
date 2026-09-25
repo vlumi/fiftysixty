@@ -7,10 +7,18 @@ test('the map of Japan comes up under the name, with no page errors', async ({ p
   expect(errors).toEqual([])
 })
 
-test('the clock opens on yesterday, jumps to now and scrubs through the half hours', async ({ page }) => {
+test('the clock opens on yesterday, plays into the next day, jumps to now and scrubs through the half hours', async ({
+  page,
+}) => {
   await open(page)
   await expect(page.getByLabel('Delivery day')).toHaveValue('2026-09-25')
   await expect(page.getByRole('status')).toHaveText('Yesterday 12:00–12:30 JST')
+  await page.getByRole('slider', { name: 'Half hour' }).fill('47')
+  await page.getByRole('button', { name: 'Play' }).click()
+  await expect(page.getByRole('status')).toHaveText('Yesterday 23:30–00:00 JST')
+  await expect(page.getByLabel('Delivery day')).toHaveValue('2026-09-26')
+  await page.getByRole('button', { name: 'Pause' }).click()
+  await page.getByRole('button', { name: 'Previous day' }).click()
   await page.getByRole('slider', { name: 'Half hour' }).fill('48')
   await expect(page.getByRole('status')).toHaveText('Yesterday 23:30–00:00 JST')
   await page.getByRole('button', { name: 'Now' }).click()

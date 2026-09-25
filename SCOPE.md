@@ -53,7 +53,7 @@ Toolchain, CI, a map of Japan under the name, the data fetcher for JEPX and TEPC
 ### M4 — the story days
 
 - Named days to jump to: a summer peak, a winter cold snap, a spring curtailment Sunday, a typhoon; chosen from the data, not by hand.
-- Play at speed, as nebulosa's clock does, so a day runs in seconds.
+- Play at speed, so a day runs in seconds: four half hours a second, on into the next day.
 
 ### M5 — closer in
 

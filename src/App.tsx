@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ADAPTERS } from './market/adapters'
 import { flowsAt, loadFlows, type FlowDays } from './market/flows'
 import { fiscalYear, loadSpot, slotOf, type SpotDays } from './market/jepx'
@@ -11,6 +11,7 @@ import { useApp } from './store'
 import { openingDay } from './time/days'
 import TimeBar from './time/TimeBar'
 import { useNow } from './time/useNow'
+import { usePlayer } from './time/usePlayer'
 
 const MapView = lazy(() => import('./map/MapView'))
 
@@ -30,9 +31,14 @@ export default function App() {
   const setSlot = useApp((s) => s.setSlot)
   const area = useApp((s) => s.area)
   const selectArea = useApp((s) => s.selectArea)
+  const playing = useApp((s) => s.playing)
+  const togglePlay = useApp((s) => s.togglePlay)
+  const step = useApp((s) => s.step)
   const now = useNow()
   const date = chosenDate ?? openingDay(spot, now)
-  const days = spot ? [...spot.keys()].sort() : []
+  const days = useMemo(() => (spot ? [...spot.keys()].sort() : []), [spot])
+  const tick = useCallback(() => step(days, date), [step, days, date])
+  usePlayer(playing, tick)
   const displayed = slotOf(spot, date, slot)
 
   const month = date ? monthOf(date) : null
@@ -91,7 +97,16 @@ export default function App() {
           onClose={() => selectArea(null)}
           onSlot={setSlot}
         />
-        <TimeBar date={date} days={days} slot={slot} now={now} onDate={setDate} onSlot={setSlot} />
+        <TimeBar
+          date={date}
+          days={days}
+          slot={slot}
+          now={now}
+          playing={playing}
+          onDate={setDate}
+          onSlot={setSlot}
+          onPlay={togglePlay}
+        />
         <Legend />
       </main>
     </>
