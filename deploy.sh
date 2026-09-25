@@ -7,7 +7,7 @@
 #
 # The web root must be writable by the deploying user; it is asked on first run and
 # saved to .deploy.local (git-ignored). nginx serves $WEBROOT/current and $WEBROOT/data.
-# The first run also installs the daily market-data refresh in the user's crontab.
+# Every run installs, or replaces, the hourly market-data refresh in the user's crontab.
 set -euo pipefail
 
 cd "$(dirname "$0")"
@@ -43,12 +43,12 @@ cp -R dist "$release"
 ln -sfn "releases/$(basename "$release")" "$WEBROOT/current"
 ls -1dt "$WEBROOT"/releases/* | tail -n +4 | xargs -r rm -rf
 
+# JEPX posts the next day's prices after the 10:00 JST auction and the grid records grow by the half
+# hour, so the fetch runs hourly; files that have not changed are not downloaded again.
 fetch="$PWD/scripts/fetch-data.mjs"
-if ! crontab -l 2>/dev/null | grep -qF "$fetch"; then
-  # JEPX posts the next day's prices after the 10:00 JST auction; the grid records add the previous
-  # day in the evening. One fetch after both catches tomorrow's prices and yesterday's balance.
-  cron_line="23 19 * * * $(command -v node) $fetch $WEBROOT/data >> $WEBROOT/fetch-data.log 2>&1"
-  { crontab -l 2>/dev/null || true; echo "$cron_line"; } | crontab -
+cron_line="23 * * * * $(command -v node) $fetch $WEBROOT/data >> $WEBROOT/fetch-data.log 2>&1"
+if ! crontab -l 2>/dev/null | grep -qxF "$cron_line"; then
+  { crontab -l 2>/dev/null | grep -vF "$fetch" || true; echo "$cron_line"; } | crontab -
   echo "Installed cron job: $cron_line"
 fi
 

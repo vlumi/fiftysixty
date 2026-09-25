@@ -23,7 +23,7 @@ All public, all fetched by `scripts/fetch-data.mjs` on the host into `data/` and
 - **Rendering:** deck.gl interleaved into a MapLibre GL basemap (OpenFreeMap vector tiles, free, no key), flat, bounded to Japan; the globe is not needed here.
 - **State:** zustand, one store, the frame store for the clock, the same time bar pattern as nebulosa.
 - **Data path:** a Node script fetches the CSVs into `data/`, the browser parses them; parsing and per-slot aggregation in a worker if it gets heavy.
-- **Hosting:** static files behind nginx, `deploy.sh` publishing releases and installing the daily fetch, as nebulosa.
+- **Hosting:** static files behind nginx, `deploy.sh` publishing releases and installing the hourly fetch, as nebulosa with a faster clock.
 - **License:** MIT.
 
 ## Milestones

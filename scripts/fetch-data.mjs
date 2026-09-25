@@ -12,10 +12,11 @@
 // file is downloaded with curl. Tohoku posts the running month as one file per day and the whole month
 // only around the 25th of the next, so its month is stitched from the days when the month's own file is
 // not there; a month no company has published at all is skipped rather than an error.
-// All sources move once a day, the auction result by late morning and the previous day's balance by
-// evening, so a daily fetch after both is current; an intraday view would want its own, more frequent
-// fetch of the hour-ahead and flow data.
+// The auction result lands by late morning and the companies add each half hour to the running month
+// within about an hour, so the fetch runs hourly; a file already held is asked for with If-Modified-Since
+// and left alone when the host says it has not changed, which the previous month's files never have.
 import { execFile } from 'node:child_process'
+import { existsSync } from 'node:fs'
 import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { promisify } from 'node:util'
@@ -83,12 +84,27 @@ function decode(bytes) {
 
 const USER_AGENT = 'fiftysixty/0.0 (+https://github.com/vlumi/fiftysixty)'
 
-/** The file's bytes, or null when the server has no such file yet. */
-async function download(source, target) {
+const UNCHANGED = Symbol('unchanged')
+
+/** The file's bytes; null when the server has no such file yet; UNCHANGED when it is no newer than `since`. */
+async function download(source, target, since) {
   const headers = Object.entries(source.headers).flatMap(([k, v]) => ['-H', `${k}: ${v}`])
-  const args = ['-sSL', '--compressed', '-A', USER_AGENT, ...headers, '-o', target, '-w', '%{http_code}', source.url]
-  const { stdout: status } = await promisify(execFile)('curl', args)
+  const conditional = since && existsSync(since) ? ['-z', since] : []
+  const args = [
+    '-sSL',
+    '--compressed',
+    '-A',
+    USER_AGENT,
+    ...headers,
+    ...conditional,
+    '-o',
+    target,
+    '-w',
+    '%{http_code}',
+  ]
+  const { stdout: status } = await promisify(execFile)('curl', [...args, source.url])
   if (status === '404') return null
+  if (status === '304') return UNCHANGED
   if (status !== '200') throw new Error(`${source.url} responded ${status}`)
   return readFile(target)
 }
@@ -110,7 +126,12 @@ for (const source of SOURCES) {
   const target = join(output, source.name)
   const raw = `${target}.raw`
   try {
-    const bytes = await download(source, raw)
+    // A month stitched from days is asked for afresh: a host may say 'not modified' about a file it does not have.
+    const bytes = await download(source, raw, source.days ? undefined : target)
+    if (bytes === UNCHANGED) {
+      console.log(`unchanged: ${source.name}`)
+      continue
+    }
     const text = bytes ? decode(bytes) : source.days ? await downloadDays(source, raw) : null
     if (!text) {
       console.log(`not published yet: ${source.name}`)
