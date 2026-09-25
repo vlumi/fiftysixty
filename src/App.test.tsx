@@ -58,3 +58,15 @@ test('the theme follows the system until chosen, the choice on the document and 
   expect(localStorage.getItem('fiftysixty.theme')).toBe('light')
   localStorage.clear()
 })
+
+test('Japanese is a click away: the words, the areas and the document follow, and the choice is kept', async () => {
+  render(<App />)
+  expect(await screen.findByDisplayValue('2026-09-25')).toBeInTheDocument()
+  act(() => screen.getByRole('button', { name: 'Language' }).click())
+  expect(document.documentElement.lang).toBe('ja')
+  expect(screen.getByText('地図で見る日本の電力市場')).toBeInTheDocument()
+  expect(screen.getByRole('status')).toHaveTextContent('昨日 12:00–12:30 JST')
+  expect(localStorage.getItem('fiftysixty.lang')).toBe('ja')
+  act(() => screen.getByRole('button', { name: '言語' }).click())
+  localStorage.clear()
+})

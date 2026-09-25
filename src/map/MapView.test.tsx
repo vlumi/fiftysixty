@@ -6,7 +6,16 @@ import type { Regions } from '../regions/geometry'
 import MapView from './MapView'
 
 const { mapInstance, overlayInstance, markers } = vi.hoisted(() => ({
-  mapInstance: { addControl: vi.fn(), remove: vi.fn(), on: vi.fn(), getZoom: () => 5, setStyle: vi.fn() },
+  mapInstance: {
+    addControl: vi.fn(),
+    remove: vi.fn(),
+    on: vi.fn(),
+    getZoom: () => 5,
+    setStyle: vi.fn(),
+    isStyleLoaded: () => true,
+    getStyle: () => ({ layers: [{ id: 'place', type: 'symbol', layout: { 'text-field': '{name:latin}' } }] }),
+    setLayoutProperty: vi.fn(),
+  },
   overlayInstance: { setProps: vi.fn() },
   markers: [] as { lngLat: unknown; element: HTMLElement; remove: () => void }[],
 }))
@@ -49,10 +58,12 @@ const regions: Regions = {
 }
 
 test('the overlay joins the map, gets the layers once the regions arrive, and goes with the map', () => {
-  const { rerender, unmount } = render(<MapView theme="dark" regions={null} onPick={vi.fn()} onPickPlant={vi.fn()} />)
+  const { rerender, unmount } = render(
+    <MapView theme="dark" lang="en" regions={null} onPick={vi.fn()} onPickPlant={vi.fn()} />,
+  )
   expect(mapInstance.addControl).toHaveBeenCalledWith(overlayInstance)
   expect(overlayInstance.setProps).toHaveBeenLastCalledWith({ layers: [] })
-  rerender(<MapView theme="dark" regions={regions} onPick={vi.fn()} onPickPlant={vi.fn()} />)
+  rerender(<MapView theme="dark" lang="en" regions={regions} onPick={vi.fn()} onPickPlant={vi.fn()} />)
   const { layers } = overlayInstance.setProps.mock.lastCall![0]
   expect(layers.map((l: { id: string }) => l.id)).toEqual(['areas', 'split'])
   unmount()
@@ -61,7 +72,7 @@ test('the overlay joins the map, gets the layers once the regions arrive, and go
 
 test('a click reports the area under it, or none for the sea', () => {
   const onPick = vi.fn()
-  render(<MapView theme="dark" regions={regions} onPick={onPick} onPickPlant={vi.fn()} />)
+  render(<MapView theme="dark" lang="en" regions={regions} onPick={onPick} onPickPlant={vi.fn()} />)
   const onClick = MapLibreOverlay.mock.lastCall![0].onClick!
   onClick({ object: { properties: { area: 'kyushu', hz: 60 } } })
   expect(onPick).toHaveBeenLastCalledWith('kyushu')
@@ -74,7 +85,9 @@ test('a click reports the area under it, or none for the sea', () => {
 test('a click on a plant reports the plant, and the zoom is reported as it changes', () => {
   const onPickPlant = vi.fn()
   const onZoom = vi.fn()
-  render(<MapView theme="dark" regions={regions} onPick={vi.fn()} onPickPlant={onPickPlant} onZoom={onZoom} />)
+  render(
+    <MapView theme="dark" lang="en" regions={regions} onPick={vi.fn()} onPickPlant={onPickPlant} onZoom={onZoom} />,
+  )
   const onClick = MapLibreOverlay.mock.lastCall![0].onClick!
   onClick({ object: { properties: { id: 'way/1', name: 'x', fuel: 'coal', mw: 100 } } })
   expect(onPickPlant).toHaveBeenCalledWith('way/1')
@@ -87,7 +100,14 @@ test('a recorded area gets a glyph on its anchor, which picks the area, and lose
   const onPick = vi.fn()
   const record = recordSlot(TEPCO.parse(csv), '2026-09-24', 25)!
   const { rerender } = render(
-    <MapView theme="dark" regions={regions} mixes={{ tokyo: record }} onPick={onPick} onPickPlant={vi.fn()} />,
+    <MapView
+      theme="dark"
+      lang="en"
+      regions={regions}
+      mixes={{ tokyo: record }}
+      onPick={onPick}
+      onPickPlant={vi.fn()}
+    />,
   )
   expect(markers).toHaveLength(1)
   expect(markers[0].lngLat).toEqual([139.6, 36.1])
@@ -95,15 +115,30 @@ test('a recorded area gets a glyph on its anchor, which picks the area, and lose
   expect(glyph).toHaveAccessibleName('Tokyo mix')
   glyph.click()
   expect(onPick).toHaveBeenCalledWith('tokyo')
-  rerender(<MapView theme="dark" regions={regions} mixes={{}} onPick={onPick} onPickPlant={vi.fn()} />)
+  rerender(<MapView theme="dark" lang="en" regions={regions} mixes={{}} onPick={onPick} onPickPlant={vi.fn()} />)
   expect(markers[0].remove).toHaveBeenCalled()
 })
 
 test('a theme change swaps the basemap and recolors the layers', () => {
-  const { rerender } = render(<MapView theme="dark" regions={regions} onPick={vi.fn()} onPickPlant={vi.fn()} />)
+  const { rerender } = render(
+    <MapView theme="dark" lang="en" regions={regions} onPick={vi.fn()} onPickPlant={vi.fn()} />,
+  )
   expect(mapInstance.setStyle).not.toHaveBeenCalled()
-  rerender(<MapView theme="light" regions={regions} onPick={vi.fn()} onPickPlant={vi.fn()} />)
+  rerender(<MapView theme="light" lang="en" regions={regions} onPick={vi.fn()} onPickPlant={vi.fn()} />)
   expect(mapInstance.setStyle).toHaveBeenCalledWith('https://tiles.openfreemap.org/styles/positron')
   const { layers } = overlayInstance.setProps.mock.lastCall![0]
   expect(layers[0].props.beforeId).toBe('waterway_line_label')
+})
+
+test('the basemap labels follow the language', () => {
+  const { rerender } = render(
+    <MapView theme="dark" lang="en" regions={regions} onPick={vi.fn()} onPickPlant={vi.fn()} />,
+  )
+  rerender(<MapView theme="dark" lang="ja" regions={regions} onPick={vi.fn()} onPickPlant={vi.fn()} />)
+  expect(mapInstance.setLayoutProperty).toHaveBeenLastCalledWith('place', 'text-field', [
+    'coalesce',
+    ['get', 'name:ja'],
+    ['get', 'name:latin'],
+    ['get', 'name'],
+  ])
 })

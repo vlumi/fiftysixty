@@ -1,7 +1,8 @@
 import type { KeyboardEvent, PointerEvent } from 'react'
 import type { RecordSlot } from '../market/record'
+import { useStrings } from '../i18n/useStrings'
 import { SLOTS } from '../market/jepx'
-import { SERIES, SERIES_NAMES, stackDay, type Series, type StackedSlot } from '../market/stack'
+import { SERIES, stackDay, type Series, type StackedSlot } from '../market/stack'
 import { clampSlot, slotRange } from '../time/slots'
 import styles from './SupplyChart.module.css'
 
@@ -23,6 +24,7 @@ interface Props {
  * the half hour, so the readout beside it is the tooltip.
  */
 export default function SupplyChart({ day, slot, onSlot }: Props) {
+  const s = useStrings()
   const stack = stackDay(day)
   const x = (s: number) => ((s - 0.5) / SLOTS) * WIDTH
   const y = (mw: number) => TOP + ((stack.maxMW - mw) / (stack.maxMW - stack.minMW)) * PLOT
@@ -55,7 +57,7 @@ export default function SupplyChart({ day, slot, onSlot }: Props) {
         className={styles.chart}
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         role="slider"
-        aria-label="Supply over the day"
+        aria-label={s.chart.label}
         aria-valuemin={1}
         aria-valuemax={SLOTS}
         aria-valuenow={slot}
@@ -71,17 +73,17 @@ export default function SupplyChart({ day, slot, onSlot }: Props) {
         {gridlines.map((mw) => (
           <line key={mw} className={styles.grid} x1={0} x2={WIDTH} y1={y(mw)} y2={y(mw)} />
         ))}
-        {SERIES.map((s) => (
+        {SERIES.map((x) => (
           <path
-            key={s}
+            key={x}
             className={styles.band}
-            style={{ fill: `var(--src-${s})` }}
+            style={{ fill: `var(--src-${x})` }}
             d={band(
-              (t) => t.bands[s].from + t.bands[s].value,
-              (t) => t.bands[s].from,
+              (t) => t.bands[x].from + t.bands[x].value,
+              (t) => t.bands[x].from,
             )}
           >
-            <title>{SERIES_NAMES[s]}</title>
+            <title>{s.chart.series[x]}</title>
           </path>
         ))}
         <path
@@ -92,7 +94,7 @@ export default function SupplyChart({ day, slot, onSlot }: Props) {
             (t) => t.generatedMW,
           )}
         >
-          <title>Storage and imports</title>
+          <title>{s.chart.storage}</title>
         </path>
         <path
           className={styles.band}
@@ -102,7 +104,7 @@ export default function SupplyChart({ day, slot, onSlot }: Props) {
             (t) => Math.min(0, t.exchangeMW),
           )}
         >
-          <title>Pumping, charging and exports</title>
+          <title>{s.chart.sentOut}</title>
         </path>
         {curtailed && (
           <path
@@ -112,14 +114,14 @@ export default function SupplyChart({ day, slot, onSlot }: Props) {
               (t) => t.generatedMW + Math.max(0, t.exchangeMW),
             )}
           >
-            <title>Curtailed</title>
+            <title>{s.chart.curtailed}</title>
           </path>
         )}
         <path className={styles.demand} d={line((t) => t.demandMW)} />
         <line className={styles.zero} x1={0} x2={WIDTH} y1={y(0)} y2={y(0)} />
         {gridlines.map((mw) => (
           <text key={mw} className={styles.gridLabel} x={2} y={y(mw) < 14 ? y(mw) + 9 : y(mw) - 2}>
-            {mw / GW} GW
+            {mw / GW} {s.chart.gw}
           </text>
         ))}
         <line className={styles.marker} x1={x(slot)} x2={x(slot)} y1={TOP} y2={TOP + PLOT} />
@@ -136,13 +138,13 @@ export default function SupplyChart({ day, slot, onSlot }: Props) {
         ))}
       </svg>
       <figcaption className={styles.legend}>
-        {[...SERIES].reverse().map((s) => (
-          <Key key={s} color={`var(--src-${s})`} name={SERIES_NAMES[s]} />
+        {[...SERIES].reverse().map((x) => (
+          <Key key={x} color={`var(--src-${x})`} name={s.chart.series[x]} />
         ))}
-        <Key color="var(--src-exchange)" name="Storage and imports" />
-        <Key color="var(--src-exchange)" name="Sent out, below the line" />
-        {curtailed && <Key color="var(--src-solar)" name="Curtailed" hatched />}
-        <Key color="var(--text)" name="Demand" line />
+        <Key color="var(--src-exchange)" name={s.chart.storage} />
+        <Key color="var(--src-exchange)" name={s.chart.sentOut} />
+        {curtailed && <Key color="var(--src-solar)" name={s.chart.curtailed} hatched />}
+        <Key color="var(--text)" name={s.chart.demand} line />
       </figcaption>
     </figure>
   )

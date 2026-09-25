@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { useApp } from '../store'
 import TimeBar from './TimeBar'
 
 const days = ['2026-09-22', '2026-09-23', '2026-09-25', '2026-09-26']
@@ -206,7 +207,7 @@ test('play and pause', async () => {
 test('a story day is a jump away', async () => {
   const onDate = vi.fn()
   const onSlot = vi.fn()
-  const story = { id: 'summer', name: 'Summer peak', date: '2026-09-23', slot: 34, note: 'system price 50.01 ¥/kWh' }
+  const story = { id: 'summer' as const, date: '2026-09-23', slot: 34, value: 50.01 }
   render(
     <TimeBar
       date="2026-09-25"
@@ -223,4 +224,24 @@ test('a story day is a jump away', async () => {
   await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Jump to' }), 'summer')
   expect(onDate).toHaveBeenCalledWith('2026-09-23')
   expect(onSlot).toHaveBeenCalledWith(34)
+})
+
+test('in Japanese the words follow', () => {
+  useApp.getState().setLang('ja')
+  render(
+    <TimeBar
+      date="2026-09-25"
+      days={days}
+      slot={25}
+      now={now}
+      playing={false}
+      stories={[]}
+      onDate={vi.fn()}
+      onSlot={vi.fn()}
+      onPlay={vi.fn()}
+    />,
+  )
+  expect(screen.getByRole('status')).toHaveTextContent('昨日 12:00–12:30 JST')
+  expect(screen.getByRole('button', { name: '今' })).toBeInTheDocument()
+  useApp.getState().setLang('en')
 })

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useStrings } from '../i18n/useStrings'
 import type { Series } from '../market/stack'
 import type { Plants } from '../regions/plants'
 import type { Palette } from '../shared/palette'
@@ -20,6 +21,7 @@ interface Props {
 
 /** The bottom corner: a Key and a Plants button, one panel open above them at a time, the key open by default on a wide screen. */
 export default function Corner({ palette, plants, hiddenFuels, onToggleFuel, onHideFuels, plantsShown }: Props) {
+  const s = useStrings()
   const narrow = useNarrow()
   const [open, setOpen] = useState<Open>(narrow ? null : 'key')
   const toggle = (which: Exclude<Open, null>) => setOpen((o) => (o === which ? null : which))
@@ -37,10 +39,10 @@ export default function Corner({ palette, plants, hiddenFuels, onToggleFuel, onH
       )}
       <div className={styles.buttons}>
         <button className={styles.toggle} aria-expanded={open === 'plants'} onClick={() => toggle('plants')}>
-          Plants
+          {s.key.plants}
         </button>
         <button className={styles.toggle} aria-expanded={open === 'key'} onClick={() => toggle('key')}>
-          Key
+          {s.key.key}
         </button>
       </div>
     </div>

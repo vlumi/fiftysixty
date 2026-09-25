@@ -21,10 +21,10 @@ test('eight bands, the exchange, the demand line and a legend, with the slot as 
     'Gas',
     'Hydro',
     'Storage and imports',
-    'Pumping, charging and exports',
+    'Sent out, below the line',
   ])
   expect(screen.getByText('Demand')).toBeInTheDocument()
-  expect(screen.getByText('Sent out, below the line')).toBeInTheDocument()
+  expect(screen.getAllByText('Sent out, below the line').length).toBeGreaterThan(0)
   expect(screen.queryByText('Curtailed')).not.toBeInTheDocument()
 })
 

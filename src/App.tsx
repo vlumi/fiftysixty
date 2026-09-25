@@ -12,6 +12,7 @@ import { loadPlants, type Plants } from './regions/plants'
 import { PLANTS_FROM_ZOOM } from './map/plantLayers'
 import { useApp } from './store'
 import { jstDate, openingDay } from './time/days'
+import { useStrings } from './i18n/useStrings'
 import { PALETTES } from './shared/palette'
 import { resolveTheme, useSystemDark } from './shared/theme'
 import TimeBar from './time/TimeBar'
@@ -57,6 +58,12 @@ export default function App() {
   const systemDark = useSystemDark()
   const themeChoice = useApp((s) => s.themeChoice)
   const setThemeChoice = useApp((s) => s.setThemeChoice)
+  const lang = useApp((s) => s.lang)
+  const setLang = useApp((s) => s.setLang)
+  const words = useStrings()
+  useEffect(() => {
+    document.documentElement.lang = lang
+  }, [lang])
   const theme = resolveTheme(themeChoice, systemDark)
   useEffect(() => {
     document.documentElement.dataset.theme = theme
@@ -115,10 +122,13 @@ export default function App() {
           <span className="slash">/</span>
           <span className="hz60">60</span>
         </h1>
-        <p>The Japanese power market on a map</p>
+        <p>{words.subtitle}</p>
+        <button className="lang" aria-label={words.language.label} onClick={() => setLang(lang === 'ja' ? 'en' : 'ja')}>
+          {words.language.other}
+        </button>
         <button
           className="theme"
-          aria-label={theme === 'light' ? 'Switch to the dark theme' : 'Switch to the light theme'}
+          aria-label={theme === 'light' ? words.theme.toDark : words.theme.toLight}
           onClick={() => setThemeChoice(theme === 'light' ? 'dark' : 'light')}
         >
           {theme === 'light' ? '☾' : '☀'}
@@ -128,6 +138,7 @@ export default function App() {
         <Suspense fallback={null}>
           <MapView
             theme={theme}
+            lang={lang}
             regions={regions}
             prices={displayed?.areaPrice}
             selected={area}
