@@ -6,6 +6,7 @@ import type { PricedArea } from '../market/jepx'
 import type { Area } from '../regions/areas'
 import type { AreaProps, Regions } from '../regions/geometry'
 import type { Plants } from '../regions/plants'
+import type { Series } from '../market/stack'
 import type { Palette, Rgba } from '../shared/palette'
 import { priceColor } from '../shared/scale'
 import { BELOW_LABELS } from './basemap'
@@ -28,6 +29,7 @@ export interface LayerOptions {
   zoom?: number
   plants?: Plants | null
   selectedPlant?: string | null
+  hiddenFuels?: readonly Series[]
 }
 
 /**
@@ -37,7 +39,7 @@ export interface LayerOptions {
 export function buildLayers(
   regions: Regions | null,
   palette: Palette,
-  { prices, selected, flows, zoom = 5, plants = null, selectedPlant = null }: LayerOptions = {},
+  { prices, selected, flows, zoom = 5, plants = null, selectedPlant = null, hiddenFuels = [] }: LayerOptions = {},
 ): Layer[] {
   if (!regions) return []
   const fill = (f: Feature<Geometry, AreaProps>): Rgba => {
@@ -70,6 +72,6 @@ export function buildLayers(
       getLineWidth: 2,
     }),
     ...buildFlowLayers(flows ?? new Map(), palette, zoom),
-    ...buildPlantLayers(plants, palette, zoom, selectedPlant),
+    ...buildPlantLayers(plants, palette, zoom, selectedPlant, hiddenFuels),
   ]
 }

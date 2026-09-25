@@ -18,8 +18,19 @@ const FUEL: Record<Series, string> = {
   renewables: 'Geo, bio',
 }
 
-/** The key: the price ramp, the arrows and the fuels, behind a button on phones, where it would take the map. */
-export default function Legend() {
+interface Props {
+  /** The fuels whose plants are hidden; a swatch pressed shows its fuel. */
+  hiddenFuels: readonly Series[]
+  onToggleFuel: (fuel: Series) => void
+  /** Whether the map is close enough for the plants to show at all. */
+  plantsShown: boolean
+}
+
+/**
+ * The key: the price ramp, the arrows and the fuels, behind a button on phones, where it would take the map. The
+ * fuel swatches double as the plants' filter, so the key is live.
+ */
+export default function Legend({ hiddenFuels, onToggleFuel, plantsShown }: Props) {
   const narrow = useNarrow()
   const [open, setOpen] = useState(!narrow)
   const [lo, hi] = PRICE_DOMAIN
@@ -41,13 +52,19 @@ export default function Legend() {
             <Arrow width={6} color={cssRgb(DARK.flow.full)} /> at the limit
             <Arrow width={6} color={cssRgb(DARK.flow.full)} rim /> split
           </div>
-          <div className={styles.fuels}>
+          <div className={styles.fuels} role="group" aria-label="Plants by fuel">
             {[...SERIES].reverse().map((s) => (
-              <span key={s} className={styles.fuel}>
+              <button
+                key={s}
+                className={styles.fuel}
+                aria-pressed={!hiddenFuels.includes(s)}
+                onClick={() => onToggleFuel(s)}
+              >
                 <span className={styles.swatch} style={{ background: `var(--src-${s})` }} /> {FUEL[s]}
-              </span>
+              </button>
             ))}
           </div>
+          {!plantsShown && <div className={styles.hint}>plants: zoom in</div>}
         </figure>
       )}
     </div>
@@ -60,7 +77,7 @@ function Arrow({ width, color, rim = false }: { width: number; color: string; ri
     `0,${12 - (1 + extra) / 2} 26,${12 - (width + extra) / 2} 26,${12 + (width + extra) / 2} 0,${12 + (1 + extra) / 2}`
   const size = 8 + width * 2
   return (
-    <svg className={styles.arrowKey} width="40" height="24" viewBox="0 0 40 24" aria-hidden="true">
+    <svg className={styles.arrowKey} width="52" height="24" viewBox="0 0 52 24" aria-hidden="true">
       {rim && <polygon points={shaft(4)} fill="var(--text)" />}
       <polygon points={shaft(0)} fill={color} />
       <polygon points={`26,${12 - size / 2} ${26 + size},12 26,${12 + size / 2}`} fill={color} />

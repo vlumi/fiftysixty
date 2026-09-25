@@ -39,6 +39,7 @@ export default function MapView({
   flows,
   plants,
   selectedPlant,
+  hiddenFuels,
   mixes = {},
   onPick,
   onPickPlant,
@@ -89,9 +90,9 @@ export default function MapView({
 
   useEffect(() => {
     overlay.current?.setProps({
-      layers: buildLayers(regions, DARK, { prices, selected, flows, zoom, plants, selectedPlant }),
+      layers: buildLayers(regions, DARK, { prices, selected, flows, zoom, plants, selectedPlant, hiddenFuels }),
     })
-  }, [regions, prices, selected, flows, zoom, plants, selectedPlant])
+  }, [regions, prices, selected, flows, zoom, plants, selectedPlant, hiddenFuels])
 
   return (
     <>
