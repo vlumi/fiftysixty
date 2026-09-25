@@ -55,7 +55,9 @@ export function buildLayers(
   const fill = (f: Feature<Geometry, AreaProps>): Rgba => {
     if (!prices) return [...palette.hz[f.properties.hz], 45]
     const price = f.properties.area === 'okinawa' ? undefined : prices[f.properties.area]
-    return price === undefined ? [...palette.muted, 40] : [...priceColor(price, palette.price), 170]
+    return price === undefined || !Number.isFinite(price)
+      ? [...palette.muted, 40]
+      : [...priceColor(price, palette.price), 170]
   }
   return [
     new GeoJsonLayer<AreaProps, Interleaved>({

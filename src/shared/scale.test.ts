@@ -12,6 +12,7 @@ test('the ends of the domain are the ends of the ramp, and beyond them is clampe
   expect(priceColor(PRICE_DOMAIN[1], ramp)).toEqual([200, 200, 200])
   expect(priceColor(-5, ramp)).toEqual([0, 0, 0])
   expect(priceColor(64.28, ramp)).toEqual([200, 200, 200])
+  expect(priceColor(Number.NaN, ramp)).toEqual([0, 0, 0])
 })
 
 test('between stops the color is interpolated', () => {

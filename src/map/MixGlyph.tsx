@@ -17,7 +17,8 @@ interface Props {
 export default function MixGlyph({ name, record, onPick }: Props) {
   const s = useStrings()
   const [at] = stackDay([record]).slots
-  const px = (mw: number) => mw / MW_PER_PX
+  // A source reported negative for a half hour would give a band a negative height, which SVG drops.
+  const px = (mw: number) => Math.max(0, mw) / MW_PER_PX
   const imports = Math.max(0, at.exchangeMW)
   const exports = Math.max(0, -at.exchangeMW)
   const top = px(at.generatedMW + imports + at.curtailedMW)

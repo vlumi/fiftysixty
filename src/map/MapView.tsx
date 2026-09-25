@@ -76,6 +76,7 @@ export default function MapView({
     map.on('style.load', () => labelLanguage(map, pick.current.lang))
     setMap(map)
     setZoom(map.getZoom())
+    pick.current.onZoom?.(map.getZoom())
     map.on('zoom', () => {
       setZoom(map.getZoom())
       pick.current.onZoom?.(map.getZoom())

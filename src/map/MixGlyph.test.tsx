@@ -21,3 +21,10 @@ test('a column of the bands, capped by the curtailment, with a stub below the li
   await userEvent.click(glyph)
   expect(onPick).toHaveBeenCalled()
 })
+
+test('a source reported negative does not take a band below zero height', () => {
+  const odd = { ...noon, bySource: { ...noon.bySource, other: -50 } }
+  render(<MixGlyph name="Kyushu" record={odd} onPick={vi.fn()} />)
+  for (const rect of screen.getByRole('button', { name: 'Kyushu mix' }).querySelectorAll('rect'))
+    expect(Number(rect.getAttribute('height'))).toBeGreaterThanOrEqual(0)
+})
