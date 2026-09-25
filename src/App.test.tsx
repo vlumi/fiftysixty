@@ -31,7 +31,7 @@ test('the page is the name, the line under it, the map, the clock and the price 
   expect(screen.getByRole('heading', { name: '50/60' })).toBeInTheDocument()
   expect(screen.getByText('The Japanese power market on a map')).toBeInTheDocument()
   expect(await screen.findByRole('region', { name: 'Map' })).toBeInTheDocument()
-  expect(screen.getByRole('figure', { name: 'Price scale' })).toBeInTheDocument()
+  expect(screen.getByRole('figure', { name: 'Key' })).toBeInTheDocument()
   expect(screen.getByRole('status')).toHaveTextContent('12:00–12:30 JST')
 })
 
