@@ -26,7 +26,11 @@ export default function App() {
   return (
     <>
       <header>
-        <h1>50/60</h1>
+        <h1>
+          <span className="hz50">50</span>
+          <span className="slash">/</span>
+          <span className="hz60">60</span>
+        </h1>
         <p>The Japanese power market on a map</p>
       </header>
       <main>
