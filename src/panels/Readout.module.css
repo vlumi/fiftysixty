@@ -100,3 +100,48 @@
   font-size: 0.7rem;
   font-weight: 600;
 }
+
+/* The fuel as a pill in its own color, the text dark on the light fuels and light on the dark ones. */
+.pill {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 0.4rem;
+  padding: 0.1rem 0.55rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--bg);
+}
+
+.coal {
+  background: var(--src-coal);
+}
+
+.nuclear {
+  background: var(--src-nuclear);
+}
+
+.renewables {
+  background: var(--src-renewables);
+  color: var(--text);
+}
+
+.otherThermal {
+  background: var(--src-otherThermal);
+}
+
+.solar {
+  background: var(--src-solar);
+}
+
+.wind {
+  background: var(--src-wind);
+}
+
+.gas {
+  background: var(--src-gas);
+}
+
+.hydro {
+  background: var(--src-hydro);
+}
