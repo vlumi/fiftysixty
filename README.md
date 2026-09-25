@@ -8,7 +8,13 @@ Japan's grid is nine regional markets joined by a handful of interconnectors and
 
 Unofficial demo project, built from public data; not affiliated with any exchange, grid operator or utility.
 
-Live at [fiftysixty.misaki.fi](https://fiftysixty.misaki.fi) once there is something to see. [SCOPE.md](SCOPE.md) is the plan; [ARCHITECTURE.md](ARCHITECTURE.md) explains how it works.
+Live at [fiftysixty.misaki.fi](https://fiftysixty.misaki.fi). [SCOPE.md](SCOPE.md) is the plan; [ARCHITECTURE.md](ARCHITECTURE.md) explains how it works.
+
+![Kyushu picked on a curtailed noon: the areas colored by price, the day's supply stack under the demand line with the curtailed solar hatched on top, the mix in numbers, and a column of the mix beside each recorded area on the map](docs/screenshots/002-what-ran.png)
+
+<img src="docs/screenshots/002-what-ran-phone.png" alt="The same site on a phone: the readout over the upper half of the map, the clock at the foot" width="260">
+
+Every capture, one per milestone, is shown in [docs/screenshots](docs/screenshots/README.md).
 
 ## What you will see
 

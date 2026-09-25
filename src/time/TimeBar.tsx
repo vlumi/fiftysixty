@@ -11,10 +11,19 @@ interface Props {
   onSlot: (slot: number) => void
 }
 
-/** The day and its 48 half hours; a controlled row of native inputs, so it scrubs and takes the keyboard for free. */
+/**
+ * The day and its 48 half hours: a controlled row of native inputs, so it scrubs and takes the keyboard for free, with
+ * a step to the priced day before and after.
+ */
 export default function TimeBar({ date, days, slot, onDate, onSlot }: Props) {
+  const at = date ? days.indexOf(date) : -1
+  const previous = at > 0 ? days[at - 1] : undefined
+  const next = at >= 0 && at < days.length - 1 ? days[at + 1] : undefined
   return (
     <div className={styles.bar} data-timebar>
+      <button aria-label="Previous day" disabled={!previous} onClick={() => previous && onDate(previous)}>
+        ‹
+      </button>
       <input
         type="date"
         aria-label="Delivery day"
@@ -24,6 +33,9 @@ export default function TimeBar({ date, days, slot, onDate, onSlot }: Props) {
         disabled={!date}
         onChange={(e) => e.target.value && onDate(e.target.value)}
       />
+      <button aria-label="Next day" disabled={!next} onClick={() => next && onDate(next)}>
+        ›
+      </button>
       <input
         type="range"
         aria-label="Half hour"

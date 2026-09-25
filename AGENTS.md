@@ -25,4 +25,4 @@ The same rules as [nebulosa](https://github.com/vlumi/nebulosa), whose toolchain
 ## Documentation
 
 - Markdown paragraphs are one line each; the editor wraps. `.markdownlint.jsonc` encodes this.
-- When a milestone lands, mark it done in SCOPE.md, move its design from *Planned* to *Built* in ARCHITECTURE.md, and add a capture to `docs/screenshots/` with `scripts/screenshot.mjs`.
+- When a milestone lands, mark it done in SCOPE.md, move its design from *Planned* to *Built* in ARCHITECTURE.md, and add a capture to `docs/screenshots/` with `scripts/screenshot.mjs`: a numbered desktop and phone pair, an entry at the top of its README, and the README's own captures replaced with the new pair.
