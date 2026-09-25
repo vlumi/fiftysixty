@@ -29,6 +29,7 @@ test('a click on Tokyo reads out its price against the system and its neighbors,
   await page.getByLabel('Delivery day').fill('2026-09-25')
   await page.getByRole('slider', { name: 'Half hour' }).fill('1')
   await expect(readout.getByRole('region', { name: 'What ran' })).toContainText('Demand 25,609 MW')
+  await expect(page.getByRole('button', { name: 'Tokyo mix' })).toBeVisible()
   const chart = readout.getByRole('slider', { name: 'Supply over the day' })
   await expect(chart).toHaveAttribute('aria-valuenow', '1')
   await chart.focus()
@@ -38,13 +39,13 @@ test('a click on Tokyo reads out its price against the system and its neighbors,
   await expect(readout).toContainText('System price')
 })
 
-test('a curtailed noon in Kyushu shows in the mix and on the chart', async ({ page }) => {
+test('a curtailed noon in Kyushu shows in the mix and on the chart, and its glyph picks it', async ({ page }) => {
   await open(page)
-  await page.locator('.maplibregl-canvas').click({ position: await kyushu(page) })
-  const readout = page.getByRole('complementary', { name: 'Readout' })
-  await expect(readout).toContainText('Kyushu')
   await page.getByLabel('Delivery day').fill('2026-09-22')
   await page.getByRole('slider', { name: 'Half hour' }).fill('23')
+  await page.getByRole('button', { name: 'Kyushu mix' }).click()
+  const readout = page.getByRole('complementary', { name: 'Readout' })
+  await expect(readout).toContainText('Kyushu')
   await expect(page.getByRole('status')).toHaveText('11:00–11:30 JST')
   await expect(readout.getByRole('region', { name: 'What ran' })).toContainText('Solar curtailed1,877')
   await expect(
@@ -56,10 +57,4 @@ test('a curtailed noon in Kyushu shows in the mix and on the chart', async ({ pa
 async function tokyo(page: Page) {
   const box = (await page.locator('.maplibregl-canvas').boundingBox())!
   return { x: box.width * 0.58, y: box.height * 0.65 }
-}
-
-/** The middle of Kyushu, likewise. */
-async function kyushu(page: Page) {
-  const box = (await page.locator('.maplibregl-canvas').boundingBox())!
-  return { x: box.width * 0.31, y: box.height * 0.85 }
 }

@@ -1,0 +1,43 @@
+.glyph {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.7rem;
+  cursor: pointer;
+  filter: drop-shadow(0 0 2px var(--bg));
+}
+
+.glyph svg {
+  display: block;
+  overflow: visible;
+}
+
+.exchange {
+  fill: var(--src-exchange);
+}
+
+.curtailed {
+  fill: var(--src-solar);
+  fill-opacity: 0.35;
+  stroke: var(--src-solar);
+  stroke-width: 1;
+  stroke-dasharray: 3 2;
+}
+
+.baseline {
+  stroke: var(--text);
+  stroke-width: 1;
+}
+
+.label {
+  font-variant-numeric: tabular-nums;
+  text-shadow:
+    0 0 3px var(--bg),
+    0 0 3px var(--bg);
+}
