@@ -9,12 +9,14 @@ import Legend from './panels/Legend'
 import Readout from './panels/Readout'
 import { loadRegions, type Regions } from './regions/geometry'
 import { useApp } from './store'
-import { openingDay } from './time/days'
+import { jstDate, openingDay } from './time/days'
 import TimeBar from './time/TimeBar'
 import { useNow } from './time/useNow'
 import { usePlayer } from './time/usePlayer'
 
 const MapView = lazy(() => import('./map/MapView'))
+
+const REFRESH_MS = 30 * 60_000
 
 export default function App() {
   const [regions, setRegions] = useState<Regions | null>(null)
@@ -23,7 +25,7 @@ export default function App() {
   const [flowMonths, setFlowMonths] = useState<ReadonlyMap<string, FlowDays | null>>(new Map())
   useEffect(() => {
     loadRegions().then(setRegions, console.error)
-    loadSpotYears(fiscalYear(new Date())).then(setSpot, console.error)
+    loadSpotYears(fiscalYear(jstDate(new Date()))).then(setSpot, console.error)
   }, [])
 
   const chosenDate = useApp((s) => s.date)
@@ -43,31 +45,44 @@ export default function App() {
   usePlayer(playing, tick)
   const displayed = slotOf(spot, date, slot)
 
+  // The displayed month's files, asked for again every half hour so an open tab follows the host's hourly fetch,
+  // and again after a failure.
   const month = date ? monthOf(date) : null
-  const requested = useRef(new Set<string>())
+  const askedAt = useRef(new Map<string, number>())
   useEffect(() => {
     if (!month) return
+    const ask = (key: string, load: () => Promise<void>) => {
+      const at = askedAt.current.get(key)
+      if (at !== undefined && now.getTime() - at < REFRESH_MS) return
+      askedAt.current.set(key, now.getTime())
+      load().catch((error: unknown) => {
+        console.error(error)
+        askedAt.current.delete(key)
+      })
+    }
     for (const adapter of Object.values(ADAPTERS)) {
       const key = `${adapter.area}/${month}`
-      if (requested.current.has(key)) continue
-      requested.current.add(key)
-      loadRecord(adapter, month).then((days) => setRecords((r) => new Map(r).set(key, days)), console.error)
+      ask(key, () => loadRecord(adapter, month).then((days) => setRecords((r) => new Map(r).set(key, days))))
     }
-    if (!requested.current.has(`flows/${month}`)) {
-      requested.current.add(`flows/${month}`)
-      loadFlows(month).then((days) => setFlowMonths((f) => new Map(f).set(month, days)), console.error)
-    }
-  }, [month])
-  const flows = flowsAt(month ? flowMonths.get(month) : null, date, slot)
+    ask(`flows/${month}`, () => loadFlows(month).then((days) => setFlowMonths((f) => new Map(f).set(month, days))))
+  }, [month, now])
+  const flows = useMemo(
+    () => flowsAt(month ? flowMonths.get(month) : null, date, slot),
+    [flowMonths, month, date, slot],
+  )
   const recordFor = (a: Area | null) => (a && month ? records.get(`${a}/${month}`) : undefined)
   const record = recordSlot(recordFor(area), date, slot)
   const recordedDay = date ? recordFor(area)?.get(date) : undefined
-  const mixes = Object.fromEntries(
-    Object.keys(ADAPTERS).flatMap((a) => {
-      const at = recordSlot(recordFor(a as Area), date, slot)
-      return at ? [[a, at]] : []
-    }),
-  ) as Partial<Record<Area, RecordSlot>>
+  const mixes = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.keys(ADAPTERS).flatMap((a) => {
+          const at = recordSlot(a && month ? records.get(`${a}/${month}`) : undefined, date, slot)
+          return at ? [[a, at]] : []
+        }),
+      ) as Partial<Record<Area, RecordSlot>>,
+    [records, month, date, slot],
+  )
 
   return (
     <>
