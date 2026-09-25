@@ -7,6 +7,7 @@ vi.mock('./map/MapView', () => ({ default: () => <div role="region" aria-label="
 
 beforeEach(() => {
   resetApp()
+  vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-09-26T10:00:00+09:00') })
   vi.stubGlobal(
     'fetch',
     vi.fn((url: string) =>
@@ -18,7 +19,10 @@ beforeEach(() => {
     ),
   )
 })
-afterEach(() => vi.unstubAllGlobals())
+afterEach(() => {
+  vi.unstubAllGlobals()
+  vi.useRealTimers()
+})
 
 test('the page is the name, the line under it, the map, the clock and the price scale', async () => {
   render(<App />)
@@ -29,8 +33,8 @@ test('the page is the name, the line under it, the map, the clock and the price 
   expect(screen.getByRole('status')).toHaveTextContent('12:00–12:30 JST')
 })
 
-test('the clock opens on the newest day the auction has priced, with the system price read out', async () => {
+test('the clock opens on yesterday in Japan, the newest complete day, with the system price read out', async () => {
   render(<App />)
-  expect(await screen.findByDisplayValue('2026-09-26')).toBeInTheDocument()
+  expect(await screen.findByDisplayValue('2026-09-25')).toBeInTheDocument()
   expect(screen.getByRole('complementary', { name: 'Readout' })).toHaveTextContent('System price')
 })
