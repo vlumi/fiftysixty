@@ -31,6 +31,7 @@ export default function MapView({ regions, prices, selected, flows, mixes = {}, 
   const container = useRef<HTMLDivElement>(null)
   const overlay = useRef<MapLibreOverlay>(null)
   const [map, setMap] = useState<MapLibre | null>(null)
+  const [zoom, setZoom] = useState(5)
   const pick = useRef(onPick)
   useEffect(() => {
     pick.current = onPick
@@ -47,6 +48,8 @@ export default function MapView({ regions, prices, selected, flows, mixes = {}, 
     })
     map.addControl(new NavigationControl({ visualizePitch: false }), 'top-right')
     setMap(map)
+    setZoom(map.getZoom())
+    map.on('zoom', () => setZoom(map.getZoom()))
     overlay.current = new MapLibreOverlay({
       interleaved: true,
       layers: [],
@@ -62,8 +65,8 @@ export default function MapView({ regions, prices, selected, flows, mixes = {}, 
   }, [])
 
   useEffect(() => {
-    overlay.current?.setProps({ layers: buildLayers(regions, DARK, { prices, selected, flows }) })
-  }, [regions, prices, selected, flows])
+    overlay.current?.setProps({ layers: buildLayers(regions, DARK, { prices, selected, flows, zoom }) })
+  }, [regions, prices, selected, flows, zoom])
 
   return (
     <>

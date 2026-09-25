@@ -22,6 +22,8 @@ export interface LayerOptions {
   selected?: Area | null
   /** The interconnectors' forecast for the slot, by line id; drawn as arrows between the areas. */
   flows?: ReadonlyMap<string, FlowSlot>
+  /** The map's zoom, which sizes the arrows' shafts. */
+  zoom?: number
 }
 
 /**
@@ -31,7 +33,7 @@ export interface LayerOptions {
 export function buildLayers(
   regions: Regions | null,
   palette: Palette,
-  { prices, selected, flows }: LayerOptions = {},
+  { prices, selected, flows, zoom = 5 }: LayerOptions = {},
 ): Layer[] {
   if (!regions) return []
   const fill = (f: Feature<Geometry, AreaProps>): Rgba => {
@@ -63,6 +65,6 @@ export function buildLayers(
       lineWidthUnits: 'pixels',
       getLineWidth: 2,
     }),
-    ...buildFlowLayers(flows ?? new Map(), palette),
+    ...buildFlowLayers(flows ?? new Map(), palette, zoom),
   ]
 }

@@ -1,19 +1,19 @@
-import type { IconLayer, PathLayer } from '@deck.gl/layers'
+import type { IconLayer, SolidPolygonLayer } from '@deck.gl/layers'
 import csv from '../test/fixtures/occto-renkei.csv?raw'
 import { flowsAt, parseFlows } from '../market/flows'
 import { AREA_BY_ID } from '../regions/areas'
 import { DARK } from '../shared/palette'
 import {
   buildFlowLayers,
+  degreesPerPixel,
   flowData,
   headSize,
   heading,
   shaft,
-  tapered,
+  taperPolygon,
   triangleFlows,
   widthOf,
   type FlowDatum,
-  type Taper,
 } from './flowLayers'
 
 const noon = flowsAt(parseFlows(csv), '2026-09-23', 24)
@@ -62,20 +62,35 @@ test('with one sender and two receivers the flows fan out from it, and with a fe
   expect(triangleFlows(new Map([['chubu-fence', fence(1000)]]))).toEqual([])
 })
 
-test('the shaft starts off the column and tapers to the flow width where the head begins', () => {
-  const kc = flowData(noon).find((d) => d.id === 'kansai-chugoku')!
-  const pieces = tapered(kc)
-  expect(pieces).toHaveLength(12)
-  expect(pieces[0].path[0]).toEqual(shaft(kc.path)[0])
-  expect(pieces.at(-1)!.path[1]).toEqual(shaft(kc.path)[1])
-  expect(pieces[0].path[0][0]).toBeCloseTo(kc.path[0][0] + (kc.path[1][0] - kc.path[0][0]) * 0.07)
-  expect(pieces.at(-1)!.width).toBeCloseTo(widthOf(kc))
-  expect(pieces[0].width).toBeLessThan(pieces.at(-1)!.width)
-  for (let i = 1; i < pieces.length; i++) expect(pieces[i].width).toBeGreaterThan(pieces[i - 1].width)
-  expect(tapered(kc, 4).at(-1)!.width).toBeCloseTo(widthOf(kc) + 4)
+test('the shaft is one solid shape, a hair wide off the column and the flow width at the head, in degrees for the zoom', () => {
+  const east: FlowDatum = {
+    id: 'x',
+    label: 'x',
+    path: [
+      [130, 35],
+      [140, 35],
+    ],
+    mw: 3000,
+    load: 0.5,
+    split: false,
+  }
+  const zoom = 5
+  const [a, b, c, d] = taperPolygon(east, zoom)
+  const [from, to] = shaft(east.path)
+  expect(a[0]).toBeCloseTo(from[0])
+  expect(b[0]).toBeCloseTo(to[0])
+  const perLatPixel = degreesPerPixel(zoom) * Math.cos((35 * Math.PI) / 180)
+  expect(Math.abs(a[1] - d[1]) / perLatPixel).toBeCloseTo(1)
+  expect(Math.abs(b[1] - c[1]) / perLatPixel).toBeCloseTo(widthOf(east))
+  expect(Math.abs(taperPolygon(east, zoom, 4)[1][1] - taperPolygon(east, zoom, 4)[2][1]) / perLatPixel).toBeCloseTo(
+    widthOf(east) + 4,
+  )
+  expect(Math.abs(taperPolygon(east, zoom + 1)[1][1] - taperPolygon(east, zoom + 1)[2][1])).toBeCloseTo(
+    Math.abs(b[1] - c[1]) / 2,
+  )
 })
 
-test('the arrow heads along the path, the pieces take color from the load, split lines get a rim, the head sits at the shaft end in the same color', () => {
+test('the arrow heads along the path, the shapes take color from the load, split lines get a rim, the head sits at the shaft end in the same color', () => {
   expect(
     heading([
       [130, 35],
@@ -88,21 +103,24 @@ test('the arrow heads along the path, the pieces take color from the load, split
       [135, 40],
     ]),
   ).toBeCloseTo(90)
-  const [rims, paths, heads] = buildFlowLayers(noon, DARK) as [PathLayer<Taper>, PathLayer<Taper>, IconLayer<FlowDatum>]
-  expect([rims.id, paths.id, heads.id]).toEqual(['flow-splits', 'flows', 'flow-heads'])
+  const [rims, shafts, heads] = buildFlowLayers(noon, DARK, 5) as [
+    SolidPolygonLayer<FlowDatum>,
+    SolidPolygonLayer<FlowDatum>,
+    IconLayer<FlowDatum>,
+  ]
+  expect([rims.id, shafts.id, heads.id]).toEqual(['flow-splits', 'flows', 'flow-heads'])
   const kc = flowData(noon).find((d) => d.id === 'kansai-chugoku')!
   expect(widthOf(kc)).toBeCloseTo(1 + 6.58)
   const context = { index: 0, data: [], target: [] }
-  const color = paths.props.getColor
+  const color = shafts.props.getFillColor
   if (typeof color !== 'function') throw new Error('accessor')
-  expect(color(tapered(kc)[0], context)).toEqual([...DARK.flow.full, 230])
-  const rimIds = new Set((rims.props.data as Taper[]).map((t) => t.flow.id))
-  expect([...rimIds]).toEqual(
+  expect(color(kc, context)).toEqual([...DARK.flow.full, 230])
+  expect((rims.props.data as FlowDatum[]).map((d) => d.id)).toEqual(
     flowData(noon)
       .filter((d) => d.split)
       .map((d) => d.id),
   )
-  expect(rimIds.size).toBeGreaterThan(0)
+  expect((rims.props.data as FlowDatum[]).length).toBeGreaterThan(0)
   const position = heads.props.getPosition
   if (typeof position !== 'function') throw new Error('accessor')
   expect(position(kc, context)).toEqual(shaft(kc.path)[1])
@@ -113,5 +131,5 @@ test('the arrow heads along the path, the pieces take color from the load, split
 })
 
 test('no flows, no layers', () => {
-  expect(buildFlowLayers(new Map(), DARK)).toEqual([])
+  expect(buildFlowLayers(new Map(), DARK, 5)).toEqual([])
 })
