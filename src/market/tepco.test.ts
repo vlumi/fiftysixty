@@ -32,6 +32,7 @@ test('a real day parses into 48 slots and the newest, partial day into what has 
 
 test('a file without the header is refused', () => {
   expect(() => TEPCO.parse('単位[MW平均]\n2026/9/1,0:00,1')).toThrow('header')
+  expect(() => TEPCO.parse('DATE,TIME,エリア需要\n2026/9/1,0:00,1')).toThrow('原子力')
 })
 
 test('the file for a month', () => {

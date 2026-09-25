@@ -38,8 +38,28 @@ test('a click on Tokyo reads out its price against the system and its neighbors,
   await expect(readout).toContainText('System price')
 })
 
+test('a curtailed noon in Kyushu shows in the mix and on the chart', async ({ page }) => {
+  await open(page)
+  await page.locator('.maplibregl-canvas').click({ position: await kyushu(page) })
+  const readout = page.getByRole('complementary', { name: 'Readout' })
+  await expect(readout).toContainText('Kyushu')
+  await page.getByLabel('Delivery day').fill('2026-09-22')
+  await page.getByRole('slider', { name: 'Half hour' }).fill('23')
+  await expect(page.getByRole('status')).toHaveText('11:00–11:30 JST')
+  await expect(readout.getByRole('region', { name: 'What ran' })).toContainText('Solar curtailed1,877')
+  await expect(
+    readout.getByRole('slider', { name: 'Supply over the day' }).locator('path > title', { hasText: 'Curtailed' }),
+  ).toBeAttached()
+})
+
 /** Where the Kanto plain falls on the canvas at the opening view of the desktop project. */
 async function tokyo(page: Page) {
   const box = (await page.locator('.maplibregl-canvas').boundingBox())!
   return { x: box.width * 0.58, y: box.height * 0.65 }
+}
+
+/** The middle of Kyushu, likewise. */
+async function kyushu(page: Page) {
+  const box = (await page.locator('.maplibregl-canvas').boundingBox())!
+  return { x: box.width * 0.31, y: box.height * 0.85 }
 }

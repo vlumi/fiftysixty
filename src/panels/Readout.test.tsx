@@ -67,6 +67,6 @@ test('what ran in a picked area, the idle sources left out and the pumping negat
 })
 
 test('an area whose company is not wired says so', () => {
-  render(<Readout slot={slot} record={undefined} day={undefined} area="kyushu" onClose={vi.fn()} onSlot={vi.fn()} />)
-  expect(screen.getByText('The record for Kyushu is not wired yet.')).toBeInTheDocument()
+  render(<Readout slot={slot} record={undefined} day={undefined} area="hokkaido" onClose={vi.fn()} onSlot={vi.fn()} />)
+  expect(screen.getByText('The record for Hokkaido is not wired yet.')).toBeInTheDocument()
 })
