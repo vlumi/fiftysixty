@@ -17,12 +17,18 @@ test('the clock opens on the newest priced day and scrubs through its half hours
   await expect(page.getByRole('complementary', { name: 'Readout' })).toContainText('12.75')
 })
 
-test('a click on Tokyo reads out its price against the system and its neighbors', async ({ page }) => {
+test('a click on Tokyo reads out its price against the system and its neighbors, and what ran on a recorded day', async ({
+  page,
+}) => {
   await open(page)
   await page.locator('.maplibregl-canvas').click({ position: await tokyo(page) })
   const readout = page.getByRole('complementary', { name: 'Readout' })
   await expect(readout).toContainText('Tokyo')
   await expect(readout).toContainText('Chubu')
+  await expect(readout).toContainText('No record for this half hour yet.')
+  await page.getByLabel('Delivery day').fill('2026-09-25')
+  await page.getByRole('slider', { name: 'Half hour' }).fill('1')
+  await expect(readout.getByRole('region', { name: 'What ran' })).toContainText('Demand 25,609 MW')
   await readout.getByRole('button', { name: 'Close' }).click()
   await expect(readout).toContainText('System price')
 })
