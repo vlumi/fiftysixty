@@ -55,3 +55,9 @@ test('today is a jump away, and its half hours read as past, now or ahead', asyn
   rerender(<TimeBar date="2026-09-26" days={days} slot={30} now={now} onDate={onDate} onSlot={vi.fn()} />)
   expect(screen.getByRole('status')).toHaveTextContent('Today 14:30–15:00 JST · ahead')
 })
+
+test('tomorrow says only tomorrow: the whole day is ahead', () => {
+  const tomorrow = new Date('2026-09-25T10:10:00+09:00')
+  render(<TimeBar date="2026-09-26" days={days} slot={30} now={tomorrow} onDate={vi.fn()} onSlot={vi.fn()} />)
+  expect(screen.getByRole('status')).toHaveTextContent(/^Tomorrow 14:30–15:00 JST$/)
+})
