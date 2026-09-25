@@ -9,10 +9,11 @@ const TILE = /\/planet\//
 
 const SPOT = readFileSync(new URL('../src/test/fixtures/jepx-spot.csv', import.meta.url), 'utf8')
 const TEPCO = readFileSync(new URL('../src/test/fixtures/tepco-jukyu.csv', import.meta.url), 'utf8')
+const KYUSHU = readFileSync(new URL('../src/test/fixtures/kyushu-jukyu.csv', import.meta.url), 'utf8')
 
 /**
- * The app with two real days of prices and of TEPCO's record, any page error made into a test failure, and the
- * basemap's assets stubbed.
+ * The app with real days of prices and of TEPCO's and Kyushu's records, any page error made into a test failure, and
+ * the basemap's assets stubbed.
  */
 export const test = base.extend<{ errors: string[] }>({
   errors: async ({ page }, provide) => {
@@ -25,6 +26,7 @@ export const test = base.extend<{ errors: string[] }>({
     await page.route(EMPTY_ASSETS, (route) => route.fulfill({ status: 204 }))
     await page.route('**/data/jepx-spot-*.csv', (route) => route.fulfill({ body: SPOT, contentType: 'text/csv' }))
     await page.route('**/data/tepco-jukyu-*.csv', (route) => route.fulfill({ body: TEPCO, contentType: 'text/csv' }))
+    await page.route('**/data/kyushu-jukyu-*.csv', (route) => route.fulfill({ body: KYUSHU, contentType: 'text/csv' }))
     await provide(page)
   },
 })
