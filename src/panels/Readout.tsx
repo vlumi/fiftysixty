@@ -1,7 +1,9 @@
+import { Fragment } from 'react'
 import type { PricedArea, SpotSlot } from '../market/jepx'
+import { load, type FlowSlot } from '../market/flows'
 import { SOURCES, type RecordSlot, type Source } from '../market/record'
 import { AREA_BY_ID, PRICED_AREAS, type Area } from '../regions/areas'
-import { neighbors } from '../regions/interconnectors'
+import { linesOf, neighbors } from '../regions/interconnectors'
 import { mw, signed, yen } from '../shared/format'
 import styles from './Readout.module.css'
 import SupplyChart from './SupplyChart'
@@ -12,6 +14,8 @@ interface Props {
   record: RecordSlot | undefined
   /** The same for the whole displayed day, as far as it is published. */
   day: readonly RecordSlot[] | undefined
+  /** OCCTO's forecast for the slot's interconnectors, by line id. */
+  flows: ReadonlyMap<string, FlowSlot>
   area: Area | null
   onClose: () => void
   onSlot: (slot: number) => void
@@ -21,7 +25,7 @@ interface Props {
  * The displayed slot in numbers: the system price and the spread across the areas, or a picked area against its
  * neighbors and what ran in it.
  */
-export default function Readout({ slot, record, day, area, onClose, onSlot }: Props) {
+export default function Readout({ slot, record, day, flows, area, onClose, onSlot }: Props) {
   if (!slot) return null
   const picked = area && area !== 'okinawa' ? (area as PricedArea) : null
   return (
@@ -29,6 +33,7 @@ export default function Readout({ slot, record, day, area, onClose, onSlot }: Pr
       {picked ? (
         <>
           <AreaReadout area={picked} slot={slot} onClose={onClose} />
+          <Lines area={picked} flows={flows} />
           {day?.length ? <SupplyChart day={day} slot={slot.slot} onSlot={onSlot} /> : null}
           <Mix record={record} />
         </>
@@ -138,5 +143,37 @@ function Row({ name, value }: { name: string; value: number }) {
       <dt>{name}</dt>
       <dd>{mw(value)}</dd>
     </>
+  )
+}
+
+/** The area's lines for the slot as OCCTO forecast them: the flow toward or away from the area against the limit, and a split. */
+function Lines({ area, flows }: { area: PricedArea; flows: ReadonlyMap<string, FlowSlot> }) {
+  const rows = linesOf(area).flatMap((line) => {
+    const at = flows.get(line.id)
+    if (!at) return []
+    const inward = (line.to === area) === at.flowMW >= 0
+    const capacity = at.flowMW >= 0 ? at.capacityMW.forward : at.capacityMW.reverse
+    return [
+      { id: line.id, label: line.label, inward, mw: Math.abs(at.flowMW), capacity, load: load(at), split: at.split },
+    ]
+  })
+  if (!rows.length) return null
+  return (
+    <section aria-label="Lines">
+      <h3>Lines</h3>
+      <dl className={styles.rows}>
+        {rows.map((r) => (
+          <Fragment key={r.id}>
+            <dt>
+              {r.label} {r.split && <span className={styles.split}>split</span>}
+            </dt>
+            <dd>
+              <span className="muted">{r.inward ? 'in' : 'out'}</span> {mw(r.mw)}{' '}
+              <span className="muted">of {mw(r.capacity)}</span>
+            </dd>
+          </Fragment>
+        ))}
+      </dl>
+    </section>
   )
 }

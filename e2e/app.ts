@@ -10,6 +10,7 @@ const TILE = /\/planet\//
 const SPOT = readFileSync(new URL('../src/test/fixtures/jepx-spot.csv', import.meta.url), 'utf8')
 const TEPCO = readFileSync(new URL('../src/test/fixtures/tepco-jukyu.csv', import.meta.url), 'utf8')
 const KYUSHU = readFileSync(new URL('../src/test/fixtures/kyushu-jukyu.csv', import.meta.url), 'utf8')
+const FLOWS = readFileSync(new URL('../src/test/fixtures/occto-renkei.csv', import.meta.url), 'utf8')
 
 /**
  * The app on the morning of 2026-09-26 in Japan, with real days of prices and of TEPCO's and Kyushu's records and no
@@ -26,7 +27,7 @@ export const test = base.extend<{ errors: string[] }>({
     await page.clock.setFixedTime(new Date('2026-09-26T10:00:00+09:00'))
     await page.route(EMPTY_ASSETS, (route) => route.fulfill({ status: 204 }))
     await page.route('**/data/*-jukyu-*.csv', (route) => route.fulfill({ status: 404 }))
-    await page.route('**/data/occto-*.csv', (route) => route.fulfill({ status: 404 }))
+    await page.route('**/data/occto-*.csv', (route) => route.fulfill({ body: FLOWS, contentType: 'text/csv' }))
     await page.route('**/data/jepx-spot-*.csv', (route) => route.fulfill({ body: SPOT, contentType: 'text/csv' }))
     await page.route('**/data/tepco-jukyu-*.csv', (route) => route.fulfill({ body: TEPCO, contentType: 'text/csv' }))
     await page.route('**/data/kyushu-jukyu-*.csv', (route) => route.fulfill({ body: KYUSHU, contentType: 'text/csv' }))

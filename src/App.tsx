@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { ADAPTERS } from './market/adapters'
+import { flowsAt, loadFlows, type FlowDays } from './market/flows'
 import { fiscalYear, loadSpot, slotOf, type SpotDays } from './market/jepx'
 import { loadRecord, monthOf, recordSlot, type RecordDays, type RecordSlot } from './market/record'
 import type { Area } from './regions/areas'
@@ -17,6 +18,7 @@ export default function App() {
   const [regions, setRegions] = useState<Regions | null>(null)
   const [spot, setSpot] = useState<SpotDays | null>(null)
   const [records, setRecords] = useState<ReadonlyMap<string, RecordDays | null>>(new Map())
+  const [flowMonths, setFlowMonths] = useState<ReadonlyMap<string, FlowDays | null>>(new Map())
   useEffect(() => {
     loadRegions().then(setRegions, console.error)
     loadSpot(fiscalYear(new Date())).then(setSpot, console.error)
@@ -43,7 +45,12 @@ export default function App() {
       requested.current.add(key)
       loadRecord(adapter, month).then((days) => setRecords((r) => new Map(r).set(key, days)), console.error)
     }
+    if (!requested.current.has(`flows/${month}`)) {
+      requested.current.add(`flows/${month}`)
+      loadFlows(month).then((days) => setFlowMonths((f) => new Map(f).set(month, days)), console.error)
+    }
   }, [month])
+  const flows = flowsAt(month ? flowMonths.get(month) : null, date, slot)
   const recordFor = (a: Area | null) => (a && month ? records.get(`${a}/${month}`) : undefined)
   const record = recordSlot(recordFor(area), date, slot)
   const recordedDay = date ? recordFor(area)?.get(date) : undefined
@@ -66,12 +73,20 @@ export default function App() {
       </header>
       <main>
         <Suspense fallback={null}>
-          <MapView regions={regions} prices={displayed?.areaPrice} selected={area} mixes={mixes} onPick={selectArea} />
+          <MapView
+            regions={regions}
+            prices={displayed?.areaPrice}
+            selected={area}
+            flows={flows}
+            mixes={mixes}
+            onPick={selectArea}
+          />
         </Suspense>
         <Readout
           slot={displayed}
           record={record}
           day={recordedDay}
+          flows={flows}
           area={area}
           onClose={() => selectArea(null)}
           onSlot={setSlot}

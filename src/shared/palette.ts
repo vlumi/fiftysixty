@@ -10,6 +10,8 @@ export interface Palette {
   hz: Record<50 | 60, Rgb>
   /** One warm hue from near the surface to bright, low price to high; see shared/scale.ts. */
   price: readonly Rgb[]
+  /** A line's color from idle to full, the cool hue against the warm areas. */
+  flow: { idle: Rgb; full: Rgb }
 }
 
 export const DARK: Palette = {
@@ -24,4 +26,5 @@ export const DARK: Palette = {
     [232, 118, 30],
     [255, 190, 70],
   ],
+  flow: { idle: [120, 150, 170], full: [0, 230, 255] },
 }

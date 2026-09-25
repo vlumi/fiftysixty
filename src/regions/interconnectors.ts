@@ -42,20 +42,29 @@ export type FlowEnd = Area | 'middle'
 export interface OcctoLine {
   name: string
   id: string
+  label: string
   from: FlowEnd
   to: FlowEnd
 }
 
 export const OCCTO_LINES: readonly OcctoLine[] = [
-  { name: '北海道・本州間電力連系設備', id: 'kitahon', from: 'hokkaido', to: 'tohoku' },
-  { name: '相馬双葉幹線', id: 'tohoku-tokyo', from: 'tohoku', to: 'tokyo' },
-  { name: '周波数変換設備', id: 'fc', from: 'tokyo', to: 'chubu' },
-  { name: '中部フェンス', id: 'chubu-fence', from: 'chubu', to: 'middle' },
-  { name: '北陸フェンス', id: 'hokuriku-fence', from: 'middle', to: 'hokuriku' },
-  { name: '関西フェンス', id: 'kansai-fence', from: 'middle', to: 'kansai' },
-  { name: '関西-中国（東）', id: 'kansai-chugoku', from: 'kansai', to: 'chugoku' },
-  { name: '関西-中国（西）', id: 'kansai-chugoku', from: 'kansai', to: 'chugoku' },
-  { name: '阿南紀北直流幹線', id: 'kansai-shikoku', from: 'kansai', to: 'shikoku' },
-  { name: '本四連系線', id: 'chugoku-shikoku', from: 'chugoku', to: 'shikoku' },
-  { name: '関門連系線', id: 'chugoku-kyushu', from: 'chugoku', to: 'kyushu' },
+  { name: '北海道・本州間電力連系設備', id: 'kitahon', label: 'Kitahon', from: 'hokkaido', to: 'tohoku' },
+  { name: '相馬双葉幹線', id: 'tohoku-tokyo', label: 'Soma–Futaba', from: 'tohoku', to: 'tokyo' },
+  { name: '周波数変換設備', id: 'fc', label: 'Frequency converters', from: 'tokyo', to: 'chubu' },
+  { name: '中部フェンス', id: 'chubu-fence', label: 'Chubu fence', from: 'chubu', to: 'middle' },
+  { name: '北陸フェンス', id: 'hokuriku-fence', label: 'Hokuriku fence', from: 'middle', to: 'hokuriku' },
+  { name: '関西フェンス', id: 'kansai-fence', label: 'Kansai fence', from: 'middle', to: 'kansai' },
+  { name: '関西-中国（東）', id: 'kansai-chugoku', label: 'Kansai–Chugoku', from: 'kansai', to: 'chugoku' },
+  { name: '関西-中国（西）', id: 'kansai-chugoku', label: 'Kansai–Chugoku', from: 'kansai', to: 'chugoku' },
+  { name: '阿南紀北直流幹線', id: 'kansai-shikoku', label: 'Anan–Kihoku', from: 'kansai', to: 'shikoku' },
+  { name: '本四連系線', id: 'chugoku-shikoku', label: 'Honshi', from: 'chugoku', to: 'shikoku' },
+  { name: '関門連系線', id: 'chugoku-kyushu', label: 'Kanmon', from: 'chugoku', to: 'kyushu' },
 ]
+
+/** OCCTO's lines once each, the circuits folded, in table order. */
+export const OCCTO_LINE_IDS: readonly OcctoLine[] = OCCTO_LINES.filter(
+  (l, i) => OCCTO_LINES.findIndex((m) => m.id === l.id) === i,
+)
+
+/** The lines with an end in the area; a fence belongs to the area it bounds. */
+export const linesOf = (area: Area) => OCCTO_LINE_IDS.filter((l) => l.from === area || l.to === area)

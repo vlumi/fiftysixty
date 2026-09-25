@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import TimeBar from './TimeBar'
 
-const days = ['2026-09-22', '2026-09-25', '2026-09-26']
+const days = ['2026-09-22', '2026-09-23', '2026-09-25', '2026-09-26']
 const now = new Date('2026-09-26T10:10:00+09:00')
 
 test('the slot reads as its half hour and scrubbing reports the new slot', () => {
@@ -34,7 +34,7 @@ test('the day steps to the priced day before and after, and stops at the ends', 
     <TimeBar date="2026-09-25" days={days} slot={1} now={now} onDate={onDate} onSlot={vi.fn()} />,
   )
   await userEvent.click(screen.getByRole('button', { name: 'Previous day' }))
-  expect(onDate).toHaveBeenLastCalledWith('2026-09-22')
+  expect(onDate).toHaveBeenLastCalledWith('2026-09-23')
   await userEvent.click(screen.getByRole('button', { name: 'Next day' }))
   expect(onDate).toHaveBeenLastCalledWith('2026-09-26')
   rerender(<TimeBar date="2026-09-26" days={days} slot={1} now={now} onDate={onDate} onSlot={vi.fn()} />)
