@@ -5,29 +5,6 @@ export const SERIES = ['coal', 'nuclear', 'renewables', 'otherThermal', 'solar',
 
 export type Series = (typeof SERIES)[number]
 
-export const SERIES_NAMES: Record<Series, string> = {
-  coal: 'Coal',
-  nuclear: 'Nuclear',
-  renewables: 'Geothermal and biomass',
-  otherThermal: 'Oil and other',
-  solar: 'Solar',
-  wind: 'Wind',
-  gas: 'Gas',
-  hydro: 'Hydro',
-}
-
-/** The series in a word or two, for where the long names would not fit. */
-export const SERIES_SHORT: Record<Series, string> = {
-  coal: 'Coal',
-  nuclear: 'Nuclear',
-  renewables: 'Geo, bio',
-  otherThermal: 'Oil, other',
-  solar: 'Solar',
-  wind: 'Wind',
-  gas: 'Gas',
-  hydro: 'Hydro',
-}
-
 export function seriesMW(slot: RecordSlot): Record<Series, number> {
   const s = slot.bySource
   return {

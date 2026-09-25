@@ -1,6 +1,7 @@
 import type { Series } from '../market/stack'
 import type { Source } from '../market/record'
 import type { StoryId } from '../market/stories'
+import { readItem, storage, writeItem } from '../shared/storage'
 
 export type Lang = 'en' | 'ja'
 export const LANGS: readonly Lang[] = ['en', 'ja']
@@ -331,29 +332,13 @@ export const STRINGS: Record<Lang, Strings> = { en, ja }
 
 const KEY = 'fiftysixty.lang'
 
-function storage(): Storage | null {
-  try {
-    return globalThis.localStorage ?? null
-  } catch {
-    return null
-  }
-}
-
 /** The stored choice, else the browser's language, else English. */
 export function loadLang(store = storage(), browserLanguage = navigator.language): Lang {
-  try {
-    const raw = store?.getItem(KEY)
-    if (raw === 'en' || raw === 'ja') return raw
-  } catch {
-    // Unreadable storage: fall through to the browser's language.
-  }
+  const raw = readItem(KEY, store)
+  if (raw === 'en' || raw === 'ja') return raw
   return browserLanguage.toLowerCase().startsWith('ja') ? 'ja' : 'en'
 }
 
 export function saveLang(lang: Lang, store = storage()): void {
-  try {
-    store?.setItem(KEY, lang)
-  } catch {
-    // Storage full or forbidden: the choice lives on for this visit only.
-  }
+  writeItem(KEY, lang, store)
 }
