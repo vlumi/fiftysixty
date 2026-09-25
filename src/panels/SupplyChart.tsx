@@ -67,12 +67,7 @@ export default function SupplyChart({ day, slot, onSlot }: Props) {
         onKeyDown={onKey}
       >
         {gridlines.map((mw) => (
-          <g key={mw} className={styles.grid}>
-            <line x1={0} x2={WIDTH} y1={y(mw)} y2={y(mw)} />
-            <text x={2} y={y(mw) - 2}>
-              {mw / GW} GW
-            </text>
-          </g>
+          <line key={mw} className={styles.grid} x1={0} x2={WIDTH} y1={y(mw)} y2={y(mw)} />
         ))}
         {SERIES.map((s) => (
           <path
@@ -119,6 +114,12 @@ export default function SupplyChart({ day, slot, onSlot }: Props) {
           </path>
         )}
         <path className={styles.demand} d={line((t) => t.demandMW)} />
+        <line className={styles.zero} x1={0} x2={WIDTH} y1={y(0)} y2={y(0)} />
+        {gridlines.map((mw) => (
+          <text key={mw} className={styles.gridLabel} x={2} y={y(mw) < 14 ? y(mw) + 9 : y(mw) - 2}>
+            {mw / GW} GW
+          </text>
+        ))}
         <line className={styles.marker} x1={x(slot)} x2={x(slot)} y1={TOP} y2={TOP + PLOT} />
         {[0, 6, 12, 18, 24].map((h) => (
           <text
@@ -137,6 +138,7 @@ export default function SupplyChart({ day, slot, onSlot }: Props) {
           <Key key={s} color={`var(--src-${s})`} name={SERIES_NAMES[s]} />
         ))}
         <Key color="var(--src-exchange)" name="Storage and imports" />
+        <Key color="var(--src-exchange)" name="Sent out, below the line" />
         {curtailed && <Key color="var(--src-solar)" name="Curtailed" hatched />}
         <Key color="var(--text)" name="Demand" line />
       </figcaption>
