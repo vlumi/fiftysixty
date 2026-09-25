@@ -65,8 +65,3 @@ test('what ran in a picked area, the idle sources left out and the pumping negat
   expect(mix).toHaveTextContent('Pumped storage−2,260')
   expect(screen.getByRole('slider', { name: 'Supply over the day' })).toHaveAttribute('aria-valuenow', '47')
 })
-
-test('an area whose company is not wired says so', () => {
-  render(<Readout slot={slot} record={undefined} day={undefined} area="hokkaido" onClose={vi.fn()} onSlot={vi.fn()} />)
-  expect(screen.getByText('The record for Hokkaido is not wired yet.')).toBeInTheDocument()
-})

@@ -1,4 +1,3 @@
-import { ADAPTERS } from '../market/adapters'
 import type { PricedArea, SpotSlot } from '../market/jepx'
 import { SOURCES, type RecordSlot, type Source } from '../market/record'
 import { AREA_BY_ID, PRICED_AREAS, type Area } from '../regions/areas'
@@ -31,7 +30,7 @@ export default function Readout({ slot, record, day, area, onClose, onSlot }: Pr
         <>
           <AreaReadout area={picked} slot={slot} onClose={onClose} />
           {day?.length ? <SupplyChart day={day} slot={slot.slot} onSlot={onSlot} /> : null}
-          <Mix area={picked} record={record} />
+          <Mix record={record} />
         </>
       ) : (
         <SystemReadout slot={slot} okinawa={area === 'okinawa'} />
@@ -114,8 +113,7 @@ const SOURCE_NAMES: Record<Source, string> = {
 }
 
 /** What ran in the area for the slot, in MW, the sources that were idle left out; curtailment when there was any. */
-function Mix({ area, record }: { area: PricedArea; record: RecordSlot | undefined }) {
-  if (!ADAPTERS[area]) return <p className="muted">The record for {AREA_BY_ID[area].name} is not wired yet.</p>
+function Mix({ record }: { record: RecordSlot | undefined }) {
   if (!record) return <p className="muted">No record for this half hour yet.</p>
   const ran = SOURCES.filter((s) => record.bySource[s] !== 0)
   return (
