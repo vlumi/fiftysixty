@@ -4,3 +4,4 @@ public/data
 docs
 *.md
 package-lock.json
+public/geo
