@@ -64,3 +64,19 @@ async function tokyo(page: Page) {
   const box = (await page.locator('.maplibregl-canvas').boundingBox())!
   return { x: box.width * 0.58, y: box.height * 0.65 }
 }
+
+test("the holiday noon: Kansai's lines full from the west and the market split on them", async ({ page }) => {
+  await open(page)
+  await page.getByLabel('Delivery day').fill('2026-09-23')
+  await page.getByRole('slider', { name: 'Half hour' }).fill('24')
+  await page.locator('.maplibregl-canvas').click({ position: await kansai(page) })
+  const lines = page.getByRole('complementary', { name: 'Readout' }).getByRole('region', { name: 'Lines' })
+  await expect(lines).toContainText('Kansai–Chugoku split')
+  await expect(lines).toContainText('in 6,580 of 6,580')
+})
+
+/** The middle of Kansai on the canvas at the opening view of the desktop project. */
+async function kansai(page: Page) {
+  const box = (await page.locator('.maplibregl-canvas').boundingBox())!
+  return { x: box.width * 0.465, y: box.height * 0.72 }
+}

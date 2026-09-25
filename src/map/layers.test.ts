@@ -1,5 +1,7 @@
 import type { GeoJsonLayer } from '@deck.gl/layers'
+import { flowsAt, parseFlows } from '../market/flows'
 import type { AreaProps, Regions } from '../regions/geometry'
+import flowsCsv from '../test/fixtures/occto-renkei.csv?raw'
 import { DARK } from '../shared/palette'
 import { priceColor } from '../shared/scale'
 import { buildLayers, type AreaPrices, type Interleaved } from './layers'
@@ -51,4 +53,10 @@ test('the selected area is outlined strongly', () => {
   const context = { index: 0, data: regions.areas.features, target: [] }
   expect(width(regions.areas.features[0], context)).toBe(1)
   expect(width(regions.areas.features[1], context)).toBe(2.5)
+})
+
+test('with flows, the arrows follow the areas and the split line', () => {
+  const flows = flowsAt(parseFlows(flowsCsv), '2026-09-23', 24)
+  const layers = buildLayers(regions, DARK, { flows })
+  expect(layers.map((l) => l.id)).toEqual(['areas', 'split', 'flow-splits', 'flows', 'flow-heads'])
 })

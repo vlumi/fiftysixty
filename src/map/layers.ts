@@ -1,12 +1,14 @@
 import type { Layer } from '@deck.gl/core'
 import { GeoJsonLayer } from '@deck.gl/layers'
 import type { Feature, Geometry } from 'geojson'
+import type { FlowSlot } from '../market/flows'
 import type { PricedArea } from '../market/jepx'
 import type { Area } from '../regions/areas'
 import type { AreaProps, Regions } from '../regions/geometry'
 import type { Palette, Rgba } from '../shared/palette'
 import { priceColor } from '../shared/scale'
 import { BELOW_LABELS } from './basemap'
+import { buildFlowLayers } from './flowLayers'
 
 /** Read by the interleaved overlay to slot a layer into the basemap's order, but not typed by deck. */
 export interface Interleaved {
@@ -18,6 +20,8 @@ export type AreaPrices = Readonly<Record<PricedArea, number>>
 export interface LayerOptions {
   prices?: AreaPrices
   selected?: Area | null
+  /** The interconnectors' forecast for the slot, by line id; drawn as arrows between the areas. */
+  flows?: ReadonlyMap<string, FlowSlot>
 }
 
 /**
@@ -27,7 +31,7 @@ export interface LayerOptions {
 export function buildLayers(
   regions: Regions | null,
   palette: Palette,
-  { prices, selected }: LayerOptions = {},
+  { prices, selected, flows }: LayerOptions = {},
 ): Layer[] {
   if (!regions) return []
   const fill = (f: Feature<Geometry, AreaProps>): Rgba => {
@@ -59,5 +63,6 @@ export function buildLayers(
       lineWidthUnits: 'pixels',
       getLineWidth: 2,
     }),
+    ...buildFlowLayers(flows ?? new Map(), palette),
   ]
 }

@@ -27,7 +27,7 @@ interface Props extends LayerOptions {
 }
 
 /** The basemap over Japan with the market layers interleaved into it. */
-export default function MapView({ regions, prices, selected, mixes = {}, onPick }: Props) {
+export default function MapView({ regions, prices, selected, flows, mixes = {}, onPick }: Props) {
   const container = useRef<HTMLDivElement>(null)
   const overlay = useRef<MapLibreOverlay>(null)
   const [map, setMap] = useState<MapLibre | null>(null)
@@ -62,8 +62,8 @@ export default function MapView({ regions, prices, selected, mixes = {}, onPick 
   }, [])
 
   useEffect(() => {
-    overlay.current?.setProps({ layers: buildLayers(regions, DARK, { prices, selected }) })
-  }, [regions, prices, selected])
+    overlay.current?.setProps({ layers: buildLayers(regions, DARK, { prices, selected, flows }) })
+  }, [regions, prices, selected, flows])
 
   return (
     <>

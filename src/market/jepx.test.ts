@@ -1,9 +1,9 @@
 import { fiscalYear, latestDay, parseSpot, slotOf } from './jepx'
 import csv from '../test/fixtures/jepx-spot.csv?raw'
 
-test('three real days parse into 48 slots each, found by column name', () => {
+test('four real days parse into 48 slots each, found by column name', () => {
   const days = parseSpot(csv)
-  expect([...days.keys()]).toEqual(['2026-09-22', '2026-09-25', '2026-09-26'])
+  expect([...days.keys()]).toEqual(['2026-09-22', '2026-09-23', '2026-09-25', '2026-09-26'])
   expect(days.get('2026-09-26')).toHaveLength(48)
   expect(days.get('2026-09-26')![46]).toEqual({
     slot: 47,

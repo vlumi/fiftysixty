@@ -5,7 +5,7 @@
   bottom: 2.75rem;
   margin: 0;
   padding: 0.5rem 0.75rem;
-  width: 11rem;
+  width: 15rem;
   background: var(--panel);
   border-radius: 0.5rem;
   font-size: 0.75rem;
@@ -15,6 +15,23 @@
 .ramp {
   height: 0.5rem;
   border-radius: 0.25rem;
+}
+
+.lines {
+  margin-top: 0.4rem;
+  line-height: 1.5;
+}
+
+.arrow {
+  display: inline-block;
+  width: 1.4rem;
+  height: 0;
+  vertical-align: middle;
+  border-top: 3px solid var(--accent);
+}
+
+.rimmed {
+  box-shadow: 0 0 0 2px var(--text);
 }
 
 .ticks {

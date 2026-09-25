@@ -15,6 +15,11 @@ export default function Legend() {
         <span>{(lo + hi) / 2}</span>
         <span>{hi}+ ¥/kWh</span>
       </div>
+      <div className={styles.lines}>
+        <span className={styles.arrow} /> flow, wider for more, brighter nearer the limit
+        <br />
+        <span className={`${styles.arrow} ${styles.rimmed}`} /> the market split there
+      </div>
     </figure>
   )
 }
