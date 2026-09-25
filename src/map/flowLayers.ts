@@ -41,9 +41,22 @@ export function flowData(flows: ReadonlyMap<string, FlowSlot>): FlowDatum[] {
 const MW_PER_PX = 1000
 const MIN_PX = 1
 const RIM_PX = 4
+/** How far along the line the shaft ends and the head begins. */
+const HEAD_AT = 0.78
 
 /** The line's width on screen, a pixel plus one per gigawatt. */
 export const widthOf = (d: FlowDatum) => MIN_PX + d.mw / MW_PER_PX
+
+/** The arrowhead's size on screen, growing with the shaft. */
+export const headSize = (d: FlowDatum) => 8 + widthOf(d) * 3
+
+/** The shaft, from the start to where the head begins. */
+export function shaft([[x1, y1], [x2, y2]]: FlowDatum['path']): FlowDatum['path'] {
+  return [
+    [x1, y1],
+    [x1 + (x2 - x1) * HEAD_AT, y1 + (y2 - y1) * HEAD_AT],
+  ]
+}
 
 /** The arrow's heading in degrees counterclockwise from east, on the map's mercator plane. */
 export function heading([[x1, y1], [x2, y2]]: FlowDatum['path']): number {
@@ -55,22 +68,20 @@ const mix = (a: Rgb, b: Rgb, t: number): Rgb => [0, 1, 2].map((i) => Math.round(
 
 /**
  * The flows as arrows: a path with the width from the flow and the color from the load, a bright rim under it where
- * the market split, and an arrowhead in the text color past the middle pointing the way the power goes.
+ * the market split, the shaft stopping where a head in the text color, sized with the shaft, points on the way the
+ * power goes.
  */
 export function buildFlowLayers(flows: ReadonlyMap<string, FlowSlot>, palette: Palette): Layer[] {
   const data = flowData(flows)
   if (!data.length) return []
   const color = (d: FlowDatum): Rgba => [...mix(palette.flow.idle, palette.flow.full, d.load), 230]
-  const head = (d: FlowDatum): [number, number] => [
-    d.path[0][0] + (d.path[1][0] - d.path[0][0]) * 0.7,
-    d.path[0][1] + (d.path[1][1] - d.path[0][1]) * 0.7,
-  ]
+  const head = (d: FlowDatum): [number, number] => shaft(d.path)[1]
   return [
     new PathLayer<FlowDatum, Interleaved>({
       id: 'flow-splits',
       beforeId: BELOW_LABELS,
       data: data.filter((d) => d.split),
-      getPath: (d) => d.path,
+      getPath: (d) => shaft(d.path),
       getColor: [...palette.text, 200],
       getWidth: (d) => widthOf(d) + RIM_PX,
       widthUnits: 'pixels',
@@ -81,7 +92,7 @@ export function buildFlowLayers(flows: ReadonlyMap<string, FlowSlot>, palette: P
       id: 'flows',
       beforeId: BELOW_LABELS,
       data,
-      getPath: (d) => d.path,
+      getPath: (d) => shaft(d.path),
       getColor: color,
       getWidth: widthOf,
       widthUnits: 'pixels',
@@ -94,13 +105,15 @@ export function buildFlowLayers(flows: ReadonlyMap<string, FlowSlot>, palette: P
       beforeId: BELOW_LABELS,
       data,
       getPosition: head,
-      getText: () => '➤',
+      getText: () => '▶',
       getAngle: (d) => heading(d.path),
       getColor: [...palette.text, 255],
-      getSize: (d) => 12 + Math.min(8, widthOf(d)),
+      getSize: headSize,
+      getTextAnchor: 'start',
+      getAlignmentBaseline: 'center',
       sizeUnits: 'pixels',
       billboard: false,
-      characterSet: ['➤'],
+      characterSet: ['▶'],
       fontFamily: 'sans-serif',
       updateTriggers: { getColor: palette },
     }),
