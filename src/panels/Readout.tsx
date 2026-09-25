@@ -45,11 +45,10 @@ export default function Readout({ slot, record, day, flows, area, plant, onClose
         </button>
         <h2>{plant.name || 'A plant'}</h2>
         <p className={styles.price}>
-          {mw(plant.mw)} <span className="muted">MW</span>
+          {mw(plant.mw)} <span className="muted">MW</span>{' '}
+          <span className={`${styles.pill} ${styles[plant.fuel]}`}>{SERIES_NAMES[plant.fuel]}</span>
         </p>
-        <p className="muted">
-          {SERIES_NAMES[plant.fuel]}. Capacity as mapped in OpenStreetMap; what it runs is not public.
-        </p>
+        <p className="muted">Capacity as mapped in OpenStreetMap; what it runs is not public.</p>
       </aside>
     )
   }
