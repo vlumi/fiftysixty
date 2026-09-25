@@ -22,8 +22,8 @@ export interface AreaInfo {
  * three are drawn whole in the area that holds most of them.
  */
 export const AREAS: readonly AreaInfo[] = [
-  { id: 'hokkaido', name: 'Hokkaido', ja: '北海道', hz: 50, prefectures: [1], anchor: [142.8, 43.4] },
-  { id: 'tohoku', name: 'Tohoku', ja: '東北', hz: 50, prefectures: [2, 3, 4, 5, 6, 7, 15], anchor: [140.6, 38.9] },
+  { id: 'hokkaido', name: 'Hokkaido', ja: '北海道', hz: 50, prefectures: [1], anchor: [142.9, 43.5] },
+  { id: 'tohoku', name: 'Tohoku', ja: '東北', hz: 50, prefectures: [2, 3, 4, 5, 6, 7, 15], anchor: [140.6, 39.3] },
   {
     id: 'tokyo',
     name: 'Tokyo',
@@ -32,18 +32,18 @@ export const AREAS: readonly AreaInfo[] = [
     prefectures: [8, 9, 10, 11, 12, 13, 14, 19],
     anchor: [139.6, 36.1],
   },
-  { id: 'chubu', name: 'Chubu', ja: '中部', hz: 60, prefectures: [20, 21, 22, 23, 24], anchor: [137.4, 35.5] },
-  { id: 'hokuriku', name: 'Hokuriku', ja: '北陸', hz: 60, prefectures: [16, 17, 18], anchor: [136.7, 36.6] },
-  { id: 'kansai', name: 'Kansai', ja: '関西', hz: 60, prefectures: [25, 26, 27, 28, 29, 30], anchor: [135.4, 34.9] },
-  { id: 'chugoku', name: 'Chugoku', ja: '中国', hz: 60, prefectures: [31, 32, 33, 34, 35], anchor: [132.8, 34.9] },
-  { id: 'shikoku', name: 'Shikoku', ja: '四国', hz: 60, prefectures: [36, 37, 38, 39], anchor: [133.6, 33.7] },
+  { id: 'chubu', name: 'Chubu', ja: '中部', hz: 60, prefectures: [20, 21, 22, 23, 24], anchor: [137.3, 35.9] },
+  { id: 'hokuriku', name: 'Hokuriku', ja: '北陸', hz: 60, prefectures: [16, 17, 18], anchor: [136.8, 36.5] },
+  { id: 'kansai', name: 'Kansai', ja: '関西', hz: 60, prefectures: [25, 26, 27, 28, 29, 30], anchor: [135.6, 35.2] },
+  { id: 'chugoku', name: 'Chugoku', ja: '中国', hz: 60, prefectures: [31, 32, 33, 34, 35], anchor: [133.2, 35.0] },
+  { id: 'shikoku', name: 'Shikoku', ja: '四国', hz: 60, prefectures: [36, 37, 38, 39], anchor: [133.7, 33.9] },
   {
     id: 'kyushu',
     name: 'Kyushu',
     ja: '九州',
     hz: 60,
     prefectures: [40, 41, 42, 43, 44, 45, 46],
-    anchor: [131.0, 32.6],
+    anchor: [131.2, 32.9],
   },
   { id: 'okinawa', name: 'Okinawa', ja: '沖縄', hz: 60, prefectures: [47], anchor: [127.8, 26.5] },
 ]
