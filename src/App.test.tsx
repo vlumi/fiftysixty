@@ -12,9 +12,11 @@ beforeEach(() => {
     'fetch',
     vi.fn((url: string) =>
       Promise.resolve(
-        url.endsWith('.csv')
+        url.endsWith('jepx-spot-2026.csv')
           ? new Response(csv)
-          : new Response(JSON.stringify({ type: 'FeatureCollection', features: [] })),
+          : url.endsWith('.csv')
+            ? new Response('', { status: 404 })
+            : new Response(JSON.stringify({ type: 'FeatureCollection', features: [] })),
       ),
     ),
   )

@@ -4,7 +4,7 @@ The Japanese power market on a map, from public data. A sibling of [nebulosa](ht
 
 **The name:** 50 Hz east, 60 Hz west, and the three converter stations between them that cap the flow across the middle of the country; also Nykänen's *fifty-sixty*, "more or less", which is what a day-ahead price is. Styled 50/60.
 
-**Status:** unofficial demo project, not affiliated with JEPX, OCCTO or any utility. Bootstrapped 2026-09-25 with the toolchain and a map of Japan; the same day, the day-ahead price on the map, what ran in every area, and the flows between them. The milestones below are in the order they are meant to land; the first one alone makes the point.
+**Status:** unofficial demo project, not affiliated with JEPX, OCCTO or any utility. Bootstrapped 2026-09-25 with the toolchain and a map of Japan; the same day, the day-ahead price on the map, what ran in every area, the flows between them, play and the story days. The milestones below are in the order they are meant to land; the first one alone makes the point.
 
 ## Data
 
@@ -50,9 +50,9 @@ Toolchain, CI, a map of Japan under the name, the data fetcher for JEPX and TEPC
 - The interconnectors as arrows between regions, width by flow, color by share of capacity, from OCCTO's day-ahead forecast of each line; the market split marked on the line. Actual flows are on OCCTONET behind a browser session and are not fetched.
 - The price split made visible: when the middle is saturated, the east and west prices diverge, and the map shows the cause and the effect at once.
 
-### M4 — the story days
+### M4 — the story days (done 2026-09-25)
 
-- Named days to jump to: a summer peak, a winter cold snap, a spring curtailment Sunday, a typhoon; chosen from the data, not by hand.
+- Named days to jump to, chosen from the prices rather than by hand: the summer and the winter peak by the system price, the widest split between areas, the day with the most half hours at the floor, and the cheapest day; last fiscal year's prices are held for the winter. A typhoon is not in the prices, so there is no typhoon day.
 - Play at speed, so a day runs in seconds: four half hours a second, on into the next day.
 
 ### M5 — closer in

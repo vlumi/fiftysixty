@@ -1,7 +1,8 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ADAPTERS } from './market/adapters'
 import { flowsAt, loadFlows, type FlowDays } from './market/flows'
-import { fiscalYear, loadSpot, slotOf, type SpotDays } from './market/jepx'
+import { fiscalYear, loadSpotYears, slotOf, type SpotDays } from './market/jepx'
+import { stories } from './market/stories'
 import { loadRecord, monthOf, recordSlot, type RecordDays, type RecordSlot } from './market/record'
 import type { Area } from './regions/areas'
 import Legend from './panels/Legend'
@@ -22,7 +23,7 @@ export default function App() {
   const [flowMonths, setFlowMonths] = useState<ReadonlyMap<string, FlowDays | null>>(new Map())
   useEffect(() => {
     loadRegions().then(setRegions, console.error)
-    loadSpot(fiscalYear(new Date())).then(setSpot, console.error)
+    loadSpotYears(fiscalYear(new Date())).then(setSpot, console.error)
   }, [])
 
   const chosenDate = useApp((s) => s.date)
@@ -37,6 +38,7 @@ export default function App() {
   const now = useNow()
   const date = chosenDate ?? openingDay(spot, now)
   const days = useMemo(() => (spot ? [...spot.keys()].sort() : []), [spot])
+  const storyDays = useMemo(() => stories(spot), [spot])
   const tick = useCallback(() => step(days, date), [step, days, date])
   usePlayer(playing, tick)
   const displayed = slotOf(spot, date, slot)
@@ -103,6 +105,7 @@ export default function App() {
           slot={slot}
           now={now}
           playing={playing}
+          stories={storyDays}
           onDate={setDate}
           onSlot={setSlot}
           onPlay={togglePlay}

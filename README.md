@@ -10,9 +10,9 @@ Unofficial demo project, built from public data; not affiliated with any exchang
 
 Live at [fiftysixty.misaki.fi](https://fiftysixty.misaki.fi). [SCOPE.md](SCOPE.md) is the plan; [ARCHITECTURE.md](ARCHITECTURE.md) explains how it works.
 
-![A holiday noon: the nine areas colored by price with a column of what ran beside each, arrows along the interconnectors sized by flow and rimmed where the market split, Kansai picked with its lines, its neighbors' prices, the day's supply stack and the mix in numbers](docs/screenshots/003-flows.png)
+![The summer peak: every area at the 50 yen cap with a column of what ran beside each, arrows along the interconnectors sized by flow, Tokyo picked with its lines, its neighbors' prices, the day's supply stack and the mix in numbers](docs/screenshots/004-story-days.png)
 
-<img src="docs/screenshots/003-flows-phone.png" alt="The same site on a phone: the arrows between the nine columns, the system price above, the clock at the foot" width="260">
+<img src="docs/screenshots/004-story-days-phone.png" alt="The same site on a phone: the arrows between the nine columns, the system price above, the clock at the foot" width="260">
 
 Every capture, one per milestone, is shown in [docs/screenshots](docs/screenshots/README.md).
 
@@ -22,7 +22,7 @@ Every capture, one per milestone, is shown in [docs/screenshots](docs/screenshot
 
 **The interconnectors.** Arrows between the regions sized by the flow and colored by how close it is to the line's limit, from OCCTO's day-ahead forecast of each line, with a rim where the day-ahead market split across it; the three frequency-converter stations between the two halves are one of the lines, since that is where the east and west prices part.
 
-**The clock.** A time bar over the day with 48 slots and a date picker, so the solar hump can be watched rolling across the country at noon, the price collapsing under it and the evening peak arriving; and a jump to a heat wave, a typhoon or a spring Sunday when Kyushu had more solar than it could use.
+**The clock.** A time bar over the day with 48 slots and a date picker, so the solar hump can be watched rolling across the country at noon, the price collapsing under it and the evening peak arriving; play runs a day in seconds, and a menu jumps to the days the prices single out, the summer and the winter peak, the widest split, the most at the floor, the cheapest day.
 
 **Closer in.** The plants themselves by fuel and capacity where the data allows; what each one is running is not public, only the per-area totals, and the map says so.
 

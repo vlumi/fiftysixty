@@ -2,6 +2,16 @@
 
 One capture per milestone, taken with [`scripts/screenshot.mjs`](../../scripts/screenshot.mjs), newest first. The files carry a running number so they sort in order, then a name for what they show; the headings carry the dates. The README shows the latest desktop and phone captures; the rest stay here as a record of how the site grew.
 
+## 2026-09-25 · M4, play and the story days
+
+![The summer peak](004-story-days.png)
+
+The summer peak, found in the prices rather than chosen: 2026-08-26 at 16:30, the system price at the exchange's 50 ¥/kWh cap and every area within a few yen of it, so the whole map glows. Tokyo is picked at 51.8 GW of demand, half of it gas, the Soma–Futaba trunk from Tohoku near its limit and the converters sending a little west. The time bar has the new pieces: the jump menu of story days, the summer and the winter peak, the widest split, the most at the floor and the cheapest day, and the play button that runs a day in twelve seconds.
+
+<img src="004-story-days-phone.png" alt="The summer peak, on a phone" width="260">
+
+The same half hour on a phone (390×844), nothing picked, the bar wrapped onto three rows.
+
 ## 2026-09-25 · M3, the flows
 
 ![The flows](003-flows.png)

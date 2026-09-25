@@ -28,7 +28,11 @@ export const test = base.extend<{ errors: string[] }>({
     await page.route(EMPTY_ASSETS, (route) => route.fulfill({ status: 204 }))
     await page.route('**/data/*-jukyu-*.csv', (route) => route.fulfill({ status: 404 }))
     await page.route('**/data/occto-*.csv', (route) => route.fulfill({ body: FLOWS, contentType: 'text/csv' }))
-    await page.route('**/data/jepx-spot-*.csv', (route) => route.fulfill({ body: SPOT, contentType: 'text/csv' }))
+    await page.route('**/data/jepx-spot-*.csv', (route) =>
+      route.request().url().includes('2026')
+        ? route.fulfill({ body: SPOT, contentType: 'text/csv' })
+        : route.fulfill({ status: 404 }),
+    )
     await page.route('**/data/tepco-jukyu-*.csv', (route) => route.fulfill({ body: TEPCO, contentType: 'text/csv' }))
     await page.route('**/data/kyushu-jukyu-*.csv', (route) => route.fulfill({ body: KYUSHU, contentType: 'text/csv' }))
     await provide(page)

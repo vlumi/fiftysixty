@@ -14,6 +14,7 @@ test('the slot reads as its half hour and scrubbing reports the new slot', () =>
       slot={25}
       now={now}
       playing={false}
+      stories={[]}
       onDate={vi.fn()}
       onSlot={onSlot}
       onPlay={vi.fn()}
@@ -33,6 +34,7 @@ test('the day picker spans the days there are prices for', () => {
       slot={1}
       now={now}
       playing={false}
+      stories={[]}
       onDate={onDate}
       onSlot={vi.fn()}
       onPlay={vi.fn()}
@@ -53,6 +55,7 @@ test('before the data arrives the picker is disabled', () => {
       slot={1}
       now={now}
       playing={false}
+      stories={[]}
       onDate={vi.fn()}
       onSlot={vi.fn()}
       onPlay={vi.fn()}
@@ -70,6 +73,7 @@ test('the day steps to the priced day before and after, and stops at the ends', 
       slot={1}
       now={now}
       playing={false}
+      stories={[]}
       onDate={onDate}
       onSlot={vi.fn()}
       onPlay={vi.fn()}
@@ -86,6 +90,7 @@ test('the day steps to the priced day before and after, and stops at the ends', 
       slot={1}
       now={now}
       playing={false}
+      stories={[]}
       onDate={onDate}
       onSlot={vi.fn()}
       onPlay={vi.fn()}
@@ -105,6 +110,7 @@ test('the half hour under way is a jump away, and today reads as past, now or ah
       slot={30}
       now={now}
       playing={false}
+      stories={[]}
       onDate={onDate}
       onSlot={onSlot}
       onPlay={vi.fn()}
@@ -120,6 +126,7 @@ test('the half hour under way is a jump away, and today reads as past, now or ah
       slot={21}
       now={now}
       playing={false}
+      stories={[]}
       onDate={onDate}
       onSlot={vi.fn()}
       onPlay={vi.fn()}
@@ -134,6 +141,7 @@ test('the half hour under way is a jump away, and today reads as past, now or ah
       slot={30}
       now={now}
       playing={false}
+      stories={[]}
       onDate={onDate}
       onSlot={vi.fn()}
       onPlay={vi.fn()}
@@ -151,6 +159,7 @@ test('tomorrow says only tomorrow: the whole day is ahead', () => {
       slot={30}
       now={tomorrow}
       playing={false}
+      stories={[]}
       onDate={vi.fn()}
       onSlot={vi.fn()}
       onPlay={vi.fn()}
@@ -168,6 +177,7 @@ test('play and pause', async () => {
       slot={1}
       now={now}
       playing={false}
+      stories={[]}
       onDate={vi.fn()}
       onSlot={vi.fn()}
       onPlay={onPlay}
@@ -182,10 +192,33 @@ test('play and pause', async () => {
       slot={1}
       now={now}
       playing={true}
+      stories={[]}
       onDate={vi.fn()}
       onSlot={vi.fn()}
       onPlay={onPlay}
     />,
   )
   expect(screen.getByRole('button', { name: 'Pause' })).toBeInTheDocument()
+})
+
+test('a story day is a jump away', async () => {
+  const onDate = vi.fn()
+  const onSlot = vi.fn()
+  const story = { id: 'summer', name: 'Summer peak', date: '2026-09-23', slot: 34, note: 'system price 50.01 ¥/kWh' }
+  render(
+    <TimeBar
+      date="2026-09-25"
+      days={days}
+      slot={1}
+      now={now}
+      playing={false}
+      stories={[story]}
+      onDate={onDate}
+      onSlot={onSlot}
+      onPlay={vi.fn()}
+    />,
+  )
+  await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Jump to' }), 'summer')
+  expect(onDate).toHaveBeenCalledWith('2026-09-23')
+  expect(onSlot).toHaveBeenCalledWith(34)
 })
