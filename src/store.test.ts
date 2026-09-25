@@ -59,4 +59,6 @@ test('a fuel is hidden and shown again', () => {
   expect(useApp.getState().hiddenFuels).toEqual(['coal', 'gas'])
   useApp.getState().toggleFuel('coal')
   expect(useApp.getState().hiddenFuels).toEqual(['gas'])
+  useApp.getState().setHiddenFuels([])
+  expect(useApp.getState().hiddenFuels).toEqual([])
 })

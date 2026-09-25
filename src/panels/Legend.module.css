@@ -1,29 +1,3 @@
-.corner {
-  position: absolute;
-  z-index: 5;
-  right: 0.75rem;
-  bottom: 2.75rem;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.35rem;
-}
-
-.toggle {
-  padding: 0.15rem 0.6rem;
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-  background: var(--panel);
-  color: var(--muted);
-  font: inherit;
-  font-size: 0.75rem;
-  cursor: pointer;
-}
-
-.toggle[aria-expanded='true'] {
-  color: var(--text);
-}
-
 .legend {
   margin: 0;
   padding: 0.5rem 0.75rem;
@@ -56,49 +30,4 @@
 
 .arrowKey {
   display: block;
-}
-
-.fuels {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.1rem 0.5rem;
-  margin-top: 0.5rem;
-}
-
-.fuel {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.fuel[aria-pressed='false'] {
-  opacity: 0.4;
-  text-decoration: line-through;
-}
-
-.hint {
-  margin-top: 0.3rem;
-  font-style: italic;
-}
-
-.swatch {
-  display: inline-block;
-  width: 0.7rem;
-  height: 0.7rem;
-  border-radius: 2px;
-  flex: none;
-}
-
-@media (max-width: 720px), (max-height: 560px) {
-  .corner {
-    right: 0.5rem;
-    bottom: 9rem;
-  }
 }
