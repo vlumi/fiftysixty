@@ -1,8 +1,8 @@
-import type { KeyboardEvent, PointerEvent } from 'react'
+import { useMemo, type KeyboardEvent, type PointerEvent } from 'react'
 import type { RecordSlot } from '../market/record'
 import { useStrings } from '../i18n/useStrings'
 import { SLOTS } from '../market/jepx'
-import { SERIES, stackDay, type Series, type StackedSlot } from '../market/stack'
+import { SERIES, stackDay, type StackedSlot } from '../market/stack'
 import { clampSlot, slotRange } from '../time/slots'
 import styles from './SupplyChart.module.css'
 
@@ -25,7 +25,7 @@ interface Props {
  */
 export default function SupplyChart({ day, slot, onSlot }: Props) {
   const s = useStrings()
-  const stack = stackDay(day)
+  const stack = useMemo(() => stackDay(day), [day])
   const x = (s: number) => ((s - 0.5) / SLOTS) * WIDTH
   const y = (mw: number) => TOP + ((stack.maxMW - mw) / (stack.maxMW - stack.minMW)) * PLOT
   const band = (top: (s: StackedSlot) => number, bottom: (s: StackedSlot) => number) => {
@@ -159,5 +159,3 @@ function Key({ color, name, line, hatched }: { color: string; name: string; line
     </span>
   )
 }
-
-export type { Series }

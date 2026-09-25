@@ -37,6 +37,6 @@ test('the half hour under way in Japan', () => {
 })
 
 test('the day in words carries its weekday in either language', () => {
-  expect(formatDay('2026-09-24', 'en')).toBe('Thu, 24 Sept 2026')
+  expect(formatDay('2026-09-24', 'en')).toBe('Thu, Sep 24, 2026')
   expect(formatDay('2026-09-24', 'ja')).toBe('2026年9月24日(木)')
 })

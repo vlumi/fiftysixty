@@ -261,6 +261,6 @@ test('the day reads in words with its weekday, over the picker', () => {
       onPlay={vi.fn()}
     />,
   )
-  expect(screen.getByRole('button', { name: 'Fri, 25 Sept 2026' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Fri, Sep 25, 2026' })).toBeInTheDocument()
   expect(screen.getByLabelText('Delivery day')).toHaveValue('2026-09-25')
 })
