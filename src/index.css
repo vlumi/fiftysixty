@@ -113,42 +113,42 @@ header p {
   }
 }
 
-header .lang {
+/* The language picker lists each language by its own name; the theme button shows the theme it is in, lit when light. */
+header .lang,
+header .theme,
+header .about {
   flex: none;
-  white-space: nowrap;
-  margin-left: auto;
+  height: 1.8rem;
   padding: 0 0.5rem;
   border: 1px solid var(--border);
   border-radius: 0.5rem;
-  background: none;
+  background: var(--panel);
   color: var(--muted);
   font: inherit;
   font-size: 0.8rem;
   cursor: pointer;
 }
 
-header .lang:hover {
+header .lang {
+  margin-left: auto;
   color: var(--text);
-  background: var(--hover);
 }
 
 header .theme,
 header .about {
-  flex: none;
-  padding: 0 0.5rem;
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-  background: none;
-  color: var(--muted);
   font-size: 1rem;
-  line-height: 1.4;
-  cursor: pointer;
 }
 
+header .lang:hover,
 header .theme:hover,
 header .about:hover {
   color: var(--text);
-  background: var(--hover);
+  border-color: var(--border-strong);
+}
+
+header .theme[aria-pressed='true'] {
+  color: var(--accent);
+  border-color: var(--accent);
 }
 
 main {

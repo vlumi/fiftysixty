@@ -98,16 +98,16 @@ test('a story day is a jump away: the day the data found most at the floor', asy
 
 test('the light theme is a click away and is kept across a reload', async ({ page }) => {
   await open(page)
-  await page.getByRole('button', { name: 'Switch to the light theme' }).click()
+  await page.getByRole('button', { name: 'Light theme' }).click()
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
   await page.reload()
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
   await expect(page.locator('.maplibregl-canvas')).toBeVisible()
 })
 
-test('Japanese is a click away and is kept across a reload', async ({ page }) => {
+test('Japanese is a pick away and is kept across a reload', async ({ page }) => {
   await open(page)
-  await page.getByRole('button', { name: 'Language' }).click()
+  await page.getByRole('combobox', { name: 'Language' }).selectOption('ja')
   await expect(page.locator('html')).toHaveAttribute('lang', 'ja')
   await expect(page.getByRole('status')).toHaveText('昨日 12:00–12:30 JST')
   await page.reload()

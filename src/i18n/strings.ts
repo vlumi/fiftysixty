@@ -5,11 +5,13 @@ import { readItem, storage, writeItem } from '../shared/storage'
 
 export type Lang = 'en' | 'ja'
 export const LANGS: readonly Lang[] = ['en', 'ja']
+/** Each language by its own name, whatever the language chosen: the picker lists them so. */
+export const LANGUAGE_NAMES: Record<Lang, string> = { en: 'English', ja: '日本語' }
 
 /** Every visible word, by key, in each language; the layout never changes with the language, only the words. */
 export interface Strings {
   subtitle: string
-  theme: { toLight: string; toDark: string }
+  theme: string
   close: string
   credits: {
     label: string
@@ -23,7 +25,7 @@ export interface Strings {
     lines: string
     source: string
   }
-  language: { label: string; other: string }
+  language: string
   time: {
     day: string
     halfHour: string
@@ -94,7 +96,7 @@ export interface Strings {
 
 const en: Strings = {
   subtitle: 'The Japanese power market on a map',
-  theme: { toLight: 'Switch to the light theme', toDark: 'Switch to the dark theme' },
+  theme: 'Light theme',
   close: 'Close',
   credits: {
     label: 'About and credits',
@@ -108,7 +110,7 @@ const en: Strings = {
     lines: 'Interconnectors',
     source: 'Source on GitHub',
   },
-  language: { label: 'Language', other: '日本語' },
+  language: 'Language',
   time: {
     day: 'Delivery day',
     halfHour: 'Half hour',
@@ -227,7 +229,7 @@ const en: Strings = {
 
 const ja: Strings = {
   subtitle: '地図で見る日本の電力市場',
-  theme: { toLight: 'ライトテーマにする', toDark: 'ダークテーマにする' },
+  theme: 'ライトテーマ',
   close: '閉じる',
   credits: {
     label: '情報とクレジット',
@@ -241,7 +243,7 @@ const ja: Strings = {
     lines: '連系線',
     source: 'GitHub のソース',
   },
-  language: { label: '言語', other: 'English' },
+  language: '言語',
   time: {
     day: '受渡日',
     halfHour: 'コマ',

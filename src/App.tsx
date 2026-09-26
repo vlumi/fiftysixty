@@ -12,6 +12,7 @@ import { loadRegions, type Regions } from './regions/geometry'
 import { loadPlants, type Plants } from './regions/plants'
 import { useApp } from './store'
 import { jstDate, openingDay } from './time/days'
+import { LANGS, LANGUAGE_NAMES, type Lang } from './i18n/strings'
 import { useStrings } from './i18n/useStrings'
 import { PALETTES } from './shared/palette'
 import { resolveTheme, useSystemDark } from './shared/theme'
@@ -136,15 +137,27 @@ export default function App() {
           <span className="hz60">60</span>
         </h1>
         <p>{words.subtitle}</p>
-        <button className="lang" aria-label={words.language.label} onClick={() => setLang(lang === 'ja' ? 'en' : 'ja')}>
-          {words.language.other}
-        </button>
+        <select
+          className="lang"
+          aria-label={words.language}
+          title={words.language}
+          value={lang}
+          onChange={(e) => setLang(e.target.value as Lang)}
+        >
+          {LANGS.map((l) => (
+            <option key={l} value={l}>
+              {LANGUAGE_NAMES[l]}
+            </option>
+          ))}
+        </select>
         <button
           className="theme"
-          aria-label={theme === 'light' ? words.theme.toDark : words.theme.toLight}
+          aria-pressed={theme === 'light'}
+          aria-label={words.theme}
+          title={words.theme}
           onClick={() => setThemeChoice(theme === 'light' ? 'dark' : 'light')}
         >
-          {theme === 'light' ? '☾' : '☀'}
+          {theme === 'light' ? '☀' : '☾'}
         </button>
         <button className="about" aria-label={words.credits.label} onClick={() => setCredits(true)}>
           ⓘ
