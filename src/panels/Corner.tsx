@@ -4,6 +4,7 @@ import type { Series } from '../market/stack'
 import type { Plants } from '../regions/plants'
 import type { Palette } from '../shared/palette'
 import { useNarrow } from '../shared/useNarrow'
+import CloseButton from './CloseButton'
 import styles from './Corner.module.css'
 import Legend from './Legend'
 import PlantsPanel from './Plants'
@@ -28,9 +29,7 @@ export default function Corner({ palette, plants, hiddenFuels, onToggleFuel, onH
     <div className={styles.corner}>
       {open && (
         <div className={styles.sheet}>
-          <button className={styles.close} aria-label={s.close} onClick={() => setOpen(null)}>
-            ×
-          </button>
+          <CloseButton onClick={() => setOpen(null)} />
           {open === 'key' ? (
             <Legend palette={palette} />
           ) : (

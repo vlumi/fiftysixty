@@ -24,28 +24,13 @@
 
 .dialog h2 {
   margin: 0 0 0.75rem;
+  padding-right: 2rem;
   font-size: 1rem;
   font-weight: 600;
 }
 
 .dialog a {
   color: inherit;
-}
-
-.close {
-  position: absolute;
-  top: 0.6rem;
-  right: 0.75rem;
-  border: 0;
-  background: none;
-  color: var(--muted);
-  font-size: 1.25rem;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.close:hover {
-  color: var(--text);
 }
 
 .rows {
