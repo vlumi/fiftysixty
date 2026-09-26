@@ -16,11 +16,10 @@ interface Props {
   hiddenFuels: readonly Series[]
   onToggleFuel: (fuel: Series) => void
   onHideFuels: (fuels: Series[]) => void
-  plantsShown: boolean
 }
 
 /** The bottom corner: a Key and a Plants button, one panel open above them at a time, the key open by default on a wide screen. */
-export default function Corner({ palette, plants, hiddenFuels, onToggleFuel, onHideFuels, plantsShown }: Props) {
+export default function Corner({ palette, plants, hiddenFuels, onToggleFuel, onHideFuels }: Props) {
   const s = useStrings()
   const narrow = useNarrow()
   const [open, setOpen] = useState<Open>(narrow ? null : 'key')
@@ -29,19 +28,13 @@ export default function Corner({ palette, plants, hiddenFuels, onToggleFuel, onH
     <div className={styles.corner}>
       {open && (
         <div className={styles.sheet}>
-          <button className={styles.close} aria-label={s.readout.close} onClick={() => setOpen(null)}>
+          <button className={styles.close} aria-label={s.close} onClick={() => setOpen(null)}>
             ×
           </button>
           {open === 'key' ? (
             <Legend palette={palette} />
           ) : (
-            <PlantsPanel
-              plants={plants}
-              hiddenFuels={hiddenFuels}
-              onToggle={onToggleFuel}
-              onHide={onHideFuels}
-              shown={plantsShown}
-            />
+            <PlantsPanel plants={plants} hiddenFuels={hiddenFuels} onToggle={onToggleFuel} onHide={onHideFuels} />
           )}
         </div>
       )}

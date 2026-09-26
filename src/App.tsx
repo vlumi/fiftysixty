@@ -6,10 +6,10 @@ import { stories } from './market/stories'
 import { loadRecord, monthOf, recordSlot, type RecordDays, type RecordSlot } from './market/record'
 import type { Area } from './regions/areas'
 import Corner from './panels/Corner'
+import Credits from './panels/Credits'
 import Readout from './panels/Readout'
 import { loadRegions, type Regions } from './regions/geometry'
 import { loadPlants, type Plants } from './regions/plants'
-import { PLANTS_FROM_ZOOM } from './map/plantLayers'
 import { useApp } from './store'
 import { jstDate, openingDay } from './time/days'
 import { useStrings } from './i18n/useStrings'
@@ -27,7 +27,6 @@ const REFRESH_MS = 30 * 60_000
 export default function App() {
   const [regions, setRegions] = useState<Regions | null>(null)
   const [plants, setPlants] = useState<Plants | null>(null)
-  const [zoom, setZoom] = useState(5)
   const [spot, setSpot] = useState<SpotDays | null>(null)
   const [records, setRecords] = useState<ReadonlyMap<string, RecordDays | null>>(new Map())
   const [flowMonths, setFlowMonths] = useState<ReadonlyMap<string, FlowDays | null>>(new Map())
@@ -63,6 +62,7 @@ export default function App() {
   const lang = useApp((s) => s.lang)
   const setLang = useApp((s) => s.setLang)
   const words = useStrings()
+  const [credits, setCredits] = useState(false)
   useEffect(() => {
     document.documentElement.lang = lang
   }, [lang])
@@ -146,7 +146,11 @@ export default function App() {
         >
           {theme === 'light' ? '☾' : '☀'}
         </button>
+        <button className="about" aria-label={words.credits.label} onClick={() => setCredits(true)}>
+          ⓘ
+        </button>
       </header>
+      {credits && <Credits onClose={() => setCredits(false)} />}
       <main style={{ '--bar-inset': `${barHeight + 12}px` } as CSSProperties}>
         <Suspense fallback={null}>
           <MapView
@@ -162,7 +166,6 @@ export default function App() {
             mixes={mixes}
             onPick={selectArea}
             onPickPlant={pickPlant}
-            onZoom={(z) => setZoom((was) => (was >= PLANTS_FROM_ZOOM === z >= PLANTS_FROM_ZOOM ? was : z))}
           />
         </Suspense>
         <Readout
@@ -172,7 +175,7 @@ export default function App() {
           flows={flows}
           area={area}
           plant={plant}
-          onClose={() => (plant ? pickPlant(null) : selectArea(null))}
+          onBack={() => (plant ? pickPlant(null) : selectArea(null))}
           onSlot={setSlot}
         />
         <TimeBar
@@ -193,7 +196,6 @@ export default function App() {
           hiddenFuels={hiddenFuels}
           onToggleFuel={toggleFuel}
           onHideFuels={setHiddenFuels}
-          plantsShown={zoom >= PLANTS_FROM_ZOOM}
         />
       </main>
     </>

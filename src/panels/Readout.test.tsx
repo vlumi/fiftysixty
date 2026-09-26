@@ -24,7 +24,7 @@ test('without an area, the system price and the range across the areas', () => {
       day={undefined}
       flows={none}
       area={null}
-      onClose={vi.fn()}
+      onBack={vi.fn()}
       onSlot={vi.fn()}
     />,
   )
@@ -34,7 +34,7 @@ test('without an area, the system price and the range across the areas', () => {
 })
 
 test('a picked area against the system price and its neighbors', async () => {
-  const onClose = vi.fn()
+  const onBack = vi.fn()
   render(
     <Readout
       slot={slot}
@@ -42,7 +42,7 @@ test('a picked area against the system price and its neighbors', async () => {
       day={undefined}
       flows={none}
       area="tokyo"
-      onClose={onClose}
+      onBack={onBack}
       onSlot={vi.fn()}
     />,
   )
@@ -51,8 +51,8 @@ test('a picked area against the system price and its neighbors', async () => {
   const rows = screen.getAllByRole('definition').map((d) => d.textContent)
   expect(rows).toEqual(['14.12 −7.90', '10.45 −11.57', '22.02 ±0.00'])
   expect(screen.getByText('No record for this half hour yet.')).toBeInTheDocument()
-  await userEvent.click(screen.getByRole('button', { name: 'Close' }))
-  expect(onClose).toHaveBeenCalled()
+  await userEvent.click(screen.getByRole('button', { name: 'Back' }))
+  expect(onBack).toHaveBeenCalled()
 })
 
 test('Okinawa has no price to show', () => {
@@ -63,7 +63,7 @@ test('Okinawa has no price to show', () => {
       day={undefined}
       flows={none}
       area="okinawa"
-      onClose={vi.fn()}
+      onBack={vi.fn()}
       onSlot={vi.fn()}
     />,
   )
@@ -78,7 +78,7 @@ test('nothing before the prices arrive', () => {
       day={undefined}
       flows={none}
       area={null}
-      onClose={vi.fn()}
+      onBack={vi.fn()}
       onSlot={vi.fn()}
     />,
   )
@@ -86,7 +86,7 @@ test('nothing before the prices arrive', () => {
 })
 
 test('what ran in a picked area, the idle sources left out and the pumping negative', () => {
-  render(<Readout slot={slot} record={record} day={day} flows={none} area="tokyo" onClose={vi.fn()} onSlot={vi.fn()} />)
+  render(<Readout slot={slot} record={record} day={day} flows={none} area="tokyo" onBack={vi.fn()} onSlot={vi.fn()} />)
   const mix = screen.getByRole('region', { name: 'What ran' })
   expect(mix).toHaveTextContent('Demand 36,867 MW')
   const names = [...mix.querySelectorAll('dt')].map((d) => d.textContent)
@@ -117,7 +117,7 @@ test("a picked area's lines: flow in or out against the limit, and where the mar
       day={undefined}
       flows={noon}
       area="kansai"
-      onClose={vi.fn()}
+      onBack={vi.fn()}
       onSlot={vi.fn()}
     />,
   )
@@ -137,7 +137,7 @@ test('a picked plant: its capacity and fuel, and that its output is not public',
       flows={none}
       area={null}
       plant={{ id: 'way/1', name: 'Kashiwazaki-Kariwa Nuclear Power Plant', fuel: 'nuclear', mw: 8212 }}
-      onClose={vi.fn()}
+      onBack={vi.fn()}
       onSlot={vi.fn()}
     />,
   )
@@ -150,7 +150,7 @@ test('a picked plant: its capacity and fuel, and that its output is not public',
 
 test('on a phone a picked area opens on its headline, the rest a tap on the row away', async () => {
   vi.stubGlobal('matchMedia', () => ({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() }))
-  render(<Readout slot={slot} record={record} day={day} flows={none} area="tokyo" onClose={vi.fn()} onSlot={vi.fn()} />)
+  render(<Readout slot={slot} record={record} day={day} flows={none} area="tokyo" onBack={vi.fn()} onSlot={vi.fn()} />)
   const row = screen.getByRole('button', { expanded: false })
   expect(row).toHaveTextContent('Tokyo 50 Hz')
   expect(screen.queryByText('Tohoku')).not.toBeInTheDocument()

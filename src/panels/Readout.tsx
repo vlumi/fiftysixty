@@ -23,7 +23,8 @@ interface Props {
   area: Area | null
   /** A picked plant, shown instead of an area. */
   plant?: PlantProps | null
-  onClose: () => void
+  /** Up a level: from a plant to the map, from an area to the system price. */
+  onBack: () => void
   onSlot: (slot: number) => void
 }
 
@@ -32,7 +33,7 @@ interface Props {
  * neighbors and what ran in it, or a picked plant. On a phone it is an accordion: the headline row alone until tapped,
  * remembered for what it was opened for, so another pick opens folded again.
  */
-export default function Readout({ slot, record, day, flows, area, plant, onClose, onSlot }: Props) {
+export default function Readout({ slot, record, day, flows, area, plant, onBack, onSlot }: Props) {
   const s = useStrings()
   const narrow = useNarrow()
   const [openFor, setOpenFor] = useState<string | null>(null)
@@ -62,24 +63,33 @@ export default function Readout({ slot, record, day, flows, area, plant, onClose
   return (
     <aside className={styles.panel} aria-label={s.readout.label}>
       <div className={styles.head}>
+        {(plant || picked) && (
+          <button className={styles.back} aria-label={s.readout.back} onClick={onBack}>
+            <Chevron turn={90} />
+          </button>
+        )}
         {narrow ? (
           <button className={styles.fold} aria-expanded={open} onClick={() => setOpenFor(open ? null : key)}>
             {head}
-            <span className={styles.chevron} aria-hidden="true">
-              {open ? '▴' : '▾'}
+            <span className={styles.chevron}>
+              <Chevron turn={open ? 180 : 0} />
             </span>
           </button>
         ) : (
           <div className={styles.fold}>{head}</div>
         )}
-        {(plant || picked) && (
-          <button className={styles.close} aria-label={s.readout.close} onClick={onClose}>
-            ×
-          </button>
-        )}
       </div>
       {open && <div className={styles.body}>{body}</div>}
     </aside>
+  )
+}
+
+/** A chevron pointing down, turned clockwise by `turn` degrees. */
+function Chevron({ turn }: { turn: number }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" style={{ transform: `rotate(${turn}deg)` }}>
+      <path d="M5 7.5 10 12.5 15 7.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
   )
 }
 

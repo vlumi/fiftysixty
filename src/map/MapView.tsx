@@ -1,6 +1,5 @@
 import { MapLibreOverlay } from '@deck.gl/maplibre'
 import { Map as MapLibre, Marker, NavigationControl, setWorkerUrl } from 'maplibre-gl'
-import { NARROW_QUERY } from '../shared/useNarrow'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import { useEffect, useRef, useState } from 'react'
@@ -19,9 +18,6 @@ import MixGlyph from './MixGlyph'
 // MapLibre 6 resolves its worker relative to its own script URL, which a bundled app does not provide.
 setWorkerUrl(maplibreWorkerUrl)
 
-const GEOMETRY_CREDIT =
-  '<a href="https://www.gsi.go.jp/kankyochiri/gm_jpn.html">地球地図日本</a> (GSI) via dataofjapan/land'
-
 interface Props extends LayerOptions {
   theme: Theme
   /** The basemap's labels and the areas' names come in this language. */
@@ -33,8 +29,6 @@ interface Props extends LayerOptions {
   onPick: (area: Area | null) => void
   /** A click on a plant's dot. */
   onPickPlant: (id: string) => void
-  /** The map's zoom as it changes, for whoever shows what depends on it. */
-  onZoom?: (zoom: number) => void
 }
 
 /** The basemap over Japan with the market layers interleaved into it. */
@@ -51,7 +45,6 @@ export default function MapView({
   mixes = {},
   onPick,
   onPickPlant,
-  onZoom,
 }: Props) {
   const container = useRef<HTMLDivElement>(null)
   const overlay = useRef<MapLibreOverlay>(null)
@@ -59,10 +52,10 @@ export default function MapView({
   const [zoom, setZoom] = useState(5)
   // The theme the basemap was styled for last; the map is created with it and restyled when it changes.
   const styled = useRef(theme)
-  const pick = useRef({ onPick, onPickPlant, onZoom, lang })
+  const pick = useRef({ onPick, onPickPlant, lang })
   useEffect(() => {
-    pick.current = { onPick, onPickPlant, onZoom, lang }
-  }, [onPick, onPickPlant, onZoom, lang])
+    pick.current = { onPick, onPickPlant, lang }
+  }, [onPick, onPickPlant, lang])
 
   useEffect(() => {
     if (!container.current) return
@@ -70,21 +63,15 @@ export default function MapView({
       container: container.current,
       style: BASEMAPS[styled.current],
       bounds: JAPAN_BOUNDS,
-      attributionControl: { compact: true, customAttribution: GEOMETRY_CREDIT },
+      attributionControl: false,
       canvasContextAttributes: { antialias: true },
     })
     map.addControl(new NavigationControl({ visualizePitch: false }), 'top-right')
-    // The credits open across the whole width of a phone, over the corner's buttons, until the first drag folds them.
-    if (window.matchMedia?.(NARROW_QUERY).matches) {
-      container.current.querySelector('.maplibregl-ctrl-attrib')?.classList.remove('maplibregl-compact-show')
-    }
     map.on('style.load', () => labelLanguage(map, pick.current.lang))
     setMap(map)
     setZoom(map.getZoom())
-    pick.current.onZoom?.(map.getZoom())
     map.on('zoom', () => {
       setZoom(map.getZoom())
-      pick.current.onZoom?.(map.getZoom())
     })
     overlay.current = new MapLibreOverlay({
       interleaved: true,

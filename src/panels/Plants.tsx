@@ -8,12 +8,10 @@ interface Props {
   hiddenFuels: readonly Series[]
   onToggle: (fuel: Series) => void
   onHide: (fuels: Series[]) => void
-  /** Whether the map is close enough for the plants to show at all. */
-  shown: boolean
 }
 
 /** The plants' filter, a row a fuel with its count, the pressed ones on the map; and the fuels' key by the same token. */
-export default function PlantsPanel({ plants, hiddenFuels, onToggle, onHide, shown }: Props) {
+export default function PlantsPanel({ plants, hiddenFuels, onToggle, onHide }: Props) {
   const s = useStrings()
   const counts = new Map<Series, number>()
   for (const f of plants?.features ?? []) counts.set(f.properties.fuel, (counts.get(f.properties.fuel) ?? 0) + 1)
@@ -26,7 +24,6 @@ export default function PlantsPanel({ plants, hiddenFuels, onToggle, onHide, sho
         <button onClick={() => onHide([...SERIES])} disabled={hiddenFuels.length === SERIES.length}>
           {s.key.none}
         </button>
-        {!shown && <span className={styles.hint}>{s.key.zoomIn}</span>}
       </div>
       {[...SERIES].reverse().map((x) => {
         const count = counts.get(x) ?? 0

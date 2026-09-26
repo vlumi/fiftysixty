@@ -10,6 +10,19 @@ export const LANGS: readonly Lang[] = ['en', 'ja']
 export interface Strings {
   subtitle: string
   theme: { toLight: string; toDark: string }
+  close: string
+  credits: {
+    label: string
+    title: string
+    map: string
+    regions: string
+    plants: string
+    prices: string
+    records: string
+    recordsBy: string
+    lines: string
+    source: string
+  }
   language: { label: string; other: string }
   time: {
     day: string
@@ -32,7 +45,7 @@ export interface Strings {
   stories: { name: Record<StoryId, string>; note: Record<StoryId, (value: number, other?: number) => string> }
   readout: {
     label: string
-    close: string
+    back: string
     systemPrice: string
     yenPerKwh: string
     spread: (low: string, high: string) => string
@@ -73,7 +86,6 @@ export interface Strings {
     split: string
     all: string
     none: string
-    zoomIn: string
     fuel: Record<Series, string>
     count: (n: number) => string
     mix: (area: string) => string
@@ -83,6 +95,19 @@ export interface Strings {
 const en: Strings = {
   subtitle: 'The Japanese power market on a map',
   theme: { toLight: 'Switch to the light theme', toDark: 'Switch to the dark theme' },
+  close: 'Close',
+  credits: {
+    label: 'About and credits',
+    title: 'Credits',
+    map: 'Map',
+    regions: 'Areas',
+    plants: 'Plants',
+    prices: 'Prices',
+    records: 'Supply and demand',
+    recordsBy: "The nine transmission companies, in OCCTO's format",
+    lines: 'Interconnectors',
+    source: 'Source on GitHub',
+  },
   language: { label: 'Language', other: '日本語' },
   time: {
     day: 'Delivery day',
@@ -120,7 +145,7 @@ const en: Strings = {
   },
   readout: {
     label: 'Readout',
-    close: 'Close',
+    back: 'Back',
     systemPrice: 'System price',
     yenPerKwh: '¥/kWh',
     spread: (low, high) => `Areas from ${low} to ${high}.`,
@@ -185,7 +210,6 @@ const en: Strings = {
     split: 'split',
     all: 'All',
     none: 'None',
-    zoomIn: 'zoom in to see them',
     fuel: {
       coal: 'Coal',
       nuclear: 'Nuclear',
@@ -204,6 +228,19 @@ const en: Strings = {
 const ja: Strings = {
   subtitle: '地図で見る日本の電力市場',
   theme: { toLight: 'ライトテーマにする', toDark: 'ダークテーマにする' },
+  close: '閉じる',
+  credits: {
+    label: '情報とクレジット',
+    title: 'クレジット',
+    map: '地図',
+    regions: 'エリア',
+    plants: '発電所',
+    prices: '価格',
+    records: '需給実績',
+    recordsBy: '一般送配電事業者9社、OCCTO の様式で',
+    lines: '連系線',
+    source: 'GitHub のソース',
+  },
   language: { label: '言語', other: 'English' },
   time: {
     day: '受渡日',
@@ -241,7 +278,7 @@ const ja: Strings = {
   },
   readout: {
     label: '詳細',
-    close: '閉じる',
+    back: '戻る',
     systemPrice: 'システムプライス',
     yenPerKwh: '円/kWh',
     spread: (low, high) => `エリアプライスは ${low}〜${high}。`,
@@ -306,7 +343,6 @@ const ja: Strings = {
     split: '分断',
     all: '全て',
     none: 'なし',
-    zoomIn: '拡大すると表示',
     fuel: {
       coal: '石炭',
       nuclear: '原子力',
