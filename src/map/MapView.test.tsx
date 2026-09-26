@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react'
+import { act, render } from '@testing-library/react'
 import csv from '../test/fixtures/tepco-jukyu.csv?raw'
 import { recordSlot } from '../market/record'
 import { TEPCO } from '../market/tepco'
@@ -113,15 +113,17 @@ test('a recorded area gets a glyph on its anchor, which picks the area, and lose
   expect(markers[0].remove).toHaveBeenCalled()
 })
 
-test('a theme change swaps the basemap and recolors the layers', () => {
+test('a theme change swaps the basemap, and the layers move under its labels once it has loaded', () => {
   const { rerender } = render(
     <MapView theme="dark" lang="en" regions={regions} onPick={vi.fn()} onPickPlant={vi.fn()} />,
   )
   expect(mapInstance.setStyle).not.toHaveBeenCalled()
   rerender(<MapView theme="light" lang="en" regions={regions} onPick={vi.fn()} onPickPlant={vi.fn()} />)
   expect(mapInstance.setStyle).toHaveBeenCalledWith('https://tiles.openfreemap.org/styles/positron')
-  const { layers } = overlayInstance.setProps.mock.lastCall![0]
-  expect(layers[0].props.beforeId).toBe('waterway_line_label')
+  expect(overlayInstance.setProps.mock.lastCall![0].layers[0].props.beforeId).toBe('water_name')
+  const styleLoaded = mapInstance.on.mock.calls.find((c) => c[0] === 'style.load')![1] as () => void
+  act(() => styleLoaded())
+  expect(overlayInstance.setProps.mock.lastCall![0].layers[0].props.beforeId).toBe('waterway_line_label')
 })
 
 test('the basemap labels follow the language', () => {

@@ -50,8 +50,10 @@ export default function MapView({
   const overlay = useRef<MapLibreOverlay>(null)
   const [map, setMap] = useState<MapLibre | null>(null)
   const [zoom, setZoom] = useState(5)
-  // The theme the basemap was styled for last; the map is created with it and restyled when it changes.
+  // The theme the basemap was styled for last; the map is created with it and restyled when it changes. The layers
+  // follow only once the new style has loaded, since they sit beneath a label layer the old style does not have.
   const styled = useRef(theme)
+  const [loaded, setLoaded] = useState(theme)
   const pick = useRef({ onPick, onPickPlant, lang })
   useEffect(() => {
     pick.current = { onPick, onPickPlant, lang }
@@ -67,7 +69,10 @@ export default function MapView({
       canvasContextAttributes: { antialias: true },
     })
     map.addControl(new NavigationControl({ visualizePitch: false }), 'top-right')
-    map.on('style.load', () => labelLanguage(map, pick.current.lang))
+    map.on('style.load', () => {
+      labelLanguage(map, pick.current.lang)
+      setLoaded(styled.current)
+    })
     setMap(map)
     setZoom(map.getZoom())
     map.on('zoom', () => {
@@ -104,7 +109,7 @@ export default function MapView({
 
   useEffect(() => {
     overlay.current?.setProps({
-      layers: buildLayers(regions, PALETTES[theme], {
+      layers: buildLayers(regions, PALETTES[loaded], {
         prices,
         selected,
         flows,
@@ -112,10 +117,10 @@ export default function MapView({
         plants,
         selectedPlant,
         hiddenFuels,
-        beforeId: BELOW_LABELS[theme],
+        beforeId: BELOW_LABELS[loaded],
       }),
     })
-  }, [theme, regions, prices, selected, flows, zoom, plants, selectedPlant, hiddenFuels])
+  }, [loaded, regions, prices, selected, flows, zoom, plants, selectedPlant, hiddenFuels])
 
   return (
     <>
