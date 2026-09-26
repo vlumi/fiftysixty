@@ -19,6 +19,6 @@ test('on a phone a picked area opens on its headline, the rest a tap away', asyn
   const readout = page.getByRole('complementary', { name: 'Readout' })
   await expect(readout).toContainText('Tokyo')
   await expect(readout.getByRole('region', { name: 'What ran' })).toHaveCount(0)
-  await readout.getByRole('button', { name: 'More' }).click()
+  await readout.getByRole('button', { expanded: false }).click()
   await expect(readout.getByRole('region', { name: 'What ran' })).toBeVisible()
 })

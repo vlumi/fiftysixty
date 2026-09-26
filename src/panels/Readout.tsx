@@ -28,119 +28,128 @@ interface Props {
 }
 
 /**
- * The displayed slot in numbers: the system price and the spread across the areas, or a picked area against its
- * neighbors and what ran in it.
+ * The displayed slot in numbers: the system price and the spread across the areas, a picked area against its
+ * neighbors and what ran in it, or a picked plant. On a phone it is an accordion: the headline row alone until tapped,
+ * remembered for what it was opened for, so another pick opens folded again.
  */
 export default function Readout({ slot, record, day, flows, area, plant, onClose, onSlot }: Props) {
   const s = useStrings()
   const narrow = useNarrow()
-  // On a phone the panel opens on its headline alone, since the map is what the screen is for; the rest is
-  // remembered for the area it was asked for, so another area opens folded again.
-  const [expandedFor, setExpandedFor] = useState<Area | null>(null)
-  const expanded = expandedFor !== null && expandedFor === area
+  const [openFor, setOpenFor] = useState<string | null>(null)
   if (!slot) return null
-  if (plant) {
-    return (
-      <aside className={styles.panel} aria-label={s.readout.label}>
-        <button className={styles.close} aria-label={s.readout.close} onClick={onClose}>
-          ×
-        </button>
-        <h2>{plant.name || s.readout.aPlant}</h2>
-        <p className={styles.price}>
-          {mw(plant.mw)} <span className="muted">{s.readout.mw}</span>{' '}
-          <span className={`${styles.pill} ${styles[plant.fuel]}`}>{s.chart.series[plant.fuel]}</span>
-        </p>
-        <p className="muted">{s.readout.plantNote}</p>
-      </aside>
-    )
-  }
   const picked = area && area !== 'okinawa' ? (area as PricedArea) : null
+  const key = plant ? `plant/${plant.id}` : (picked ?? 'system')
+  const open = !narrow || openFor === key
+  const head = plant ? (
+    <PlantHead plant={plant} />
+  ) : picked ? (
+    <AreaHead area={picked} slot={slot} />
+  ) : (
+    <SystemHead slot={slot} />
+  )
+  const body = plant ? (
+    <p className="muted">{s.readout.plantNote}</p>
+  ) : picked ? (
+    <>
+      <AreaRows area={picked} slot={slot} />
+      <Lines area={picked} flows={flows} />
+      {day?.length ? <SupplyChart day={day} slot={slot.slot} onSlot={onSlot} /> : null}
+      <Mix record={record} />
+    </>
+  ) : (
+    <SystemNote slot={slot} okinawa={area === 'okinawa'} />
+  )
   return (
     <aside className={styles.panel} aria-label={s.readout.label}>
-      {picked ? (
-        <>
-          <AreaReadout area={picked} slot={slot} onClose={onClose} brief={narrow && !expanded} />
-          {narrow && (
-            <button
-              className={styles.more}
-              aria-expanded={expanded}
-              onClick={() => setExpandedFor(expanded ? null : area)}
-            >
-              {expanded ? s.readout.less : s.readout.more}
-            </button>
-          )}
-          {(!narrow || expanded) && (
-            <>
-              <Lines area={picked} flows={flows} />
-              {day?.length ? <SupplyChart day={day} slot={slot.slot} onSlot={onSlot} /> : null}
-              <Mix record={record} />
-            </>
-          )}
-        </>
-      ) : (
-        <SystemReadout slot={slot} okinawa={area === 'okinawa'} />
-      )}
+      <div className={styles.head}>
+        {narrow ? (
+          <button className={styles.fold} aria-expanded={open} onClick={() => setOpenFor(open ? null : key)}>
+            {head}
+            <span className={styles.chevron} aria-hidden="true">
+              {open ? '▴' : '▾'}
+            </span>
+          </button>
+        ) : (
+          <div className={styles.fold}>{head}</div>
+        )}
+        {(plant || picked) && (
+          <button className={styles.close} aria-label={s.readout.close} onClick={onClose}>
+            ×
+          </button>
+        )}
+      </div>
+      {open && <div className={styles.body}>{body}</div>}
     </aside>
   )
 }
 
-function SystemReadout({ slot, okinawa }: { slot: SpotSlot; okinawa: boolean }) {
+function PlantHead({ plant }: { plant: PlantProps }) {
   const s = useStrings()
-  const prices = PRICED_AREAS.map((a) => slot.areaPrice[a.id as PricedArea])
-  const low = Math.min(...prices)
-  const high = Math.max(...prices)
+  return (
+    <>
+      <h2>{plant.name || s.readout.aPlant}</h2>
+      <p className={styles.price}>
+        {mw(plant.mw)} <span className="muted">{s.readout.mw}</span>{' '}
+        <span className={`${styles.pill} ${styles[plant.fuel]}`}>{s.chart.series[plant.fuel]}</span>
+      </p>
+    </>
+  )
+}
+
+function SystemHead({ slot }: { slot: SpotSlot }) {
+  const s = useStrings()
   return (
     <>
       <h2>{s.readout.systemPrice}</h2>
       <p className={styles.price}>
         {yen(slot.systemPrice)} <span className="muted">{s.readout.yenPerKwh}</span>
       </p>
-      <p className="muted">
-        {low === high ? s.readout.everyAreaSystem : s.readout.spread(yen(low), yen(high))}{' '}
-        {okinawa ? s.readout.okinawa : s.readout.pickArea}
+    </>
+  )
+}
+
+function SystemNote({ slot, okinawa }: { slot: SpotSlot; okinawa: boolean }) {
+  const s = useStrings()
+  const prices = PRICED_AREAS.map((a) => slot.areaPrice[a.id as PricedArea])
+  const low = Math.min(...prices)
+  const high = Math.max(...prices)
+  return (
+    <p className="muted">
+      {low === high ? s.readout.everyAreaSystem : s.readout.spread(yen(low), yen(high))}{' '}
+      {okinawa ? s.readout.okinawa : s.readout.pickArea}
+    </p>
+  )
+}
+
+function AreaHead({ area, slot }: { area: PricedArea; slot: SpotSlot }) {
+  const s = useStrings()
+  const lang = useApp((x) => x.lang)
+  const info = AREA_BY_ID[area]
+  return (
+    <>
+      <h2>
+        {lang === 'ja' ? info.ja : info.name} <span className="muted">{s.readout.hz(info.hz)}</span>
+      </h2>
+      <p className={styles.price}>
+        {yen(slot.areaPrice[area])} <span className="muted">{s.readout.yenPerKwh}</span>
       </p>
     </>
   )
 }
 
-function AreaReadout({
-  area,
-  slot,
-  onClose,
-  brief = false,
-}: {
-  area: PricedArea
-  slot: SpotSlot
-  onClose: () => void
-  /** The name and the price alone, without the neighbors. */
-  brief?: boolean
-}) {
+function AreaRows({ area, slot }: { area: PricedArea; slot: SpotSlot }) {
   const s = useStrings()
-  const lang = useApp((x) => x.lang)
-  const info = AREA_BY_ID[area]
   const price = slot.areaPrice[area]
   return (
-    <>
-      <button className={styles.close} aria-label={s.readout.close} onClick={onClose}>
-        ×
-      </button>
-      <h2>
-        {lang === 'ja' ? info.ja : info.name} <span className="muted">{s.readout.hz(info.hz)}</span>
-      </h2>
-      <p className={styles.price}>
-        {yen(price)} <span className="muted">{s.readout.yenPerKwh}</span>
-      </p>
-      <dl className={styles.rows}>
-        <dt>{s.readout.system}</dt>
-        <dd>
-          {yen(slot.systemPrice)} <span className="muted">{signed(slot.systemPrice - price)}</span>
-        </dd>
-        {!brief &&
-          neighbors(area).map((n) => (
-            <Neighbor key={n} area={n as PricedArea} price={slot.areaPrice[n as PricedArea]} against={price} />
-          ))}
-      </dl>
-    </>
+    <dl className={styles.rows}>
+      <dt>{s.readout.system}</dt>
+      <dd>
+        {yen(slot.systemPrice)} <span className="muted">{signed(slot.systemPrice - price)}</span>
+      </dd>
+      {neighbors(area).map((n) => (
+        <Neighbor key={n} area={n as PricedArea} price={slot.areaPrice[n as PricedArea]} against={price} />
+      ))}
+    </dl>
   )
 }
 
