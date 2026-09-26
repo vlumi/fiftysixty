@@ -1,5 +1,6 @@
 import { MapLibreOverlay } from '@deck.gl/maplibre'
 import { Map as MapLibre, Marker, NavigationControl, setWorkerUrl } from 'maplibre-gl'
+import { NARROW_QUERY } from '../shared/useNarrow'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import { useEffect, useRef, useState } from 'react'
@@ -73,6 +74,10 @@ export default function MapView({
       canvasContextAttributes: { antialias: true },
     })
     map.addControl(new NavigationControl({ visualizePitch: false }), 'top-right')
+    // The credits open across the whole width of a phone, over the corner's buttons, until the first drag folds them.
+    if (window.matchMedia?.(NARROW_QUERY).matches) {
+      container.current.querySelector('.maplibregl-ctrl-attrib')?.classList.remove('maplibregl-compact-show')
+    }
     map.on('style.load', () => labelLanguage(map, pick.current.lang))
     setMap(map)
     setZoom(map.getZoom())

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { ADAPTERS } from './market/adapters'
 import { flowsAt, loadFlows, type FlowDays } from './market/flows'
 import { fiscalYear, loadSpotYears, slotOf, type SpotDays } from './market/jepx'
@@ -17,6 +17,7 @@ import { PALETTES } from './shared/palette'
 import { resolveTheme, useSystemDark } from './shared/theme'
 import TimeBar from './time/TimeBar'
 import { useNow } from './time/useNow'
+import { useElementHeight } from './shared/useElementHeight'
 import { usePlayer } from './time/usePlayer'
 
 const MapView = lazy(() => import('./map/MapView'))
@@ -54,6 +55,8 @@ export default function App() {
   const togglePlay = useApp((s) => s.togglePlay)
   const step = useApp((s) => s.step)
   const now = useNow()
+  const bar = useRef<HTMLDivElement>(null)
+  const barHeight = useElementHeight(bar)
   const systemDark = useSystemDark()
   const themeChoice = useApp((s) => s.themeChoice)
   const setThemeChoice = useApp((s) => s.setThemeChoice)
@@ -144,7 +147,7 @@ export default function App() {
           {theme === 'light' ? '☾' : '☀'}
         </button>
       </header>
-      <main>
+      <main style={{ '--bar-inset': `${barHeight + 12}px` } as CSSProperties}>
         <Suspense fallback={null}>
           <MapView
             theme={theme}
@@ -173,6 +176,7 @@ export default function App() {
           onSlot={setSlot}
         />
         <TimeBar
+          ref={bar}
           date={date}
           days={days}
           slot={slot}

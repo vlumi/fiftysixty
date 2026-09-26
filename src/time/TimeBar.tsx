@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, type Ref } from 'react'
 import { useStrings } from '../i18n/useStrings'
 import { useApp } from '../store'
 import { SLOTS } from '../market/jepx'
@@ -19,6 +19,7 @@ interface Props {
   onDate: (date: string) => void
   onSlot: (slot: number) => void
   onPlay: () => void
+  ref?: Ref<HTMLDivElement>
 }
 
 /**
@@ -28,7 +29,7 @@ interface Props {
  * through the day at four half hours a second, and a word for where the half hour stands; on today,
  * whether it is now or still ahead, since the price is known before the record.
  */
-export default function TimeBar({ date, days, slot, now, playing, stories, onDate, onSlot, onPlay }: Props) {
+export default function TimeBar({ date, days, slot, now, playing, stories, onDate, onSlot, onPlay, ref }: Props) {
   const s = useStrings()
   const lang = useApp((x) => x.lang)
   const picker = useRef<HTMLInputElement>(null)
@@ -50,7 +51,7 @@ export default function TimeBar({ date, days, slot, now, playing, stories, onDat
               ? s.time.daysAgo(-stands.offset)
               : s.time.daysAhead(stands.offset)
   return (
-    <div className={styles.bar} data-timebar>
+    <div className={styles.bar} data-timebar ref={ref}>
       <button aria-label={s.time.previousDay} disabled={!previous} onClick={() => previous && onDate(previous)}>
         ‹
       </button>

@@ -18,6 +18,45 @@
   font-weight: 600;
 }
 
+.head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.fold {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+button.fold {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 0.6rem;
+  cursor: pointer;
+}
+
+button.fold h2,
+button.fold .price {
+  margin: 0;
+}
+
+button.fold .price {
+  font-size: 1.1rem;
+}
+
+.chevron {
+  margin-left: auto;
+  color: var(--muted);
+}
+
 .panel p {
   margin: 0.25rem 0 0;
 }
@@ -49,9 +88,8 @@
 }
 
 .close {
-  position: absolute;
-  top: 0.4rem;
-  right: 0.5rem;
+  flex: none;
+  margin: -0.2rem -0.3rem 0 0;
   border: 0;
   background: none;
   color: var(--muted);
@@ -64,26 +102,15 @@
   color: var(--text);
 }
 
-.more {
-  margin-top: 0.5rem;
-  padding: 0.1rem 0.6rem;
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-  background: none;
-  color: var(--muted);
-  font: inherit;
-  font-size: 0.75rem;
-  cursor: pointer;
-}
-
+/* On a phone the panel leaves the map's controls clear on the right, and folds to its headline row. */
 @media (max-width: 720px), (max-height: 560px) {
   .panel {
     top: 0.5rem;
     left: 0.5rem;
-    right: 0.5rem;
+    right: 3.25rem;
     width: auto;
     max-height: 60%;
-    padding: 0.5rem 0.75rem;
+    padding: 0.4rem 0.6rem;
   }
 
   .price {
