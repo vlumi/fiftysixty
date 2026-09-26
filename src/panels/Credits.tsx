@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useStrings } from '../i18n/useStrings'
+import CloseButton from './CloseButton'
 import styles from './Credits.module.css'
 
 /** Where the map, the shapes and the figures come from, behind the header's ⓘ; the map's own attribution is off. */
@@ -21,9 +22,7 @@ export default function Credits({ onClose }: { onClose: () => void }) {
         aria-labelledby="credits-title"
         onClick={(e) => e.stopPropagation()}
       >
-        <button className={styles.close} aria-label={s.close} onClick={onClose}>
-          ×
-        </button>
+        <CloseButton onClick={onClose} />
         <h2 id="credits-title">{s.credits.title}</h2>
         <dl className={styles.rows}>
           <dt>{s.credits.map}</dt>
