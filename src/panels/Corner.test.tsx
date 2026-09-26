@@ -30,3 +30,9 @@ test('on a phone both start folded', () => {
   expect(screen.queryByRole('figure', { name: 'Key' })).not.toBeInTheDocument()
   expect(screen.queryByRole('region', { name: 'Plants' })).not.toBeInTheDocument()
 })
+
+test('an open panel has a close button of its own', async () => {
+  render(<Corner {...props} />)
+  await userEvent.click(screen.getByRole('button', { name: 'Close' }))
+  expect(screen.queryByRole('figure', { name: 'Key' })).not.toBeInTheDocument()
+})

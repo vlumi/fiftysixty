@@ -27,15 +27,23 @@ export default function Corner({ palette, plants, hiddenFuels, onToggleFuel, onH
   const toggle = (which: Exclude<Open, null>) => setOpen((o) => (o === which ? null : which))
   return (
     <div className={styles.corner}>
-      {open === 'key' && <Legend palette={palette} />}
-      {open === 'plants' && (
-        <PlantsPanel
-          plants={plants}
-          hiddenFuels={hiddenFuels}
-          onToggle={onToggleFuel}
-          onHide={onHideFuels}
-          shown={plantsShown}
-        />
+      {open && (
+        <div className={styles.sheet}>
+          <button className={styles.close} aria-label={s.readout.close} onClick={() => setOpen(null)}>
+            ×
+          </button>
+          {open === 'key' ? (
+            <Legend palette={palette} />
+          ) : (
+            <PlantsPanel
+              plants={plants}
+              hiddenFuels={hiddenFuels}
+              onToggle={onToggleFuel}
+              onHide={onHideFuels}
+              shown={plantsShown}
+            />
+          )}
+        </div>
       )}
       <div className={styles.buttons}>
         <button className={styles.toggle} aria-expanded={open === 'plants'} onClick={() => toggle('plants')}>

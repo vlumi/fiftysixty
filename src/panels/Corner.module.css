@@ -9,6 +9,27 @@
   gap: 0.35rem;
 }
 
+.sheet {
+  position: relative;
+}
+
+.close {
+  position: absolute;
+  top: 0.15rem;
+  right: 0.35rem;
+  z-index: 1;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.close:hover {
+  color: var(--text);
+}
+
 .buttons {
   display: flex;
   gap: 0.35rem;
