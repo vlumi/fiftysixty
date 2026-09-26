@@ -165,3 +165,11 @@ main > .map {
 .muted {
   color: var(--muted);
 }
+
+/* On a phone the time bar spans the foot, so the map's own controls there move up above it. */
+@media (max-width: 720px), (max-height: 560px) {
+  main .maplibregl-ctrl-bottom-right,
+  main .maplibregl-ctrl-bottom-left {
+    bottom: var(--bar-inset, 0px);
+  }
+}

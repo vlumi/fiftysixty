@@ -53,6 +53,6 @@
 @media (max-width: 720px), (max-height: 560px) {
   .corner {
     right: 0.5rem;
-    bottom: 9rem;
+    bottom: calc(var(--bar-inset, 0px) + 2.5rem);
   }
 }
