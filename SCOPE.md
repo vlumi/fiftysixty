@@ -57,7 +57,7 @@ Toolchain, CI, a map of Japan under the name, the data fetcher for JEPX and TEPC
 
 ### M5 — closer in (done 2026-09-25)
 
-- The plants by fuel and capacity at higher zoom, honest about showing capacity and not output: from OpenStreetMap, the 408 tagged with an output of 10 MW or more (done 2026-09-25).
+- The plants by fuel and capacity at higher zoom, honest about showing capacity and not output: from OpenStreetMap, the 419 tagged with an output of 10 MW or more (done 2026-09-25).
 - Phone layout (the key and the readout fold to a button and a headline), light theme, English and Japanese interfaces, following the nebulosa patterns.
 
 ## Non-goals

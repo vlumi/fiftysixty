@@ -15,6 +15,8 @@ import { fileURLToPath } from 'node:url'
 const OVERPASS = ['https://overpass.kumi.systems/api/interpreter', 'https://overpass-api.de/api/interpreter']
 const QUERY = `[out:json][timeout:240];area["ISO3166-1"="JP"]["admin_level"="2"]->.jp;nwr["power"="plant"]["plant:output:electricity"](area.jp);out tags center;`
 const MIN_MW = 10
+// The main servers answer 406 to a request without a User-Agent that says who is asking.
+const USER_AGENT = 'fiftysixty/0.0 (+https://github.com/vlumi/fiftysixty)'
 const OUT = join(dirname(fileURLToPath(import.meta.url)), '..', 'public', 'geo', 'plants.geojson')
 
 /** OpenStreetMap's plant:source values onto the chart's series; a list of sources counts by its first. */
@@ -45,7 +47,11 @@ async function ask() {
   if (saved) return JSON.parse(await readFile(saved, 'utf8'))
   let last = ''
   for (const url of OVERPASS) {
-    const response = await fetch(url, { method: 'POST', body: `data=${encodeURIComponent(QUERY)}` })
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'User-Agent': USER_AGENT, 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `data=${encodeURIComponent(QUERY)}`,
+    })
     if (response.ok) return response.json()
     last = `${url}: ${response.status}`
     console.warn(last)
