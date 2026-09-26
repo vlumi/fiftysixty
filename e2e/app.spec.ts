@@ -49,7 +49,7 @@ test('a click on Tokyo reads out its price against the system and its neighbors,
   await chart.focus()
   await page.keyboard.press('ArrowRight')
   await expect(page.getByRole('status')).toHaveText('Yesterday 00:30–01:00 JST')
-  await readout.getByRole('button', { name: 'Close' }).click()
+  await readout.getByRole('button', { name: 'Back' }).click()
   await expect(readout).toContainText('System price')
 })
 

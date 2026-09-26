@@ -45,7 +45,7 @@ export interface Strings {
   stories: { name: Record<StoryId, string>; note: Record<StoryId, (value: number, other?: number) => string> }
   readout: {
     label: string
-    close: string
+    back: string
     systemPrice: string
     yenPerKwh: string
     spread: (low: string, high: string) => string
@@ -145,7 +145,7 @@ const en: Strings = {
   },
   readout: {
     label: 'Readout',
-    close: 'Close',
+    back: 'Back',
     systemPrice: 'System price',
     yenPerKwh: '¥/kWh',
     spread: (low, high) => `Areas from ${low} to ${high}.`,
@@ -278,7 +278,7 @@ const ja: Strings = {
   },
   readout: {
     label: '詳細',
-    close: '閉じる',
+    back: '戻る',
     systemPrice: 'システムプライス',
     yenPerKwh: '円/kWh',
     spread: (low, high) => `エリアプライスは ${low}〜${high}。`,

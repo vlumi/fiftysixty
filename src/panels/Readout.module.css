@@ -53,8 +53,27 @@ button.fold .price {
 }
 
 .chevron {
+  display: flex;
+  align-self: center;
   margin-left: auto;
   color: var(--muted);
+}
+
+.back {
+  flex: none;
+  display: flex;
+  margin: -0.1rem 0 0 -0.35rem;
+  padding: 0.1rem;
+  border: 0;
+  border-radius: 0.35rem;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.back:hover {
+  color: var(--text);
+  background: var(--hover);
 }
 
 .panel p {
@@ -85,21 +104,6 @@ button.fold .price {
 .rows dd {
   margin: 0;
   text-align: right;
-}
-
-.close {
-  flex: none;
-  margin: -0.2rem -0.3rem 0 0;
-  border: 0;
-  background: none;
-  color: var(--muted);
-  font-size: 1.1rem;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.close:hover {
-  color: var(--text);
 }
 
 /* On a phone the panel leaves the map's controls clear on the right, and folds to its headline row. */

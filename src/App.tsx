@@ -175,7 +175,7 @@ export default function App() {
           flows={flows}
           area={area}
           plant={plant}
-          onClose={() => (plant ? pickPlant(null) : selectArea(null))}
+          onBack={() => (plant ? pickPlant(null) : selectArea(null))}
           onSlot={setSlot}
         />
         <TimeBar
