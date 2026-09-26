@@ -62,7 +62,7 @@ button.fold .price {
 .back {
   flex: none;
   display: flex;
-  margin: -0.1rem 0 0 -0.35rem;
+  margin: 0;
   padding: 0.1rem;
   border: 0;
   border-radius: 0.35rem;
