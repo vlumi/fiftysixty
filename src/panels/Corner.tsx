@@ -29,7 +29,7 @@ export default function Corner({ palette, plants, hiddenFuels, onToggleFuel, onH
     <div className={styles.corner}>
       {open && (
         <div className={styles.sheet}>
-          <button className={styles.close} aria-label={s.readout.close} onClick={() => setOpen(null)}>
+          <button className={styles.close} aria-label={s.close} onClick={() => setOpen(null)}>
             ×
           </button>
           {open === 'key' ? (

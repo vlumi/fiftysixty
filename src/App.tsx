@@ -6,6 +6,7 @@ import { stories } from './market/stories'
 import { loadRecord, monthOf, recordSlot, type RecordDays, type RecordSlot } from './market/record'
 import type { Area } from './regions/areas'
 import Corner from './panels/Corner'
+import Credits from './panels/Credits'
 import Readout from './panels/Readout'
 import { loadRegions, type Regions } from './regions/geometry'
 import { loadPlants, type Plants } from './regions/plants'
@@ -63,6 +64,7 @@ export default function App() {
   const lang = useApp((s) => s.lang)
   const setLang = useApp((s) => s.setLang)
   const words = useStrings()
+  const [credits, setCredits] = useState(false)
   useEffect(() => {
     document.documentElement.lang = lang
   }, [lang])
@@ -146,7 +148,11 @@ export default function App() {
         >
           {theme === 'light' ? '☾' : '☀'}
         </button>
+        <button className="about" aria-label={words.credits.label} onClick={() => setCredits(true)}>
+          ⓘ
+        </button>
       </header>
+      {credits && <Credits onClose={() => setCredits(false)} />}
       <main style={{ '--bar-inset': `${barHeight + 12}px` } as CSSProperties}>
         <Suspense fallback={null}>
           <MapView

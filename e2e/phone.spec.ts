@@ -11,7 +11,9 @@ test('on a phone the map fills the screen below the name, the key folded until a
   await expect(page.getByRole('figure', { name: 'Key' })).toBeVisible()
 })
 
-test('on a phone a picked area opens on its headline, the rest a tap away', async ({ page }) => {
+test('on a phone a picked area opens on its headline row, the rest a tap on it away, the compass clear and the credits in the header', async ({
+  page,
+}) => {
   await open(page)
   await page.getByLabel('Delivery day').fill('2026-09-25')
   await page.getByRole('slider', { name: 'Half hour' }).fill('1')
@@ -22,5 +24,8 @@ test('on a phone a picked area opens on its headline, the rest a tap away', asyn
   await readout.getByRole('button', { expanded: false }).click()
   await expect(readout.getByRole('region', { name: 'What ran' })).toBeVisible()
   await expect(page.locator('.maplibregl-ctrl-compass')).toBeVisible()
-  await expect(page.locator('.maplibregl-ctrl-attrib-button')).toBeVisible()
+  await page.getByRole('button', { name: 'About and credits' }).click()
+  await expect(page.getByRole('dialog', { name: 'Credits' })).toContainText('OpenStreetMap')
+  await page.getByRole('dialog').getByRole('button', { name: 'Close' }).click()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
 })

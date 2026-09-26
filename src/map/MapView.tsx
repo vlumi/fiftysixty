@@ -1,6 +1,5 @@
 import { MapLibreOverlay } from '@deck.gl/maplibre'
 import { Map as MapLibre, Marker, NavigationControl, setWorkerUrl } from 'maplibre-gl'
-import { NARROW_QUERY } from '../shared/useNarrow'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import { useEffect, useRef, useState } from 'react'
@@ -18,9 +17,6 @@ import MixGlyph from './MixGlyph'
 
 // MapLibre 6 resolves its worker relative to its own script URL, which a bundled app does not provide.
 setWorkerUrl(maplibreWorkerUrl)
-
-const GEOMETRY_CREDIT =
-  '<a href="https://www.gsi.go.jp/kankyochiri/gm_jpn.html">地球地図日本</a> (GSI) via dataofjapan/land'
 
 interface Props extends LayerOptions {
   theme: Theme
@@ -70,14 +66,10 @@ export default function MapView({
       container: container.current,
       style: BASEMAPS[styled.current],
       bounds: JAPAN_BOUNDS,
-      attributionControl: { compact: true, customAttribution: GEOMETRY_CREDIT },
+      attributionControl: false,
       canvasContextAttributes: { antialias: true },
     })
     map.addControl(new NavigationControl({ visualizePitch: false }), 'top-right')
-    // The credits open across the whole width of a phone, over the corner's buttons, until the first drag folds them.
-    if (window.matchMedia?.(NARROW_QUERY).matches) {
-      container.current.querySelector('.maplibregl-ctrl-attrib')?.classList.remove('maplibregl-compact-show')
-    }
     map.on('style.load', () => labelLanguage(map, pick.current.lang))
     setMap(map)
     setZoom(map.getZoom())

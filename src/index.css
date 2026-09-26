@@ -132,7 +132,8 @@ header .lang:hover {
   background: var(--hover);
 }
 
-header .theme {
+header .theme,
+header .about {
   flex: none;
   padding: 0 0.5rem;
   border: 1px solid var(--border);
@@ -144,7 +145,8 @@ header .theme {
   cursor: pointer;
 }
 
-header .theme:hover {
+header .theme:hover,
+header .about:hover {
   color: var(--text);
   background: var(--hover);
 }
@@ -164,12 +166,4 @@ main > .map {
 
 .muted {
   color: var(--muted);
-}
-
-/* On a phone the time bar spans the foot, so the map's own controls there move up above it. */
-@media (max-width: 720px), (max-height: 560px) {
-  main .maplibregl-ctrl-bottom-right,
-  main .maplibregl-ctrl-bottom-left {
-    bottom: var(--bar-inset, 0px);
-  }
 }

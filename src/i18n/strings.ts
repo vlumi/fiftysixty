@@ -10,6 +10,19 @@ export const LANGS: readonly Lang[] = ['en', 'ja']
 export interface Strings {
   subtitle: string
   theme: { toLight: string; toDark: string }
+  close: string
+  credits: {
+    label: string
+    title: string
+    map: string
+    regions: string
+    plants: string
+    prices: string
+    records: string
+    recordsBy: string
+    lines: string
+    source: string
+  }
   language: { label: string; other: string }
   time: {
     day: string
@@ -83,6 +96,19 @@ export interface Strings {
 const en: Strings = {
   subtitle: 'The Japanese power market on a map',
   theme: { toLight: 'Switch to the light theme', toDark: 'Switch to the dark theme' },
+  close: 'Close',
+  credits: {
+    label: 'About and credits',
+    title: 'Credits',
+    map: 'Map',
+    regions: 'Areas',
+    plants: 'Plants',
+    prices: 'Prices',
+    records: 'Supply and demand',
+    recordsBy: "The nine transmission companies, in OCCTO's format",
+    lines: 'Interconnectors',
+    source: 'Source on GitHub',
+  },
   language: { label: 'Language', other: '日本語' },
   time: {
     day: 'Delivery day',
@@ -204,6 +230,19 @@ const en: Strings = {
 const ja: Strings = {
   subtitle: '地図で見る日本の電力市場',
   theme: { toLight: 'ライトテーマにする', toDark: 'ダークテーマにする' },
+  close: '閉じる',
+  credits: {
+    label: '情報とクレジット',
+    title: 'クレジット',
+    map: '地図',
+    regions: 'エリア',
+    plants: '発電所',
+    prices: '価格',
+    records: '需給実績',
+    recordsBy: '一般送配電事業者9社、OCCTO の様式で',
+    lines: '連系線',
+    source: 'GitHub のソース',
+  },
   language: { label: '言語', other: 'English' },
   time: {
     day: '受渡日',

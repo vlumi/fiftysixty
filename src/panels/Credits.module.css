@@ -1,0 +1,68 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgb(0 0 0 / 0.5);
+}
+
+.dialog {
+  position: relative;
+  width: 100%;
+  max-width: 24rem;
+  max-height: 100%;
+  overflow: auto;
+  padding: 1rem 1.25rem;
+  border-radius: 0.75rem;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 0.875rem;
+}
+
+.dialog h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.dialog a {
+  color: inherit;
+}
+
+.close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.75rem;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.close:hover {
+  color: var(--text);
+}
+
+.rows {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.35rem 1rem;
+  margin: 0;
+}
+
+.rows dt {
+  color: var(--muted);
+}
+
+.rows dd {
+  margin: 0;
+}
+
+.source {
+  margin: 1rem 0 0;
+}
