@@ -10,7 +10,6 @@ import Credits from './panels/Credits'
 import Readout from './panels/Readout'
 import { loadRegions, type Regions } from './regions/geometry'
 import { loadPlants, type Plants } from './regions/plants'
-import { PLANTS_FROM_ZOOM } from './map/plantLayers'
 import { useApp } from './store'
 import { jstDate, openingDay } from './time/days'
 import { useStrings } from './i18n/useStrings'
@@ -28,7 +27,6 @@ const REFRESH_MS = 30 * 60_000
 export default function App() {
   const [regions, setRegions] = useState<Regions | null>(null)
   const [plants, setPlants] = useState<Plants | null>(null)
-  const [zoom, setZoom] = useState(5)
   const [spot, setSpot] = useState<SpotDays | null>(null)
   const [records, setRecords] = useState<ReadonlyMap<string, RecordDays | null>>(new Map())
   const [flowMonths, setFlowMonths] = useState<ReadonlyMap<string, FlowDays | null>>(new Map())
@@ -168,7 +166,6 @@ export default function App() {
             mixes={mixes}
             onPick={selectArea}
             onPickPlant={pickPlant}
-            onZoom={(z) => setZoom((was) => (was >= PLANTS_FROM_ZOOM === z >= PLANTS_FROM_ZOOM ? was : z))}
           />
         </Suspense>
         <Readout
@@ -199,7 +196,6 @@ export default function App() {
           hiddenFuels={hiddenFuels}
           onToggleFuel={toggleFuel}
           onHideFuels={setHiddenFuels}
-          plantsShown={zoom >= PLANTS_FROM_ZOOM}
         />
       </main>
     </>

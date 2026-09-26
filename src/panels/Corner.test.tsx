@@ -11,7 +11,6 @@ const props = {
   hiddenFuels: [],
   onToggleFuel: vi.fn(),
   onHideFuels: vi.fn(),
-  plantsShown: true,
 }
 
 test('the key is open by default on a wide screen; Plants takes its place and Key folds it away', async () => {

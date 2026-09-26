@@ -29,8 +29,6 @@ interface Props extends LayerOptions {
   onPick: (area: Area | null) => void
   /** A click on a plant's dot. */
   onPickPlant: (id: string) => void
-  /** The map's zoom as it changes, for whoever shows what depends on it. */
-  onZoom?: (zoom: number) => void
 }
 
 /** The basemap over Japan with the market layers interleaved into it. */
@@ -47,7 +45,6 @@ export default function MapView({
   mixes = {},
   onPick,
   onPickPlant,
-  onZoom,
 }: Props) {
   const container = useRef<HTMLDivElement>(null)
   const overlay = useRef<MapLibreOverlay>(null)
@@ -55,10 +52,10 @@ export default function MapView({
   const [zoom, setZoom] = useState(5)
   // The theme the basemap was styled for last; the map is created with it and restyled when it changes.
   const styled = useRef(theme)
-  const pick = useRef({ onPick, onPickPlant, onZoom, lang })
+  const pick = useRef({ onPick, onPickPlant, lang })
   useEffect(() => {
-    pick.current = { onPick, onPickPlant, onZoom, lang }
-  }, [onPick, onPickPlant, onZoom, lang])
+    pick.current = { onPick, onPickPlant, lang }
+  }, [onPick, onPickPlant, lang])
 
   useEffect(() => {
     if (!container.current) return
@@ -73,10 +70,8 @@ export default function MapView({
     map.on('style.load', () => labelLanguage(map, pick.current.lang))
     setMap(map)
     setZoom(map.getZoom())
-    pick.current.onZoom?.(map.getZoom())
     map.on('zoom', () => {
       setZoom(map.getZoom())
-      pick.current.onZoom?.(map.getZoom())
     })
     overlay.current = new MapLibreOverlay({
       interleaved: true,

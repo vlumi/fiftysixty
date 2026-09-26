@@ -82,20 +82,12 @@ test('a click reports the area under it, or none for the sea', () => {
   expect(onPick).toHaveBeenLastCalledWith(null)
 })
 
-test('a click on a plant reports the plant, and the zoom is reported as it changes', () => {
+test('a click on a plant reports the plant', () => {
   const onPickPlant = vi.fn()
-  const onZoom = vi.fn()
-  render(
-    <MapView theme="dark" lang="en" regions={regions} onPick={vi.fn()} onPickPlant={onPickPlant} onZoom={onZoom} />,
-  )
+  render(<MapView theme="dark" lang="en" regions={regions} onPick={vi.fn()} onPickPlant={onPickPlant} />)
   const onClick = MapLibreOverlay.mock.lastCall![0].onClick!
   onClick({ object: { properties: { id: 'way/1', name: 'x', fuel: 'coal', mw: 100 } } })
   expect(onPickPlant).toHaveBeenCalledWith('way/1')
-  expect(onZoom).toHaveBeenCalledWith(5)
-  onZoom.mockClear()
-  const zoomed = mapInstance.on.mock.calls.find((c) => c[0] === 'zoom')![1] as () => void
-  zoomed()
-  expect(onZoom).toHaveBeenCalledWith(5)
 })
 
 test('a recorded area gets a glyph on its anchor, which picks the area, and loses it when the record goes', () => {

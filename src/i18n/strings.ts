@@ -86,7 +86,6 @@ export interface Strings {
     split: string
     all: string
     none: string
-    zoomIn: string
     fuel: Record<Series, string>
     count: (n: number) => string
     mix: (area: string) => string
@@ -211,7 +210,6 @@ const en: Strings = {
     split: 'split',
     all: 'All',
     none: 'None',
-    zoomIn: 'zoom in to see them',
     fuel: {
       coal: 'Coal',
       nuclear: 'Nuclear',
@@ -345,7 +343,6 @@ const ja: Strings = {
     split: '分断',
     all: '全て',
     none: 'なし',
-    zoomIn: '拡大すると表示',
     fuel: {
       coal: '石炭',
       nuclear: '原子力',

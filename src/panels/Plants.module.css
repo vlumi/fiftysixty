@@ -7,7 +7,6 @@
 }
 
 .all {
-  padding-right: 1.4rem;
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -28,13 +27,6 @@
 .all button:disabled {
   color: var(--muted);
   cursor: default;
-}
-
-.hint {
-  margin-left: auto;
-  color: var(--muted);
-  font-size: 0.75rem;
-  font-style: italic;
 }
 
 .fuel {
