@@ -79,9 +79,10 @@ export function triangleFlows(flows: ReadonlyMap<string, FlowSlot>): FlowDatum[]
 const MW_PER_PX = 1000
 const MIN_PX = 1
 const RIM_PX = 4
-/** How far along the line the shaft starts, clear of the column it leaves, and where it ends and the head begins. */
-const SHAFT_FROM = 0.07
-const HEAD_AT = 0.78
+/** Half the width and the height, in pixels with a margin, of the column a glyph draws over an anchor; the arrows keep clear of it at both ends. */
+const COLUMN_HALF_PX = [12, 48]
+/** The most of a line the clearances and the head may take, so the shaft keeps the rest of a short line. */
+const CLEAR_SHARE = 0.6
 
 /** The line's width on screen, a pixel plus one per gigawatt. */
 export const widthOf = (d: FlowDatum) => MIN_PX + d.mw / MW_PER_PX
@@ -105,33 +106,55 @@ const HEAD_ICON = {
   },
 }
 
-const along = ([[x1, y1], [x2, y2]]: FlowDatum['path'], t: number): [number, number] => [
-  x1 + (x2 - x1) * t,
-  y1 + (y2 - y1) * t,
-]
-
-/** The shaft, from a little off the start to where the head begins. */
-export function shaft(path: FlowDatum['path']): FlowDatum['path'] {
-  return [along(path, SHAFT_FROM), along(path, HEAD_AT)]
-}
-
 /** Degrees of longitude per screen pixel at a zoom, on MapLibre's 512-pixel tiles. */
 export const degreesPerPixel = (zoom: number) => 360 / (512 * 2 ** zoom)
+
+/** The line in screen pixels at the zoom: its heading as a unit vector, its length, and the degrees a pixel spans each way. */
+function frame([[x1, y1], [x2, y2]]: FlowDatum['path'], zoom: number) {
+  const perPixel = degreesPerPixel(zoom)
+  const lat = ((y1 + y2) / 2) * (Math.PI / 180)
+  const dLon = perPixel
+  const dLat = perPixel * Math.cos(lat)
+  const px = (x2 - x1) / dLon
+  const py = (y2 - y1) / dLat
+  const length = Math.hypot(px, py) || 1
+  return { dLon, dLat, ux: px / length, uy: py / length, length }
+}
+
+/** How far, in pixels, a line heading `ux, uy` runs from an anchor before it is out of the column drawn over it. */
+function clearance(ux: number, uy: number): number {
+  return Math.min(COLUMN_HALF_PX[0] / Math.abs(ux || 1e-9), COLUMN_HALF_PX[1] / Math.abs(uy || 1e-9))
+}
+
+/**
+ * Where the shaft starts and where it ends and the head begins: each end clear of the column at its anchor, the
+ * head's own length clear too, in pixels so a phone's smaller map does not tuck the heads under the columns; a line
+ * too short for both keeps two fifths of itself as the shaft.
+ */
+export function shaftEnds(d: FlowDatum, zoom: number): FlowDatum['path'] {
+  const { dLon, dLat, ux, uy, length } = frame(d.path, zoom)
+  const clear = clearance(ux, uy)
+  let start = clear
+  let end = clear + headSize(d)
+  const room = length * CLEAR_SHARE
+  if (start + end > room) {
+    const share = room / (start + end)
+    start *= share
+    end *= share
+  }
+  const [x1, y1] = d.path[0]
+  const at = (pixels: number): [number, number] => [x1 + ux * pixels * dLon, y1 + uy * pixels * dLat]
+  return [at(start), at(length - end)]
+}
 
 /**
  * The shaft as one solid shape: a hair wide where the power leaves, the flow's width where the head begins, its
  * widths turned from pixels into degrees at the map's zoom, so it is rebuilt as the map zooms and never has a joint.
  */
 export function taperPolygon(d: FlowDatum, zoom: number, extraPx = 0): [number, number][] {
-  const [from, to] = shaft(d.path)
-  const perPixel = degreesPerPixel(zoom)
-  const lat = ((from[1] + to[1]) / 2) * (Math.PI / 180)
-  const dLon = perPixel
-  const dLat = perPixel * Math.cos(lat)
-  const px = (to[0] - from[0]) / dLon
-  const py = (to[1] - from[1]) / dLat
-  const length = Math.hypot(px, py) || 1
-  const normal = [-py / length, px / length]
+  const [from, to] = shaftEnds(d, zoom)
+  const { dLon, dLat, ux, uy } = frame(d.path, zoom)
+  const normal = [-uy, ux]
   const offset = (p: [number, number], pixels: number): [number, number] => [
     p[0] + normal[0] * pixels * dLon,
     p[1] + normal[1] * pixels * dLat,
@@ -161,7 +184,7 @@ export function buildFlowLayers(
   const data = flowData(flows)
   if (!data.length) return []
   const color = (d: FlowDatum): Rgba => [...lerpRgb(palette.flow.idle, palette.flow.full, d.load), 230]
-  const head = (d: FlowDatum): [number, number] => shaft(d.path)[1]
+  const head = (d: FlowDatum): [number, number] => shaftEnds(d, zoom)[1]
   return [
     new SolidPolygonLayer<FlowDatum, Interleaved>({
       id: 'flow-splits',
@@ -192,7 +215,7 @@ export function buildFlowLayers(
       getSize: headSize,
       sizeUnits: 'pixels',
       billboard: false,
-      updateTriggers: { getColor: palette },
+      updateTriggers: { getPosition: zoom, getColor: palette },
     }),
   ]
 }
