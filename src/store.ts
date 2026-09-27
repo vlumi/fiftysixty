@@ -5,6 +5,7 @@ import { SLOTS } from './market/jepx'
 import type { Series } from './market/stack'
 import { loadLang, saveLang, type Lang } from './i18n/strings'
 import { loadThemeChoice, saveThemeChoice, type ThemeChoice } from './shared/theme'
+import { loadLayerChoice, saveLayerChoice, type LayerChoice, type MapLayer } from './map/layerChoice'
 
 /** What the reader has chosen: the delivery day (null for the opening day), the half hour, the area or a plant, and whether the day plays. */
 interface State {
@@ -14,6 +15,8 @@ interface State {
   /** A picked plant, by its OpenStreetMap id; picking one lets the area go, and the other way round. */
   plant: string | null
   playing: boolean
+  /** Which of the arrows, the columns and the plants the map draws. */
+  layers: LayerChoice
   /** The fuels whose plants are hidden from the map. */
   hiddenFuels: Series[]
   themeChoice: ThemeChoice
@@ -25,6 +28,7 @@ interface Actions {
   setSlot: (slot: number) => void
   selectArea: (area: Area | null) => void
   pickPlant: (plant: string | null) => void
+  toggleLayer: (layer: MapLayer) => void
   toggleFuel: (fuel: Series) => void
   setHiddenFuels: (fuels: Series[]) => void
   setThemeChoice: (choice: ThemeChoice) => void
@@ -40,6 +44,7 @@ const initial = (): State => ({
   area: null,
   plant: null,
   playing: false,
+  layers: loadLayerChoice(),
   hiddenFuels: [],
   themeChoice: loadThemeChoice(),
   lang: loadLang(),
@@ -54,6 +59,7 @@ export const useApp = create<State & Actions>((set) => ({
   setHiddenFuels: (hiddenFuels) => set({ hiddenFuels }),
   setThemeChoice: (themeChoice) => set({ themeChoice }),
   setLang: (lang) => set({ lang }),
+  toggleLayer: (layer) => set((s) => ({ layers: { ...s.layers, [layer]: !s.layers[layer] } })),
   toggleFuel: (fuel) =>
     set((s) => ({
       hiddenFuels: s.hiddenFuels.includes(fuel) ? s.hiddenFuels.filter((f) => f !== fuel) : [...s.hiddenFuels, fuel],
@@ -71,6 +77,7 @@ export const useApp = create<State & Actions>((set) => ({
 useApp.subscribe((s, previous) => {
   if (s.themeChoice !== previous.themeChoice) saveThemeChoice(s.themeChoice)
   if (s.lang !== previous.lang) saveLang(s.lang)
+  if (s.layers !== previous.layers) saveLayerChoice(s.layers)
 })
 
 export const resetApp = () => useApp.setState(initial())
