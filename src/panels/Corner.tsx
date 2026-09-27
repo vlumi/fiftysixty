@@ -7,20 +7,31 @@ import { useNarrow } from '../shared/useNarrow'
 import CloseButton from './CloseButton'
 import styles from './Corner.module.css'
 import Legend from './Legend'
-import PlantsPanel from './Plants'
+import type { LayerChoice, MapLayer } from '../map/layerChoice'
+import LayersPanel from './Layers'
 
-type Open = 'key' | 'plants' | null
+type Open = 'key' | 'layers' | null
 
 interface Props {
   palette: Palette
+  layers: LayerChoice
+  onToggleLayer: (layer: MapLayer) => void
   plants: Plants | null
   hiddenFuels: readonly Series[]
   onToggleFuel: (fuel: Series) => void
   onHideFuels: (fuels: Series[]) => void
 }
 
-/** The bottom corner: a Key and a Plants button, one panel open above them at a time, the key open by default on a wide screen. */
-export default function Corner({ palette, plants, hiddenFuels, onToggleFuel, onHideFuels }: Props) {
+/** The bottom corner: a Layers and a Key button, one panel open above them at a time, the key open by default on a wide screen. */
+export default function Corner({
+  palette,
+  layers,
+  onToggleLayer,
+  plants,
+  hiddenFuels,
+  onToggleFuel,
+  onHideFuels,
+}: Props) {
   const s = useStrings()
   const narrow = useNarrow()
   const [open, setOpen] = useState<Open>(narrow ? null : 'key')
@@ -33,13 +44,20 @@ export default function Corner({ palette, plants, hiddenFuels, onToggleFuel, onH
           {open === 'key' ? (
             <Legend palette={palette} />
           ) : (
-            <PlantsPanel plants={plants} hiddenFuels={hiddenFuels} onToggle={onToggleFuel} onHide={onHideFuels} />
+            <LayersPanel
+              layers={layers}
+              onToggleLayer={onToggleLayer}
+              plants={plants}
+              hiddenFuels={hiddenFuels}
+              onToggle={onToggleFuel}
+              onHide={onHideFuels}
+            />
           )}
         </div>
       )}
       <div className={styles.buttons}>
-        <button className={styles.toggle} aria-expanded={open === 'plants'} onClick={() => toggle('plants')}>
-          {s.key.plants}
+        <button className={styles.toggle} aria-expanded={open === 'layers'} onClick={() => toggle('layers')}>
+          {s.key.layers}
         </button>
         <button className={styles.toggle} aria-expanded={open === 'key'} onClick={() => toggle('key')}>
           {s.key.key}

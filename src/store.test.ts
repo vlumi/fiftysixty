@@ -63,6 +63,14 @@ test('a fuel is hidden and shown again', () => {
   expect(useApp.getState().hiddenFuels).toEqual([])
 })
 
+test('a layer is switched off and on, and the choice is kept for the next visit', () => {
+  useApp.getState().toggleLayer('plants')
+  expect(useApp.getState().layers).toEqual({ flows: true, mixes: true, plants: true })
+  expect(JSON.parse(localStorage.getItem('fiftysixty.layers')!)).toEqual({ flows: true, mixes: true, plants: true })
+  useApp.getState().toggleLayer('plants')
+  expect(localStorage.getItem('fiftysixty.layers')).toBeNull()
+})
+
 test('the theme choice is kept for the next visit', () => {
   useApp.getState().setThemeChoice('light')
   expect(localStorage.getItem('fiftysixty.theme')).toBe('light')

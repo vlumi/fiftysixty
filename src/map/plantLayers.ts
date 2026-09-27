@@ -6,15 +6,16 @@ import type { PlantProps, Plants } from '../regions/plants'
 import type { Palette, Rgba } from '../shared/palette'
 import type { Interleaved } from './layers'
 
-/** The zoom from which the plants show; further out they would only crowd the columns. */
-export const PLANTS_FROM_ZOOM = 6
-
 type PlantFeature = Feature<Point, PlantProps>
 
-/** A dot's radius on screen: a few pixels plus the square root of the capacity, so area follows capacity. */
-export const plantRadius = (mw: number) => 3 + Math.sqrt(mw) / 4
+/** The zoom at which the dots are full size; further out they shrink with the map, to a pixel and a half at least. */
+const FULL_SIZE_ZOOM = 6
 
-/** The plants as dots colored by fuel and sized by capacity, drawn once the map is close enough. */
+/** A dot's radius on screen: a few pixels plus the square root of the capacity, so area follows capacity, shrunk when far out. */
+export const plantRadius = (mw: number, zoom = FULL_SIZE_ZOOM) =>
+  Math.max(1.5, (3 + Math.sqrt(mw) / 4) * Math.min(1, 2 ** (zoom - FULL_SIZE_ZOOM)))
+
+/** The plants as dots colored by fuel and sized by capacity, smaller the further out the map is. */
 export function buildPlantLayers(
   plants: Plants | null,
   palette: Palette,
@@ -23,14 +24,14 @@ export function buildPlantLayers(
   hiddenFuels: readonly Series[] = [],
   beforeId = 'water_name',
 ): Layer[] {
-  if (!plants || zoom < PLANTS_FROM_ZOOM) return []
+  if (!plants) return []
   return [
     new ScatterplotLayer<PlantFeature, Interleaved>({
       id: 'plants',
       beforeId,
       data: plants.features.filter((f) => !hiddenFuels.includes(f.properties.fuel)),
       getPosition: (f) => f.geometry.coordinates as [number, number],
-      getRadius: (f) => plantRadius(f.properties.mw),
+      getRadius: (f) => plantRadius(f.properties.mw, zoom),
       radiusUnits: 'pixels',
       getFillColor: (f): Rgba => [...palette.series[f.properties.fuel], 220],
       stroked: true,
@@ -38,7 +39,12 @@ export function buildPlantLayers(
       getLineWidth: (f) => (f.properties.id === selected ? 2 : 1),
       lineWidthUnits: 'pixels',
       pickable: true,
-      updateTriggers: { getFillColor: palette, getLineColor: [palette, selected], getLineWidth: selected },
+      updateTriggers: {
+        getRadius: zoom,
+        getFillColor: palette,
+        getLineColor: [palette, selected],
+        getLineWidth: selected,
+      },
     }),
   ]
 }

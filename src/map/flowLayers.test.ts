@@ -9,7 +9,7 @@ import {
   flowData,
   headSize,
   heading,
-  shaft,
+  shaftEnds,
   taperPolygon,
   triangleFlows,
   widthOf,
@@ -76,7 +76,7 @@ test('the shaft is one solid shape, a hair wide off the column and the flow widt
   }
   const zoom = 5
   const [a, b, c, d] = taperPolygon(east, zoom)
-  const [from, to] = shaft(east.path)
+  const [from, to] = shaftEnds(east, zoom)
   expect(a[0]).toBeCloseTo(from[0])
   expect(b[0]).toBeCloseTo(to[0])
   const perLatPixel = degreesPerPixel(zoom) * Math.cos((35 * Math.PI) / 180)
@@ -123,11 +123,47 @@ test('the arrow heads along the path, the shapes take color from the load, split
   expect((rims.props.data as FlowDatum[]).length).toBeGreaterThan(0)
   const position = heads.props.getPosition
   if (typeof position !== 'function') throw new Error('accessor')
-  expect(position(kc, context)).toEqual(shaft(kc.path)[1])
+  expect(position(kc, context)).toEqual(shaftEnds(kc, 5)[1])
   expect(headSize(kc)).toBeCloseTo(8 + (1 + 6.58) * 3)
   const headColor = heads.props.getColor
   if (typeof headColor !== 'function') throw new Error('accessor')
   expect(headColor(kc, context)).toEqual([...DARK.flow.full, 230])
+})
+
+test('the shaft starts and the head ends clear of the columns by pixels, so a phone tucks no head under a column', () => {
+  const line = (path: FlowDatum['path'], mw = 1000): FlowDatum => ({
+    id: 'x',
+    label: 'x',
+    path,
+    mw,
+    load: 0.5,
+    split: false,
+  })
+  const east = line([
+    [130, 35],
+    [140, 35],
+  ])
+  const perLonPixel = degreesPerPixel(5)
+  const [from, to] = shaftEnds(east, 5)
+  expect((from[0] - 130) / perLonPixel).toBeCloseTo(12)
+  expect((140 - to[0]) / perLonPixel).toBeCloseTo(12 + headSize(east))
+  const north = line([
+    [135, 30],
+    [135, 40],
+  ])
+  const perLatPixel = perLonPixel * Math.cos((35 * Math.PI) / 180)
+  expect((shaftEnds(north, 5)[0][1] - 30) / perLatPixel).toBeCloseTo(48)
+  // Zoomed out, the same line is half as long on screen and the pixels clear stay, so the shaft is what shortens.
+  const [farFrom, farTo] = shaftEnds(east, 4)
+  expect((farFrom[0] - 130) / degreesPerPixel(4)).toBeCloseTo(12)
+  expect(farTo[0] - farFrom[0]).toBeLessThan(to[0] - from[0])
+  // A short line keeps two fifths of itself as the shaft, the clearances and the head sharing the rest.
+  const short = line([
+    [135, 35],
+    [135.5, 35],
+  ])
+  const [nearFrom, nearTo] = shaftEnds(short, 4)
+  expect((nearTo[0] - nearFrom[0]) / 0.5).toBeCloseTo(0.4)
 })
 
 test('no flows, no layers', () => {

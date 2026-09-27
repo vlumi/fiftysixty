@@ -7,27 +7,29 @@ afterEach(() => vi.unstubAllGlobals())
 
 const props = {
   palette: DARK,
+  layers: { flows: true, mixes: true, plants: false },
+  onToggleLayer: vi.fn(),
   plants: null,
   hiddenFuels: [],
   onToggleFuel: vi.fn(),
   onHideFuels: vi.fn(),
 }
 
-test('the key is open by default on a wide screen; Plants takes its place and Key folds it away', async () => {
+test('the key is open by default on a wide screen; Layers takes its place and Key folds it away', async () => {
   render(<Corner {...props} />)
   expect(screen.getByRole('figure', { name: 'Key' })).toBeInTheDocument()
-  await userEvent.click(screen.getByRole('button', { name: 'Plants' }))
+  await userEvent.click(screen.getByRole('button', { name: 'Layers' }))
   expect(screen.queryByRole('figure', { name: 'Key' })).not.toBeInTheDocument()
-  expect(screen.getByRole('region', { name: 'Plants' })).toBeInTheDocument()
-  await userEvent.click(screen.getByRole('button', { name: 'Plants' }))
-  expect(screen.queryByRole('region', { name: 'Plants' })).not.toBeInTheDocument()
+  expect(screen.getByRole('region', { name: 'Layers' })).toBeInTheDocument()
+  await userEvent.click(screen.getByRole('button', { name: 'Layers' }))
+  expect(screen.queryByRole('region', { name: 'Layers' })).not.toBeInTheDocument()
 })
 
 test('on a phone both start folded', () => {
   vi.stubGlobal('matchMedia', () => ({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() }))
   render(<Corner {...props} />)
   expect(screen.queryByRole('figure', { name: 'Key' })).not.toBeInTheDocument()
-  expect(screen.queryByRole('region', { name: 'Plants' })).not.toBeInTheDocument()
+  expect(screen.queryByRole('region', { name: 'Layers' })).not.toBeInTheDocument()
 })
 
 test('an open panel has a close button of its own', async () => {

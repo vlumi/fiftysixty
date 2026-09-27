@@ -24,7 +24,7 @@ export interface LayerOptions {
   selected?: Area | null
   /** The interconnectors' forecast for the slot, by line id; drawn as arrows between the areas. */
   flows?: ReadonlyMap<string, FlowSlot>
-  /** The map's zoom, which sizes the arrows' shafts and shows the plants when close enough. */
+  /** The map's zoom, which sizes the arrows' shafts and the plants' dots. */
   zoom?: number
   plants?: Plants | null
   selectedPlant?: string | null

@@ -82,6 +82,9 @@ export interface Strings {
   }
   key: {
     key: string
+    layers: string
+    flows: string
+    mixes: string
     plants: string
     flow: string
     atLimit: string
@@ -206,6 +209,9 @@ const en: Strings = {
   },
   key: {
     key: 'Key',
+    layers: 'Layers',
+    flows: 'Flows',
+    mixes: 'Mix columns',
     plants: 'Plants',
     flow: 'flow',
     atLimit: 'at the limit',
@@ -339,6 +345,9 @@ const ja: Strings = {
   },
   key: {
     key: '凡例',
+    layers: 'レイヤー',
+    flows: '連系線潮流',
+    mixes: '需給の柱',
     plants: '発電所',
     flow: '潮流',
     atLimit: '上限',

@@ -24,6 +24,8 @@ import { usePlayer } from './time/usePlayer'
 const MapView = lazy(() => import('./map/MapView'))
 
 const REFRESH_MS = 30 * 60_000
+const NO_FLOWS = new Map<string, never>()
+const NO_MIXES = {}
 
 export default function App() {
   const [regions, setRegions] = useState<Regions | null>(null)
@@ -44,6 +46,8 @@ export default function App() {
   const selectArea = useApp((s) => s.selectArea)
   const plantId = useApp((s) => s.plant)
   const pickPlant = useApp((s) => s.pickPlant)
+  const layers = useApp((s) => s.layers)
+  const toggleLayer = useApp((s) => s.toggleLayer)
   const hiddenFuels = useApp((s) => s.hiddenFuels)
   const toggleFuel = useApp((s) => s.toggleFuel)
   const setHiddenFuels = useApp((s) => s.setHiddenFuels)
@@ -172,11 +176,11 @@ export default function App() {
             regions={regions}
             prices={displayed?.areaPrice}
             selected={area}
-            flows={flows}
-            plants={plants}
+            flows={layers.flows ? flows : NO_FLOWS}
+            plants={layers.plants ? plants : null}
             selectedPlant={plantId}
             hiddenFuels={hiddenFuels}
-            mixes={mixes}
+            mixes={layers.mixes ? mixes : NO_MIXES}
             onPick={selectArea}
             onPickPlant={pickPlant}
           />
@@ -205,6 +209,8 @@ export default function App() {
         />
         <Corner
           palette={PALETTES[theme]}
+          layers={layers}
+          onToggleLayer={toggleLayer}
           plants={plants}
           hiddenFuels={hiddenFuels}
           onToggleFuel={toggleFuel}
