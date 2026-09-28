@@ -1,4 +1,4 @@
-import type { FeatureCollection, LineString, MultiPolygon, Polygon } from 'geojson'
+import type { FeatureCollection, LineString, MultiLineString, MultiPolygon, Polygon } from 'geojson'
 import type { Area, Hz } from './areas'
 
 export interface AreaProps {
@@ -6,15 +6,26 @@ export interface AreaProps {
   hz: Hz
 }
 
-/** The ten areas as polygons and the 50/60 split as one line, both built by scripts/build-regions.mjs. */
+/** The border between the two areas an interconnector joins, by the line's id; across water it is a hand-laid path. */
+export interface BorderProps {
+  line: string
+  a: Area
+  b: Area
+  sea: boolean
+}
+
+/** The ten areas as polygons, the 50/60 split as one line and the borders along the interconnectors, all built by scripts/build-regions.mjs. */
 export interface Regions {
   areas: FeatureCollection<Polygon | MultiPolygon, AreaProps>
   split: FeatureCollection<LineString, { name: string }>
+  borders: FeatureCollection<MultiLineString, BorderProps>
 }
 
 export async function loadRegions(base = '/geo'): Promise<Regions> {
-  const [areas, split] = await Promise.all([json(`${base}/areas.geojson`), json(`${base}/split.geojson`)])
-  return { areas, split }
+  const [areas, split, borders] = await Promise.all(
+    ['areas', 'split', 'borders'].map((name) => json(`${base}/${name}.geojson`)),
+  )
+  return { areas, split, borders }
 }
 
 async function json(url: string) {
