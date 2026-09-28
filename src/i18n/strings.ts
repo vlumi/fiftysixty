@@ -71,7 +71,9 @@ export interface Strings {
     hz: (hz: number) => string
     system: string
     lines: string
-    forecast: string
+    recorded: string
+    planned: string
+    loopWith: (a: string, b: string) => string
     split: string
     in: string
     out: string
@@ -99,8 +101,10 @@ export interface Strings {
     flows: string
     mixes: string
     plants: string
-    flow: string
+    planned: string
+    recorded: string
     atLimit: string
+    fork: string
     split: string
     byFuel: string
     fuel: Record<Series, string>
@@ -188,7 +192,9 @@ const en: Strings = {
     hz: (hz) => `${hz} Hz`,
     system: 'System',
     lines: 'Lines',
-    forecast: 'day-ahead forecast',
+    recorded: 'recorded',
+    planned: 'OCCTO plan',
+    loopWith: (a, b) => `${a} and ${b}`,
     split: 'split',
     in: 'in',
     out: 'out',
@@ -225,8 +231,10 @@ const en: Strings = {
     flows: 'Flows',
     mixes: 'Mix columns',
     plants: 'Plants',
-    flow: 'flow',
+    planned: 'OCCTO plan',
+    recorded: 'recorded',
     atLimit: 'at the limit',
+    fork: 'two lines, total only',
     split: 'market split',
     byFuel: 'By fuel',
     fuel: {
@@ -323,7 +331,9 @@ const ja: Strings = {
     hz: (hz) => `${hz} Hz`,
     system: 'システム',
     lines: '連系線',
-    forecast: '前日予想',
+    recorded: '実績',
+    planned: 'OCCTO計画',
+    loopWith: (a, b) => `${a}・${b}`,
     split: '分断',
     in: '受電',
     out: '送電',
@@ -360,8 +370,10 @@ const ja: Strings = {
     flows: '連系線潮流',
     mixes: '需給の柱',
     plants: '発電所',
-    flow: '潮流',
+    planned: 'OCCTO計画',
+    recorded: '実績',
     atLimit: '上限',
+    fork: '2本の合計のみ',
     split: '市場分断',
     byFuel: '燃料別',
     fuel: {

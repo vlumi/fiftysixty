@@ -41,7 +41,7 @@ export default function MapView({
   regions,
   prices,
   selected,
-  flows,
+  interchange,
   plants,
   selectedPlant,
   hiddenFuels,
@@ -118,7 +118,7 @@ export default function MapView({
       layers: buildLayers(regions, PALETTES[loaded], {
         prices,
         selected,
-        flows,
+        interchange,
         zoom,
         plants,
         selectedPlant,
@@ -126,7 +126,7 @@ export default function MapView({
         beforeId: BELOW_LABELS[loaded],
       }),
     })
-  }, [loaded, regions, prices, selected, flows, zoom, plants, selectedPlant, hiddenFuels])
+  }, [loaded, regions, prices, selected, interchange, zoom, plants, selectedPlant, hiddenFuels])
 
   return (
     <>

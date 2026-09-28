@@ -1,77 +1,75 @@
 import type { Layer } from '@deck.gl/core'
 import { IconLayer, SolidPolygonLayer } from '@deck.gl/layers'
-import { load, type FlowSlot } from '../market/flows'
+import type { Fork, Interchange } from '../market/interchange'
 import { AREA_BY_ID, type Area } from '../regions/areas'
-import { OCCTO_LINE_IDS } from '../regions/interconnectors'
 import type { Palette, Rgba } from '../shared/palette'
 import { lerpRgb } from '../shared/scale'
 import type { Interleaved } from './layers'
 import { FULL_SIZE_ZOOM, mapScale } from './scale'
 
-/** A line for the slot, laid from where the power comes to where it goes. */
+/**
+ * One stroke of the flows for the slot, laid from where the power comes to where it goes: a whole line with its head,
+ * or a piece of a fork, a thin tail or the one shaft that carries the fork's total.
+ */
 export interface FlowDatum {
   id: string
-  label: string
   path: [[number, number], [number, number]]
-  /** The flow, MW, always positive along `path`. */
+  /** The flow, MW, always positive along `path`; a tail carries none of its own. */
   mw: number
+  /** How full the line is, 0 to 1, for its color; a fork, over two lines, takes the middle. */
   load: number
+  head: boolean
+  /** Whether each end stands on an area's column and keeps clear of it; a fork's junction stands on none. */
+  clear: [boolean, boolean]
+  /** A tail's fixed width, pixels at full size, in place of one from the flow. */
+  px?: number
 }
 
 const point = (end: Area): [number, number] => [...AREA_BY_ID[end].anchor]
 
-export function flowData(flows: ReadonlyMap<string, FlowSlot>): FlowDatum[] {
-  const lines = OCCTO_LINE_IDS.flatMap((line) => {
-    const at = flows.get(line.id)
-    if (!at || at.flowMW === 0 || line.from === 'middle' || line.to === 'middle') return []
-    const [from, to] = at.flowMW > 0 ? [line.from, line.to] : [line.to, line.from]
-    return [
-      {
-        id: line.id,
-        label: line.label,
-        path: [point(from as Area), point(to as Area)] as FlowDatum['path'],
-        mw: Math.abs(at.flowMW),
-        load: load(at),
-      },
-    ]
-  })
-  return [...lines, ...triangleFlows(flows)]
+/** How far from the fork's own area toward the other two the junction sits, as a share of the way. */
+const JOIN = 0.45
+const TAIL_PX = 2
+const FORK_LOAD = 0.5
+
+export function flowData(x: Interchange): FlowDatum[] {
+  const links = x.links.map((l): FlowDatum => ({
+    id: l.id,
+    path: [point(l.from), point(l.to)],
+    mw: l.mw,
+    load: l.load,
+    head: true,
+    clear: [true, true],
+  }))
+  return [...links, ...x.forks.flatMap(forkData)]
 }
 
-/** The triangle's areas, each with its fence and which way the fence's forward runs. */
-const TRIANGLE: { area: Area; fence: string; forwardOut: boolean }[] = [
-  { area: 'chubu', fence: 'chubu-fence', forwardOut: true },
-  { area: 'hokuriku', fence: 'hokuriku-fence', forwardOut: false },
-  { area: 'kansai', fence: 'kansai-fence', forwardOut: false },
-]
-
-/**
- * The flows between Chubu, Hokuriku and Kansai, resolved from OCCTO's three fences: what leaves an area across its
- * fence arrives across another's, so with one area taking in, each sender's outflow goes to it, and with one
- * sending, each receiver's inflow comes from it. A pair's load is the fuller of its two fences.
- */
-export function triangleFlows(flows: ReadonlyMap<string, FlowSlot>): FlowDatum[] {
-  const sides = TRIANGLE.flatMap(({ area, fence, forwardOut }) => {
-    const at = flows.get(fence)
-    if (!at) return []
-    return [{ area, out: forwardOut ? at.flowMW : -at.flowMW, load: load(at) }]
+/** A fork into its area: a tail from each of the other two to a junction, then one arrow on. Out of it, the reverse. */
+export function forkData(f: Fork): FlowDatum[] {
+  const focus = point(f.focus)
+  const [a, b] = f.others.map(point)
+  const junction: [number, number] = [
+    focus[0] + ((a[0] + b[0]) / 2 - focus[0]) * JOIN,
+    focus[1] + ((a[1] + b[1]) / 2 - focus[1]) * JOIN,
+  ]
+  const tail = (end: [number, number], i: number): FlowDatum => ({
+    id: `${f.id}/${i}`,
+    path: f.into ? [end, junction] : [junction, end],
+    mw: 0,
+    load: FORK_LOAD,
+    head: !f.into,
+    clear: f.into ? [true, false] : [false, true],
+    px: TAIL_PX,
   })
-  if (sides.length < 3) return []
-  const senders = sides.filter((s) => s.out > 0)
-  const receivers = sides.filter((s) => s.out < 0)
-  const pairs =
-    receivers.length === 1
-      ? senders.map((s) => ({ from: s, to: receivers[0], mw: s.out }))
-      : senders.length === 1
-        ? receivers.map((r) => ({ from: senders[0], to: r, mw: -r.out }))
-        : []
-  return pairs.map(({ from, to, mw }) => ({
-    id: [from.area, to.area].sort().join('-'),
-    label: `${AREA_BY_ID[from.area].name}–${AREA_BY_ID[to.area].name}`,
-    path: [point(from.area), point(to.area)] as FlowDatum['path'],
-    mw,
-    load: Math.max(from.load, to.load),
-  }))
+  const shaft: FlowDatum = {
+    id: f.id,
+    path: f.into ? [junction, focus] : [focus, junction],
+    mw: f.mw,
+    load: FORK_LOAD,
+    head: f.into,
+    clear: f.into ? [false, true] : [true, false],
+  }
+  return [tail(a, 0), tail(b, 1), shaft]
 }
 
 const MW_PER_PX = 1000
@@ -82,10 +80,11 @@ const COLUMN_HALF_PX = [12, 48]
 const CLEAR_SHARE = 0.6
 
 /** The line's width on screen, a pixel plus one per gigawatt at full size, scaled with the map. */
-export const widthOf = (d: FlowDatum, zoom = FULL_SIZE_ZOOM) => (MIN_PX + d.mw / MW_PER_PX) * mapScale(zoom)
+export const widthOf = (d: FlowDatum, zoom = FULL_SIZE_ZOOM) => (d.px ?? MIN_PX + d.mw / MW_PER_PX) * mapScale(zoom)
 
 /** The arrowhead's size on screen, growing with the shaft. */
-export const headSize = (d: FlowDatum, zoom = FULL_SIZE_ZOOM) => (8 + (MIN_PX + d.mw / MW_PER_PX) * 3) * mapScale(zoom)
+export const headSize = (d: FlowDatum, zoom = FULL_SIZE_ZOOM) =>
+  (8 + (d.px ?? MIN_PX + d.mw / MW_PER_PX) * 3) * mapScale(zoom)
 
 /** A triangle pointing right, its base on the left edge, drawn white to be tinted. */
 const HEAD_ICON = {
@@ -132,8 +131,8 @@ function clearance(ux: number, uy: number, zoom: number): number {
 export function shaftEnds(d: FlowDatum, zoom: number): FlowDatum['path'] {
   const { dLon, dLat, ux, uy, length } = frame(d.path, zoom)
   const clear = clearance(ux, uy, zoom)
-  let start = clear
-  let end = clear + headSize(d, zoom)
+  let start = d.clear[0] ? clear : 0
+  let end = (d.clear[1] ? clear : 0) + (d.head ? headSize(d, zoom) : 0)
   const room = length * CLEAR_SHARE
   if (start + end > room) {
     const share = room / (start + end)
@@ -157,8 +156,9 @@ export function taperPolygon(d: FlowDatum, zoom: number): [number, number][] {
     p[0] + normal[0] * pixels * dLon,
     p[1] + normal[1] * pixels * dLat,
   ]
-  const h0 = (MIN_PX * mapScale(zoom)) / 2
+  // A tail keeps its width; a flow tapers from a hair where it leaves to its width where the head begins.
   const h1 = widthOf(d, zoom) / 2
+  const h0 = d.px ? h1 : (MIN_PX * mapScale(zoom)) / 2
   return [offset(from, h0), offset(to, h1), offset(to, -h1), offset(from, -h0)]
 }
 
@@ -173,14 +173,15 @@ export function heading([[x1, y1], [x2, y2]]: FlowDatum['path']): number {
  * begins, colored by the load, and a head in the same color, sized with the shaft, pointing on the way the power goes.
  */
 export function buildFlowLayers(
-  flows: ReadonlyMap<string, FlowSlot>,
+  interchange: Interchange | null,
   palette: Palette,
   zoom: number,
   beforeId = 'water_name',
 ): Layer[] {
-  const data = flowData(flows)
-  if (!data.length) return []
-  const color = (d: FlowDatum): Rgba => [...lerpRgb(palette.flow.idle, palette.flow.full, d.load), 230]
+  const data = interchange ? flowData(interchange) : []
+  if (!interchange || !data.length) return []
+  const ramp = palette.flow[interchange.source]
+  const color = (d: FlowDatum): Rgba => [...lerpRgb(ramp.idle, ramp.full, d.load), 230]
   const head = (d: FlowDatum): [number, number] => shaftEnds(d, zoom)[1]
   return [
     new SolidPolygonLayer<FlowDatum, Interleaved>({
@@ -189,12 +190,12 @@ export function buildFlowLayers(
       data,
       getPolygon: (d) => taperPolygon(d, zoom),
       getFillColor: color,
-      updateTriggers: { getPolygon: zoom, getFillColor: palette },
+      updateTriggers: { getPolygon: zoom, getFillColor: [palette, interchange.source] },
     }),
     new IconLayer<FlowDatum, Interleaved>({
       id: 'flow-heads',
       beforeId,
-      data,
+      data: data.filter((d) => d.head),
       iconAtlas: HEAD_ICON.head.url,
       iconMapping: HEAD_ICON,
       getIcon: () => 'head',
@@ -204,7 +205,7 @@ export function buildFlowLayers(
       getSize: (d) => headSize(d, zoom),
       sizeUnits: 'pixels',
       billboard: false,
-      updateTriggers: { getPosition: zoom, getSize: zoom, getColor: palette },
+      updateTriggers: { getPosition: zoom, getSize: zoom, getColor: [palette, interchange.source] },
     }),
   ]
 }

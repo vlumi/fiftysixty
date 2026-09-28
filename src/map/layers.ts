@@ -1,7 +1,7 @@
 import type { Layer } from '@deck.gl/core'
 import { GeoJsonLayer } from '@deck.gl/layers'
 import type { Feature, Geometry } from 'geojson'
-import type { FlowSlot } from '../market/flows'
+import type { Interchange } from '../market/interchange'
 import type { PricedArea } from '../market/jepx'
 import type { Area } from '../regions/areas'
 import type { AreaProps, BorderProps, Regions } from '../regions/geometry'
@@ -23,8 +23,8 @@ export type AreaPrices = Readonly<Record<PricedArea, number>>
 export interface LayerOptions {
   prices?: AreaPrices
   selected?: Area | null
-  /** The interconnectors' forecast for the slot, by line id; drawn as arrows between the areas. */
-  flows?: ReadonlyMap<string, FlowSlot>
+  /** The flows between the areas for the slot, recorded or planned; drawn as arrows and forks. */
+  interchange?: Interchange | null
   /** The map's zoom, which sizes the arrows' shafts and the plants' dots. */
   zoom?: number
   plants?: Plants | null
@@ -44,7 +44,7 @@ export function buildLayers(
   {
     prices,
     selected,
-    flows,
+    interchange = null,
     zoom = 5,
     plants = null,
     selectedPlant = null,
@@ -85,7 +85,7 @@ export function buildLayers(
       getLineWidth: 2,
     }),
     ...buildWallLayers(regions, palette, prices, zoom, beforeId),
-    ...buildFlowLayers(flows ?? new Map(), palette, zoom, beforeId),
+    ...buildFlowLayers(interchange, palette, zoom, beforeId),
     ...buildPlantLayers(plants, palette, zoom, selectedPlant, hiddenFuels, beforeId),
   ]
 }

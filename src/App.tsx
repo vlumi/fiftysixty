@@ -1,6 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { ADAPTERS } from './market/adapters'
 import { flowsAt, loadFlows, type FlowDays } from './market/flows'
+import { interchangeAt } from './market/interchange'
 import { fiscalYear, loadSpotYears, slotOf, type SpotDays } from './market/jepx'
 import { stories } from './market/stories'
 import { loadRecord, monthOf, recordSlot, type RecordDays, type RecordSlot } from './market/record'
@@ -25,7 +26,6 @@ import { usePlayer } from './time/usePlayer'
 const MapView = lazy(() => import('./map/MapView'))
 
 const REFRESH_MS = 30 * 60_000
-const NO_FLOWS = new Map<string, never>()
 const NO_MIXES = {}
 
 export default function App() {
@@ -146,6 +146,7 @@ export default function App() {
       ) as Partial<Record<Area, RecordSlot | null>>,
     [records, month, date, slot],
   )
+  const interchange = useMemo(() => interchangeAt(mixes, flows), [mixes, flows])
 
   return (
     <>
@@ -191,7 +192,7 @@ export default function App() {
             regions={regions}
             prices={displayed?.areaPrice}
             selected={area}
-            flows={layers.flows ? flows : NO_FLOWS}
+            interchange={layers.flows ? interchange : null}
             plants={plants}
             selectedPlant={plantId}
             hiddenFuels={hiddenFuels}
@@ -204,7 +205,7 @@ export default function App() {
           slot={displayed}
           record={record}
           day={recordedDay}
-          flows={flows}
+          interchange={interchange}
           area={area}
           plant={plant}
           onBack={() => (plant ? pickPlant(null) : selectArea(null))}

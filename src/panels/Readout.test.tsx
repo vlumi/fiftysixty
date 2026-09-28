@@ -4,6 +4,7 @@ import csv from '../test/fixtures/jepx-spot.csv?raw'
 import tepcoCsv from '../test/fixtures/tepco-jukyu.csv?raw'
 import flowsCsv from '../test/fixtures/occto-renkei.csv?raw'
 import { flowsAt, parseFlows } from '../market/flows'
+import { planned } from '../market/interchange'
 import { parseSpot, slotOf } from '../market/jepx'
 import { recordSlot } from '../market/record'
 import { TEPCO } from '../market/tepco'
@@ -13,8 +14,7 @@ const slot = slotOf(parseSpot(csv), '2026-09-26', 47)!
 const days = TEPCO.parse(tepcoCsv)
 const record = recordSlot(days, '2026-09-24', 25)
 const day = days.get('2026-09-24')!
-const noon = flowsAt(parseFlows(flowsCsv), '2026-09-23', 24)
-const none = new Map()
+const noon = planned(flowsAt(parseFlows(flowsCsv), '2026-09-23', 24))
 
 test('without an area, the system price and the range across the areas', () => {
   render(
@@ -22,7 +22,7 @@ test('without an area, the system price and the range across the areas', () => {
       slot={slot}
       record={undefined}
       day={undefined}
-      flows={none}
+      interchange={null}
       area={null}
       onBack={vi.fn()}
       onSlot={vi.fn()}
@@ -40,7 +40,7 @@ test('a picked area against the system price and its neighbors', async () => {
       slot={slot}
       record={undefined}
       day={undefined}
-      flows={none}
+      interchange={null}
       area="tokyo"
       onBack={onBack}
       onSlot={vi.fn()}
@@ -61,7 +61,7 @@ test('Okinawa has no price to show', () => {
       slot={slot}
       record={undefined}
       day={undefined}
-      flows={none}
+      interchange={null}
       area="okinawa"
       onBack={vi.fn()}
       onSlot={vi.fn()}
@@ -76,7 +76,7 @@ test('nothing before the prices arrive', () => {
       slot={undefined}
       record={undefined}
       day={undefined}
-      flows={none}
+      interchange={null}
       area={null}
       onBack={vi.fn()}
       onSlot={vi.fn()}
@@ -86,7 +86,9 @@ test('nothing before the prices arrive', () => {
 })
 
 test("what ran in a picked area is the chart's key with the half hour's figures, read top down as the chart stacks", () => {
-  render(<Readout slot={slot} record={record} day={day} flows={none} area="tokyo" onBack={vi.fn()} onSlot={vi.fn()} />)
+  render(
+    <Readout slot={slot} record={record} day={day} interchange={null} area="tokyo" onBack={vi.fn()} onSlot={vi.fn()} />,
+  )
   const mix = screen.getByRole('region', { name: 'What ran' })
   const rows = within(mix)
     .getAllByRole('row')
@@ -112,14 +114,14 @@ test("what ran in a picked area is the chart's key with the half hour's figures,
   expect(screen.queryByText('No record for this half hour yet.')).not.toBeInTheDocument()
 })
 
-test("a picked area's lines: flow in or out against the limit, and where the market split", () => {
+test("a picked area's lines in or out against the limit, and its loop as the total across its two lines, marked as OCCTO's plan", () => {
   const at = slotOf(parseSpot(csv), '2026-09-23', 24)!
   render(
     <Readout
       slot={at}
       record={undefined}
       day={undefined}
-      flows={noon}
+      interchange={noon}
       area="kansai"
       onBack={vi.fn()}
       onSlot={vi.fn()}
@@ -127,9 +129,10 @@ test("a picked area's lines: flow in or out against the limit, and where the mar
   )
   const lines = screen.getByRole('region', { name: 'Lines' })
   const names = [...lines.querySelectorAll('dt')].map((d) => d.textContent?.trim())
-  expect(names).toEqual(['Kansai fence', 'Kansai–Chugoku split', 'Anan–Kihoku split'])
+  expect(lines).toHaveTextContent('Lines · OCCTO plan')
+  expect(names).toEqual(['Kansai–Chugoku split', 'Anan–Kihoku split', 'Chubu and Hokuriku'])
   const values = [...lines.querySelectorAll('dd')].map((d) => d.textContent)
-  expect(values).toEqual(['out 1,290 of 1,830', 'in 3,290 of 3,290', 'in 550 of 550'])
+  expect(values).toEqual(['in 3,290 of 3,290', 'in 550 of 550', 'out 1,290'])
 })
 
 test('a picked plant: its capacity and fuel, and that its output is not public', () => {
@@ -138,7 +141,7 @@ test('a picked plant: its capacity and fuel, and that its output is not public',
       slot={slot}
       record={undefined}
       day={undefined}
-      flows={none}
+      interchange={null}
       area={null}
       plant={{ id: 'way/1', name: 'Kashiwazaki-Kariwa Nuclear Power Plant', fuel: 'nuclear', mw: 8212 }}
       onBack={vi.fn()}
@@ -154,7 +157,9 @@ test('a picked plant: its capacity and fuel, and that its output is not public',
 
 test('on a phone a picked area opens on its headline, the rest a tap on the row away', async () => {
   vi.stubGlobal('matchMedia', () => ({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() }))
-  render(<Readout slot={slot} record={record} day={day} flows={none} area="tokyo" onBack={vi.fn()} onSlot={vi.fn()} />)
+  render(
+    <Readout slot={slot} record={record} day={day} interchange={null} area="tokyo" onBack={vi.fn()} onSlot={vi.fn()} />,
+  )
   const row = screen.getByRole('button', { expanded: false })
   expect(row).toHaveTextContent('Tokyo 50 Hz')
   expect(screen.queryByText('Tohoku')).not.toBeInTheDocument()
