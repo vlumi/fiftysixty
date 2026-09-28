@@ -5,7 +5,14 @@ import { SLOTS } from './market/jepx'
 import type { Series } from './market/stack'
 import { loadLang, saveLang, type Lang } from './i18n/strings'
 import { loadThemeChoice, saveThemeChoice, type ThemeChoice } from './shared/theme'
-import { loadLayerChoice, saveLayerChoice, type LayerChoice, type MapLayer } from './map/layerChoice'
+import {
+  loadHiddenFuels,
+  loadLayerChoice,
+  saveHiddenFuels,
+  saveLayerChoice,
+  type LayerChoice,
+  type MapLayer,
+} from './map/layerChoice'
 
 /** What the reader has chosen: the delivery day (null for the opening day), the half hour, the area or a plant, and whether the day plays. */
 interface State {
@@ -15,9 +22,9 @@ interface State {
   /** A picked plant, by its OpenStreetMap id; picking one lets the area go, and the other way round. */
   plant: string | null
   playing: boolean
-  /** Which of the arrows, the columns and the plants the map draws. */
+  /** Whether the map draws the arrows and the columns. */
   layers: LayerChoice
-  /** The fuels whose plants are hidden from the map. */
+  /** The fuels whose plants are hidden from the map; every fuel hidden is the plants off. */
   hiddenFuels: Series[]
   themeChoice: ThemeChoice
   lang: Lang
@@ -45,7 +52,7 @@ const initial = (): State => ({
   plant: null,
   playing: false,
   layers: loadLayerChoice(),
-  hiddenFuels: [],
+  hiddenFuels: loadHiddenFuels(),
   themeChoice: loadThemeChoice(),
   lang: loadLang(),
 })
@@ -78,6 +85,7 @@ useApp.subscribe((s, previous) => {
   if (s.themeChoice !== previous.themeChoice) saveThemeChoice(s.themeChoice)
   if (s.lang !== previous.lang) saveLang(s.lang)
   if (s.layers !== previous.layers) saveLayerChoice(s.layers)
+  if (s.hiddenFuels !== previous.hiddenFuels) saveHiddenFuels(s.hiddenFuels)
 })
 
 export const resetApp = () => useApp.setState(initial())

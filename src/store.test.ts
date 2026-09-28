@@ -53,21 +53,25 @@ test('a plant and an area are picked in turn, each letting the other go', () => 
   expect(useApp.getState()).toMatchObject({ area: 'tokyo', plant: null })
 })
 
-test('a fuel is hidden and shown again', () => {
+test('every fuel starts hidden; a fuel is shown and hidden again, and the list is kept for the next visit', () => {
+  expect(useApp.getState().hiddenFuels).toHaveLength(8)
+  useApp.getState().setHiddenFuels([])
   useApp.getState().toggleFuel('coal')
   useApp.getState().toggleFuel('gas')
   expect(useApp.getState().hiddenFuels).toEqual(['coal', 'gas'])
+  expect(JSON.parse(localStorage.getItem('fiftysixty.plants')!)).toEqual(['coal', 'gas'])
   useApp.getState().toggleFuel('coal')
   expect(useApp.getState().hiddenFuels).toEqual(['gas'])
   useApp.getState().setHiddenFuels([])
-  expect(useApp.getState().hiddenFuels).toEqual([])
+  expect(JSON.parse(localStorage.getItem('fiftysixty.plants')!)).toEqual([])
+  localStorage.clear()
 })
 
 test('a layer is switched off and on, and the choice is kept for the next visit', () => {
-  useApp.getState().toggleLayer('plants')
-  expect(useApp.getState().layers).toEqual({ flows: true, mixes: true, plants: true })
-  expect(JSON.parse(localStorage.getItem('fiftysixty.layers')!)).toEqual({ flows: true, mixes: true, plants: true })
-  useApp.getState().toggleLayer('plants')
+  useApp.getState().toggleLayer('flows')
+  expect(useApp.getState().layers).toEqual({ flows: false, mixes: true })
+  expect(JSON.parse(localStorage.getItem('fiftysixty.layers')!)).toEqual({ flows: false, mixes: true })
+  useApp.getState().toggleLayer('flows')
   expect(localStorage.getItem('fiftysixty.layers')).toBeNull()
 })
 

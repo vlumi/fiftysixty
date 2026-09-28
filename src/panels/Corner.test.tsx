@@ -7,7 +7,7 @@ afterEach(() => vi.unstubAllGlobals())
 
 const props = {
   palette: DARK,
-  layers: { flows: true, mixes: true, plants: false },
+  layers: { flows: true, mixes: true },
   onToggleLayer: vi.fn(),
   plants: null,
   hiddenFuels: [],

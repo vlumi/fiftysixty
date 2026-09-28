@@ -2,6 +2,7 @@ import type { ScatterplotLayer } from '@deck.gl/layers'
 import type { Feature, Point } from 'geojson'
 import fixture from '../test/fixtures/plants.geojson?raw'
 import type { PlantProps, Plants } from '../regions/plants'
+import { SERIES } from '../market/stack'
 import { DARK } from '../shared/palette'
 import { buildPlantLayers, plantRadius } from './plantLayers'
 
@@ -29,7 +30,8 @@ test('the plants are colored by fuel, sized by the root of the capacity and shru
   expect(line(plants.features[0], context)).toBe(1)
 })
 
-test('hidden fuels leave the map', () => {
+test('hidden fuels leave the map, and with every fuel hidden there is no layer', () => {
+  expect(buildPlantLayers(plants, DARK, 8, null, [...SERIES])).toEqual([])
   const [layer] = buildPlantLayers(plants, DARK, 8, null, ['coal', 'hydro']) as [
     ScatterplotLayer<Feature<Point, PlantProps>>,
   ]

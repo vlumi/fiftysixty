@@ -177,7 +177,7 @@ export default function App() {
             prices={displayed?.areaPrice}
             selected={area}
             flows={layers.flows ? flows : NO_FLOWS}
-            plants={layers.plants ? plants : null}
+            plants={plants}
             selectedPlant={plantId}
             hiddenFuels={hiddenFuels}
             mixes={layers.mixes ? mixes : NO_MIXES}

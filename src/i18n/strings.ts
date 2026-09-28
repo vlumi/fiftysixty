@@ -91,8 +91,7 @@ export interface Strings {
     flow: string
     atLimit: string
     split: string
-    all: string
-    none: string
+    byFuel: string
     fuel: Record<Series, string>
     count: (n: number) => string
     mix: (area: string) => string
@@ -221,8 +220,7 @@ const en: Strings = {
     flow: 'flow',
     atLimit: 'at the limit',
     split: 'market split',
-    all: 'All',
-    none: 'None',
+    byFuel: 'By fuel',
     fuel: {
       coal: 'Coal',
       nuclear: 'Nuclear',
@@ -360,8 +358,7 @@ const ja: Strings = {
     flow: '潮流',
     atLimit: '上限',
     split: '市場分断',
-    all: '全て',
-    none: 'なし',
+    byFuel: '燃料別',
     fuel: {
       coal: '石炭',
       nuclear: '原子力',
