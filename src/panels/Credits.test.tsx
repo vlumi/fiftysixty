@@ -7,6 +7,8 @@ test('the about says what the page is, names every source, holds the page still,
   const { unmount } = render(<Credits onClose={onClose} />)
   expect(screen.getByRole('dialog', { name: 'About' })).toBeInTheDocument()
   expect(screen.getByText(/day-ahead power market on a map/)).toBeInTheDocument()
+  expect(screen.getByRole('heading', { name: 'Keyboard' })).toBeInTheDocument()
+  expect(screen.getByText('Esc')).toBeInTheDocument()
   expect(document.body.style.overflow).toBe('hidden')
   expect(screen.getByRole('link', { name: 'OpenFreeMap' })).toHaveAttribute('href', 'https://openfreemap.org')
   expect(screen.getByRole('link', { name: 'JEPX' })).toBeInTheDocument()
