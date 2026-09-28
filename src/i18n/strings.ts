@@ -71,6 +71,7 @@ export interface Strings {
     hz: (hz: number) => string
     system: string
     lines: string
+    forecast: string
     split: string
     in: string
     out: string
@@ -185,6 +186,7 @@ const en: Strings = {
     hz: (hz) => `${hz} Hz`,
     system: 'System',
     lines: 'Lines',
+    forecast: 'day-ahead forecast',
     split: 'split',
     in: 'in',
     out: 'out',
@@ -317,6 +319,7 @@ const ja: Strings = {
     hz: (hz) => `${hz} Hz`,
     system: 'システム',
     lines: '連系線',
+    forecast: '前日予想',
     split: '分断',
     in: '受電',
     out: '送電',
