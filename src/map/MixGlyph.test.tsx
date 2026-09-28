@@ -32,6 +32,16 @@ test('the column scales with the map, and far out the figure is left off', () =>
   expect(glyph).not.toHaveTextContent('GW')
 })
 
+test('without a record the column is an empty dashed box that says so, and still picks the area', async () => {
+  const onPick = vi.fn()
+  render(<MixGlyph name="Kyushu" record={null} onPick={onPick} />)
+  const glyph = screen.getByRole('button', { name: 'Kyushu mix, no data' })
+  expect(glyph).toHaveTextContent('no data')
+  expect(glyph.querySelectorAll('rect')).toHaveLength(1)
+  await userEvent.click(glyph)
+  expect(onPick).toHaveBeenCalled()
+})
+
 test('a source reported negative does not take a band below zero height', () => {
   const odd = { ...noon, bySource: { ...noon.bySource, other: -50 } }
   render(<MixGlyph name="Kyushu" record={odd} onPick={vi.fn()} />)

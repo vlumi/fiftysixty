@@ -95,6 +95,7 @@ export interface Strings {
     fuel: Record<Series, string>
     count: (n: number) => string
     mix: (area: string) => string
+    noData: string
   }
 }
 
@@ -233,6 +234,7 @@ const en: Strings = {
     },
     count: (n) => `${n} ${n === 1 ? 'plant' : 'plants'}`,
     mix: (area) => `${area} mix`,
+    noData: 'no data',
   },
 }
 
@@ -371,6 +373,7 @@ const ja: Strings = {
     },
     count: (n) => `${n}か所`,
     mix: (area) => `${area}の需給`,
+    noData: 'データなし',
   },
 }
 

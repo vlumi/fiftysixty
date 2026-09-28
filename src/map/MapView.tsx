@@ -25,7 +25,8 @@ interface Props extends LayerOptions {
   lang: Lang
   regions: Regions | null
   /** What ran in each recorded area for the displayed slot, drawn as a glyph beside it. */
-  mixes?: Partial<Record<Area, RecordSlot>>
+  /** What ran in each wired area for the displayed slot, null where there is no record for it yet, which draws an empty column. */
+  mixes?: Partial<Record<Area, RecordSlot | null>>
   /** A click on an area, or on the sea for none. */
   onPick: (area: Area | null) => void
   /** A click on a plant's dot. */
@@ -127,7 +128,7 @@ export default function MapView({
     <>
       <div ref={container} className="map" role="region" aria-label="Map" />
       {map &&
-        (Object.entries(mixes) as [Area, RecordSlot][]).map(([area, record]) => (
+        (Object.entries(mixes) as [Area, RecordSlot | null][]).map(([area, record]) => (
           <AreaMarker key={area} map={map} area={area}>
             <MixGlyph
               name={lang === 'ja' ? AREA_BY_ID[area].ja : AREA_BY_ID[area].name}
