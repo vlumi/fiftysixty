@@ -16,9 +16,9 @@
   outline-offset: 2px;
 }
 
+/* No outline between the bands: the colors alone tell the sources apart, and the paths share their edges exactly. */
 .band {
-  stroke: var(--panel);
-  stroke-width: 1;
+  stroke: none;
 }
 
 .curtailed {
