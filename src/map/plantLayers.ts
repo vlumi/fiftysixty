@@ -22,12 +22,13 @@ export function buildPlantLayers(
   hiddenFuels: readonly Series[] = [],
   beforeId = 'water_name',
 ): Layer[] {
-  if (!plants) return []
+  const shown = plants?.features.filter((f) => !hiddenFuels.includes(f.properties.fuel)) ?? []
+  if (!shown.length) return []
   return [
     new ScatterplotLayer<PlantFeature, Interleaved>({
       id: 'plants',
       beforeId,
-      data: plants.features.filter((f) => !hiddenFuels.includes(f.properties.fuel)),
+      data: shown,
       getPosition: (f) => f.geometry.coordinates as [number, number],
       getRadius: (f) => plantRadius(f.properties.mw, zoom),
       radiusUnits: 'pixels',

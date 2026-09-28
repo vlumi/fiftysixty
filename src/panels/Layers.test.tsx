@@ -2,45 +2,54 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import fixture from '../test/fixtures/plants.geojson?raw'
 import type { Plants } from '../regions/plants'
+import { SERIES } from '../market/stack'
 import LayersPanel from './Layers'
 
 const plants = JSON.parse(fixture) as Plants
+const on = { flows: true, mixes: true }
 
-const on = { flows: true, mixes: true, plants: true }
-
-test('a switch a layer, the plants filter under theirs only while they show', async () => {
+test('a box a layer; the plants box is off with every fuel hidden, on with none, half with some, and flips between all and none', async () => {
   const onToggleLayer = vi.fn()
+  const onHide = vi.fn()
   const { rerender } = render(
     <LayersPanel
-      layers={{ ...on, plants: false }}
+      layers={{ ...on, flows: false }}
       onToggleLayer={onToggleLayer}
       plants={plants}
-      hiddenFuels={[]}
+      hiddenFuels={[...SERIES]}
       onToggle={vi.fn()}
-      onHide={vi.fn()}
+      onHide={onHide}
     />,
   )
-  expect(screen.getByRole('switch', { name: 'Flows' })).toBeChecked()
-  expect(screen.getByRole('switch', { name: 'Plants' })).not.toBeChecked()
-  expect(screen.queryByRole('button', { name: 'All' })).not.toBeInTheDocument()
-  await userEvent.click(screen.getByRole('switch', { name: 'Plants' }))
-  expect(onToggleLayer).toHaveBeenCalledWith('plants')
-  rerender(
+  expect(screen.getByRole('checkbox', { name: 'Flows' })).not.toBeChecked()
+  expect(screen.getByRole('checkbox', { name: 'Mix columns' })).toBeChecked()
+  expect(screen.getByRole('checkbox', { name: 'Plants' })).not.toBeChecked()
+  await userEvent.click(screen.getByRole('checkbox', { name: 'Flows' }))
+  expect(onToggleLayer).toHaveBeenCalledWith('flows')
+  await userEvent.click(screen.getByRole('checkbox', { name: 'Plants' }))
+  expect(onHide).toHaveBeenLastCalledWith([])
+  const filtered = (hidden: (typeof SERIES)[number][]) => (
     <LayersPanel
       layers={on}
-      onToggleLayer={onToggleLayer}
+      onToggleLayer={vi.fn()}
       plants={plants}
-      hiddenFuels={[]}
+      hiddenFuels={hidden}
       onToggle={vi.fn()}
-      onHide={vi.fn()}
-    />,
+      onHide={onHide}
+    />
   )
-  expect(screen.getByRole('button', { name: 'All' })).toBeInTheDocument()
+  rerender(filtered(['coal']))
+  expect(screen.getByRole('checkbox', { name: 'Plants' })).toBePartiallyChecked()
+  await userEvent.click(screen.getByRole('checkbox', { name: 'Plants' }))
+  expect(onHide).toHaveBeenLastCalledWith([])
+  rerender(filtered([]))
+  expect(screen.getByRole('checkbox', { name: 'Plants' })).toBeChecked()
+  await userEvent.click(screen.getByRole('checkbox', { name: 'Plants' }))
+  expect(onHide.mock.lastCall![0]).toHaveLength(8)
 })
 
-test('a row a fuel with its count, pressed when shown; All and None', async () => {
+test('the fuels open on the chevron: a row a fuel with its count, pressed when shown', async () => {
   const onToggle = vi.fn()
-  const onHide = vi.fn()
   render(
     <LayersPanel
       layers={on}
@@ -48,42 +57,16 @@ test('a row a fuel with its count, pressed when shown; All and None', async () =
       plants={plants}
       hiddenFuels={['coal']}
       onToggle={onToggle}
-      onHide={onHide}
+      onHide={vi.fn()}
     />,
   )
+  expect(screen.queryByRole('button', { name: 'Coal, 1 plant' })).not.toBeInTheDocument()
+  await userEvent.click(screen.getByRole('button', { name: 'By fuel', expanded: false }))
   expect(screen.getByRole('button', { name: 'Coal, 1 plant' })).toHaveAttribute('aria-pressed', 'false')
   expect(screen.getByRole('button', { name: 'Hydro, 1 plant' })).toHaveAttribute('aria-pressed', 'true')
   expect(screen.getByRole('button', { name: 'Gas, 0 plants' })).toBeInTheDocument()
   await userEvent.click(screen.getByRole('button', { name: 'Hydro, 1 plant' }))
   expect(onToggle).toHaveBeenCalledWith('hydro')
-  await userEvent.click(screen.getByRole('button', { name: 'All' }))
-  expect(onHide).toHaveBeenLastCalledWith([])
-  await userEvent.click(screen.getByRole('button', { name: 'None' }))
-  expect(onHide.mock.lastCall![0]).toHaveLength(8)
-})
-
-test('All is spent when every fuel shows, None when none does', () => {
-  const { rerender } = render(
-    <LayersPanel
-      layers={on}
-      onToggleLayer={vi.fn()}
-      plants={null}
-      hiddenFuels={[]}
-      onToggle={vi.fn()}
-      onHide={vi.fn()}
-    />,
-  )
-  expect(screen.getByRole('button', { name: 'All' })).toBeDisabled()
-  expect(screen.getByRole('button', { name: 'None' })).toBeEnabled()
-  rerender(
-    <LayersPanel
-      layers={on}
-      onToggleLayer={vi.fn()}
-      plants={null}
-      hiddenFuels={['coal', 'nuclear', 'renewables', 'otherThermal', 'solar', 'wind', 'gas', 'hydro']}
-      onToggle={vi.fn()}
-      onHide={vi.fn()}
-    />,
-  )
-  expect(screen.getByRole('button', { name: 'None' })).toBeDisabled()
+  await userEvent.click(screen.getByRole('button', { name: 'By fuel', expanded: true }))
+  expect(screen.queryByRole('button', { name: 'Coal, 1 plant' })).not.toBeInTheDocument()
 })
