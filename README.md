@@ -20,7 +20,7 @@ Every capture, one per milestone, is shown in [docs/screenshots](docs/screenshot
 
 **The regions.** Each of the nine areas colored by its price in the displayed half-hour slot, with its supply mix beside it: how much of the demand was nuclear, gas, coal, hydro, solar, wind, and how much solar was curtailed.
 
-**The interconnectors.** Arrows between the regions sized by the flow and colored by how close it is to the line's limit, from OCCTO's day-ahead forecast of each line, with a rim where the day-ahead market split across it; the three frequency-converter stations between the two halves are one of the lines, since that is where the east and west prices part.
+**The interconnectors.** Arrows between the regions sized by the flow and colored by how close it is to the line's limit, from OCCTO's day-ahead forecast of each line, and a wall on the border wherever the day-ahead market split, so the walled-in areas are the markets that cleared apart; the three frequency-converter stations between the two halves are one of the lines, since that is where the east and west prices part.
 
 **The clock.** A time bar over the day with 48 slots and a date picker, so the solar hump can be watched rolling across the country at noon, the price collapsing under it and the evening peak arriving; play runs a day in seconds, and a menu jumps to the days the prices single out, the summer and the winter peak, the widest split, the most at the floor, the cheapest day.
 

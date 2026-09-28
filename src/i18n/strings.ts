@@ -215,7 +215,7 @@ const en: Strings = {
     plants: 'Plants',
     flow: 'flow',
     atLimit: 'at the limit',
-    split: 'split',
+    split: 'market split',
     all: 'All',
     none: 'None',
     fuel: {
@@ -351,7 +351,7 @@ const ja: Strings = {
     plants: '発電所',
     flow: '潮流',
     atLimit: '上限',
-    split: '分断',
+    split: '市場分断',
     all: '全て',
     none: 'なし',
     fuel: {

@@ -55,6 +55,7 @@ vi.mock('@deck.gl/maplibre', () => ({ MapLibreOverlay }))
 const regions: Regions = {
   areas: { type: 'FeatureCollection', features: [] },
   split: { type: 'FeatureCollection', features: [] },
+  borders: { type: 'FeatureCollection', features: [] },
 }
 
 test('the overlay joins the map, gets the layers once the regions arrive, and goes with the map', () => {

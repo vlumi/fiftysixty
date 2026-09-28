@@ -16,7 +16,6 @@ export interface FlowDatum {
   /** The flow, MW, always positive along `path`. */
   mw: number
   load: number
-  split: boolean
 }
 
 const point = (end: Area): [number, number] => [...AREA_BY_ID[end].anchor]
@@ -33,7 +32,6 @@ export function flowData(flows: ReadonlyMap<string, FlowSlot>): FlowDatum[] {
         path: [point(from as Area), point(to as Area)] as FlowDatum['path'],
         mw: Math.abs(at.flowMW),
         load: load(at),
-        split: at.split,
       },
     ]
   })
@@ -50,13 +48,13 @@ const TRIANGLE: { area: Area; fence: string; forwardOut: boolean }[] = [
 /**
  * The flows between Chubu, Hokuriku and Kansai, resolved from OCCTO's three fences: what leaves an area across its
  * fence arrives across another's, so with one area taking in, each sender's outflow goes to it, and with one
- * sending, each receiver's inflow comes from it. A pair's load is the fuller of its two fences, its split either's.
+ * sending, each receiver's inflow comes from it. A pair's load is the fuller of its two fences.
  */
 export function triangleFlows(flows: ReadonlyMap<string, FlowSlot>): FlowDatum[] {
   const sides = TRIANGLE.flatMap(({ area, fence, forwardOut }) => {
     const at = flows.get(fence)
     if (!at) return []
-    return [{ area, out: forwardOut ? at.flowMW : -at.flowMW, load: load(at), split: at.split }]
+    return [{ area, out: forwardOut ? at.flowMW : -at.flowMW, load: load(at) }]
   })
   if (sides.length < 3) return []
   const senders = sides.filter((s) => s.out > 0)
@@ -73,13 +71,11 @@ export function triangleFlows(flows: ReadonlyMap<string, FlowSlot>): FlowDatum[]
     path: [point(from.area), point(to.area)] as FlowDatum['path'],
     mw,
     load: Math.max(from.load, to.load),
-    split: from.split || to.split,
   }))
 }
 
 const MW_PER_PX = 1000
 const MIN_PX = 1
-const RIM_PX = 4
 /** Half the width and the height, in pixels with a margin, of the column a glyph draws over an anchor; the arrows keep clear of it at both ends. */
 const COLUMN_HALF_PX = [12, 48]
 /** The most of a line the clearances and the head may take, so the shaft keeps the rest of a short line. */
@@ -153,7 +149,7 @@ export function shaftEnds(d: FlowDatum, zoom: number): FlowDatum['path'] {
  * The shaft as one solid shape: a hair wide where the power leaves, the flow's width where the head begins, its
  * widths turned from pixels into degrees at the map's zoom, so it is rebuilt as the map zooms and never has a joint.
  */
-export function taperPolygon(d: FlowDatum, zoom: number, extraPx = 0): [number, number][] {
+export function taperPolygon(d: FlowDatum, zoom: number): [number, number][] {
   const [from, to] = shaftEnds(d, zoom)
   const { dLon, dLat, ux, uy } = frame(d.path, zoom)
   const normal = [-uy, ux]
@@ -161,8 +157,8 @@ export function taperPolygon(d: FlowDatum, zoom: number, extraPx = 0): [number, 
     p[0] + normal[0] * pixels * dLon,
     p[1] + normal[1] * pixels * dLat,
   ]
-  const h0 = (MIN_PX * mapScale(zoom) + extraPx) / 2
-  const h1 = (widthOf(d, zoom) + extraPx) / 2
+  const h0 = (MIN_PX * mapScale(zoom)) / 2
+  const h1 = widthOf(d, zoom) / 2
   return [offset(from, h0), offset(to, h1), offset(to, -h1), offset(from, -h0)]
 }
 
@@ -174,8 +170,7 @@ export function heading([[x1, y1], [x2, y2]]: FlowDatum['path']): number {
 
 /**
  * The flows as arrows: a solid shaft tapering from a hair where the power leaves to the flow's width where the head
- * begins, colored by the load, with a bright rim under it where the market split, and a head in the same color,
- * sized with the shaft, pointing on the way the power goes.
+ * begins, colored by the load, and a head in the same color, sized with the shaft, pointing on the way the power goes.
  */
 export function buildFlowLayers(
   flows: ReadonlyMap<string, FlowSlot>,
@@ -188,14 +183,6 @@ export function buildFlowLayers(
   const color = (d: FlowDatum): Rgba => [...lerpRgb(palette.flow.idle, palette.flow.full, d.load), 230]
   const head = (d: FlowDatum): [number, number] => shaftEnds(d, zoom)[1]
   return [
-    new SolidPolygonLayer<FlowDatum, Interleaved>({
-      id: 'flow-splits',
-      beforeId,
-      data: data.filter((d) => d.split),
-      getPolygon: (d) => taperPolygon(d, zoom, RIM_PX * mapScale(zoom)),
-      getFillColor: [...palette.text, 200],
-      updateTriggers: { getPolygon: zoom, getFillColor: palette },
-    }),
     new SolidPolygonLayer<FlowDatum, Interleaved>({
       id: 'flows',
       beforeId,

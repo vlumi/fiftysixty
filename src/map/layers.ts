@@ -4,12 +4,13 @@ import type { Feature, Geometry } from 'geojson'
 import type { FlowSlot } from '../market/flows'
 import type { PricedArea } from '../market/jepx'
 import type { Area } from '../regions/areas'
-import type { AreaProps, Regions } from '../regions/geometry'
+import type { AreaProps, BorderProps, Regions } from '../regions/geometry'
 import type { Plants } from '../regions/plants'
 import type { Series } from '../market/stack'
 import type { Palette, Rgba } from '../shared/palette'
 import { priceColor } from '../shared/scale'
 import { buildFlowLayers } from './flowLayers'
+import { mapScale } from './scale'
 import { buildPlantLayers } from './plantLayers'
 
 /** Read by the interleaved overlay to slot a layer into the basemap's order, but not typed by deck. */
@@ -83,7 +84,42 @@ export function buildLayers(
       lineWidthUnits: 'pixels',
       getLineWidth: 2,
     }),
+    ...buildWallLayers(regions, palette, prices, zoom, beforeId),
     ...buildFlowLayers(flows ?? new Map(), palette, zoom, beforeId),
     ...buildPlantLayers(plants, palette, zoom, selectedPlant, hiddenFuels, beforeId),
+  ]
+}
+
+/**
+ * The market's walls: the border along each interconnector whose two areas cleared at different prices, which is
+ * what a market split is, so the areas walled in together are the markets the auction settled that half hour.
+ */
+export function buildWallLayers(
+  regions: Regions,
+  palette: Palette,
+  prices: AreaPrices | undefined,
+  zoom: number,
+  beforeId = 'water_name',
+): Layer[] {
+  if (!prices) return []
+  const priced = (area: Area) => (area === 'okinawa' ? undefined : prices[area])
+  const walls = regions.borders.features.filter((f) => {
+    const [a, b] = [priced(f.properties.a), priced(f.properties.b)]
+    return a !== undefined && b !== undefined && Number.isFinite(a) && Number.isFinite(b) && a !== b
+  })
+  if (!walls.length) return []
+  return [
+    new GeoJsonLayer<BorderProps, Interleaved>({
+      id: 'walls',
+      beforeId,
+      data: { type: 'FeatureCollection', features: walls },
+      filled: false,
+      getLineColor: [...palette.text, 240],
+      lineWidthUnits: 'pixels',
+      getLineWidth: Math.max(2, 4 * mapScale(zoom)),
+      lineCapRounded: true,
+      lineJointRounded: true,
+      updateTriggers: { getLineColor: palette },
+    }),
   ]
 }
