@@ -85,8 +85,10 @@ export interface Strings {
   chart: {
     label: string
     series: Record<Series, string>
-    storage: string
-    sentOut: string
+    storageOut: string
+    imports: string
+    storageIn: string
+    exports: string
     curtailed: string
     demand: string
     gw: string
@@ -209,8 +211,10 @@ const en: Strings = {
       gas: 'Gas',
       hydro: 'Hydro',
     },
-    storage: 'Storage and imports',
-    sentOut: 'Sent out, below the line',
+    storageOut: 'From storage',
+    imports: 'Imports',
+    storageIn: 'Into storage',
+    exports: 'Exports',
     curtailed: 'Curtailed',
     demand: 'Demand',
     gw: 'GW',
@@ -342,8 +346,10 @@ const ja: Strings = {
       gas: 'LNG',
       hydro: '水力',
     },
-    storage: '蓄電・受電',
-    sentOut: '送電・揚水（線の下）',
+    storageOut: '揚水・蓄電池（放電）',
+    imports: '受電',
+    storageIn: '揚水・蓄電池（充電）',
+    exports: '送電',
     curtailed: '出力制御',
     demand: '需要',
     gw: 'GW',

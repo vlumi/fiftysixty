@@ -5,7 +5,7 @@ import SupplyChart from './SupplyChart'
 
 const day = TEPCO.parse(csv).get('2026-09-24')!
 
-test('eight bands, the exchange, the demand line and a legend, with the slot as the slider value', () => {
+test('eight bands, storage and the lines apart above and below, the demand line and a key, with the slot as the slider value', () => {
   render(<SupplyChart day={day} slot={25} onSlot={vi.fn()} />)
   const chart = screen.getByRole('slider', { name: 'Supply over the day' })
   expect(chart).toHaveAttribute('aria-valuenow', '25')
@@ -20,11 +20,13 @@ test('eight bands, the exchange, the demand line and a legend, with the slot as 
     'Wind',
     'Gas',
     'Hydro',
-    'Storage and imports',
-    'Sent out, below the line',
+    'From storage',
+    'Imports',
+    'Into storage',
+    'Exports',
   ])
   expect(screen.getByText('Demand')).toBeInTheDocument()
-  expect(screen.getAllByText('Sent out, below the line').length).toBeGreaterThan(0)
+  expect(screen.getAllByText('Exports').length).toBeGreaterThan(0)
   expect(screen.queryByText('Curtailed')).not.toBeInTheDocument()
 })
 
@@ -51,4 +53,11 @@ test('curtailment gets its own hatched band and key', () => {
   const curtailed = day.map((r) => ({ ...r, curtailedMW: { solar: 500, wind: 0 } }))
   render(<SupplyChart day={curtailed} slot={1} onSlot={vi.fn()} />)
   expect(screen.getAllByText('Curtailed')).toHaveLength(2)
+})
+
+test('an idle row reads 0, never a negative zero', () => {
+  const idle = day.map((r) => ({ ...r, bySource: { ...r.bySource, pumped: 0, battery: 0, interconnector: 1000 } }))
+  render(<SupplyChart day={idle} slot={25} onSlot={vi.fn()} />)
+  for (const name of ['Into storage', 'Exports'])
+    expect(screen.getByRole('row', { name: new RegExp(`^${name}`) })).toHaveTextContent(/^[^-]*0$/)
 })

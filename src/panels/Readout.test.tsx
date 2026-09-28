@@ -94,7 +94,8 @@ test("what ran in a picked area is the chart's key with the half hour's figures,
     .map((r) => within(r).getByRole('rowheader').textContent)
   expect(rows).toEqual([
     'Demand',
-    'Storage and imports',
+    'Imports',
+    'From storage',
     'Hydro',
     'Gas',
     'Wind',
@@ -103,7 +104,8 @@ test("what ran in a picked area is the chart's key with the half hour's figures,
     'Geothermal and biomass',
     'Nuclear',
     'Coal',
-    'Sent out, below the line',
+    'Into storage',
+    'Exports',
   ])
   expect(within(mix).getByRole('row', { name: /^Demand/ })).toHaveTextContent(/\d{2},\d{3}/)
   expect(screen.getByRole('slider', { name: 'Supply over the day' })).toHaveAttribute('aria-valuenow', '47')
