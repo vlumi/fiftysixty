@@ -18,6 +18,7 @@ import { PALETTES } from './shared/palette'
 import { resolveTheme, useSystemDark } from './shared/theme'
 import TimeBar from './time/TimeBar'
 import { useNow } from './time/useNow'
+import { dispatchShortcut, releaseFocusAfterPointerClick } from './shortcuts'
 import { useElementHeight } from './shared/useElementHeight'
 import { usePlayer } from './time/usePlayer'
 
@@ -81,6 +82,20 @@ export default function App() {
   const tick = useCallback(() => step(days, date), [step, days, date])
   usePlayer(playing, tick)
   const displayed = slotOf(spot, date, slot)
+
+  // The keys act on the store directly; the listener re-registers only when what they step through changes.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (dispatchShortcut(e, { days, date, now, theme, modal: credits, onAbout: () => setCredits(true) }))
+        e.preventDefault()
+    }
+    window.addEventListener('keydown', onKey)
+    window.addEventListener('click', releaseFocusAfterPointerClick)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('click', releaseFocusAfterPointerClick)
+    }
+  }, [days, date, now, theme, credits])
 
   // The displayed month's files, asked for again every half hour so an open tab follows the host's hourly fetch,
   // and again after a failure.

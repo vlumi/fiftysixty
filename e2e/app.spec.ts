@@ -102,6 +102,21 @@ test('a story day is a jump away: the day the data found most at the floor', asy
   await expect(page.getByRole('complementary', { name: 'Readout' })).toContainText('System price')
 })
 
+test('the keys: an arrow steps the half hour, Escape lets a picked area go, ? opens the about', async ({ page }) => {
+  await open(page)
+  await page.locator('.maplibregl-canvas').click({ position: await tokyo(page) })
+  const readout = page.getByRole('complementary', { name: 'Readout' })
+  await expect(readout).toContainText('Tokyo')
+  await page.keyboard.press('ArrowRight')
+  await expect(page.getByRole('status')).toHaveText('Yesterday 12:30–13:00 JST')
+  await page.keyboard.press('Escape')
+  await expect(readout).toContainText('System price')
+  await page.keyboard.press('?')
+  await expect(page.getByRole('dialog', { name: 'About' })).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+})
+
 test('the light theme is a click away and is kept across a reload', async ({ page }) => {
   await open(page)
   await page.getByRole('button', { name: 'Light theme' }).click()
