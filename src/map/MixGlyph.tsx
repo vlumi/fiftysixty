@@ -6,19 +6,24 @@ import styles from './MixGlyph.module.css'
 const WIDTH = 18
 const MW_PER_PX = 500
 const GW = 1000
+/** Below this scale the figure under the column would be too small to read, so it is left off. */
+const LABEL_FROM = 0.6
 
 interface Props {
   name: string
   record: RecordSlot
+  /** The column's size against full size, following the map's zoom. */
+  scale?: number
   onPick: () => void
 }
 
 /** What ran in an area for the slot, as a column in the middle of it on the map: the chart's bands, a hatched cap for curtailment, demand as its height. */
-export default function MixGlyph({ name, record, onPick }: Props) {
+export default function MixGlyph({ name, record, scale = 1, onPick }: Props) {
   const s = useStrings()
   const [at] = stackDay([record]).slots
+  const width = WIDTH * scale
   // A source reported negative for a half hour would give a band a negative height, which SVG drops.
-  const px = (mw: number) => Math.max(0, mw) / MW_PER_PX
+  const px = (mw: number) => (Math.max(0, mw) / MW_PER_PX) * scale
   const imports = Math.max(0, at.exchangeMW)
   const exports = Math.max(0, -at.exchangeMW)
   const top = px(at.generatedMW + imports + at.curtailedMW)
@@ -26,31 +31,33 @@ export default function MixGlyph({ name, record, onPick }: Props) {
   const y = (mw: number) => top - px(mw)
   return (
     <button className={styles.glyph} aria-label={s.key.mix(name)} onClick={onPick}>
-      <svg width={WIDTH} height={height} viewBox={`0 0 ${WIDTH} ${height}`}>
+      <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
         {SERIES.map((s) => (
           <rect
             key={s}
             x={0}
-            width={WIDTH}
+            width={width}
             y={y(at.bands[s].from + at.bands[s].value)}
             height={px(at.bands[s].value)}
             style={{ fill: `var(--src-${s})` }}
           />
         ))}
-        <rect className={styles.exchange} x={0} width={WIDTH} y={y(at.generatedMW + imports)} height={px(imports)} />
+        <rect className={styles.exchange} x={0} width={width} y={y(at.generatedMW + imports)} height={px(imports)} />
         <rect
           className={styles.curtailed}
           x={0}
-          width={WIDTH}
+          width={width}
           y={y(at.generatedMW + imports + at.curtailedMW)}
           height={px(at.curtailedMW)}
         />
-        <rect className={styles.exchange} x={0} width={WIDTH} y={top} height={px(exports)} />
-        <line className={styles.baseline} x1={-3} x2={WIDTH + 3} y1={top} y2={top} />
+        <rect className={styles.exchange} x={0} width={width} y={top} height={px(exports)} />
+        <line className={styles.baseline} x1={-3 * scale} x2={width + 3 * scale} y1={top} y2={top} />
       </svg>
-      <span className={styles.label}>
-        {(at.demandMW / GW).toFixed(1)} {s.chart.gw}
-      </span>
+      {scale >= LABEL_FROM && (
+        <span className={styles.label}>
+          {(at.demandMW / GW).toFixed(1)} {s.chart.gw}
+        </span>
+      )}
     </button>
   )
 }

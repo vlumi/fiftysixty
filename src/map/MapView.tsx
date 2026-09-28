@@ -14,6 +14,7 @@ import { BASEMAPS, BELOW_LABELS, type Theme } from '../shared/theme'
 import { JAPAN_BOUNDS } from './basemap'
 import { buildLayers, type LayerOptions } from './layers'
 import MixGlyph from './MixGlyph'
+import { mapScale } from './scale'
 
 // MapLibre 6 resolves its worker relative to its own script URL, which a bundled app does not provide.
 setWorkerUrl(maplibreWorkerUrl)
@@ -131,6 +132,7 @@ export default function MapView({
             <MixGlyph
               name={lang === 'ja' ? AREA_BY_ID[area].ja : AREA_BY_ID[area].name}
               record={record}
+              scale={mapScale(zoom)}
               onPick={() => pick.current.onPick(area)}
             />
           </AreaMarker>

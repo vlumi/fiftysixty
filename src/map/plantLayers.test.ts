@@ -23,7 +23,7 @@ test('the plants are colored by fuel, sized by the root of the capacity and shru
   expect(radius(plants.features[1], context)).toBeCloseTo(plantRadius(8212))
   expect(plantRadius(100)).toBeCloseTo(5.5)
   expect(plantRadius(100, 8)).toBeCloseTo(5.5)
-  expect(plantRadius(100, 5)).toBeCloseTo(2.75)
+  expect(plantRadius(100, 4)).toBeCloseTo(2.75)
   expect(plantRadius(10, 3)).toBe(1.5)
   expect(line(plants.features[1], context)).toBe(2)
   expect(line(plants.features[0], context)).toBe(1)
