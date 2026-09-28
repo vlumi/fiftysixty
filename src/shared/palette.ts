@@ -11,8 +11,8 @@ export interface Palette {
   muted: Rgb
   accent: Rgb
   hz: Record<50 | 60, Rgb>
-  /** One warm hue from near the surface to bright, low price to high; see shared/scale.ts. */
-  price: readonly Rgb[]
+  /** A ramp per half of the grid, blue for 50 Hz and amber for 60 Hz as the name's colors, each from near the surface to bright, low price to high; see shared/scale.ts. */
+  price: Record<50 | 60, readonly Rgb[]>
   /** A line's color from idle to full, the cool hue against the warm areas. */
   flow: { idle: Rgb; full: Rgb }
   /** The chart's series, the `--src-*` tokens as numbers, for the plants. */
@@ -25,12 +25,20 @@ export const DARK: Palette = {
   muted: [138, 144, 160],
   accent: [0, 198, 230],
   hz: { 50: [0, 198, 230], 60: [238, 221, 102] },
-  price: [
-    [46, 24, 12],
-    [150, 62, 18],
-    [232, 118, 30],
-    [255, 190, 70],
-  ],
+  price: {
+    50: [
+      [14, 22, 52],
+      [34, 64, 156],
+      [70, 130, 235],
+      [150, 200, 255],
+    ],
+    60: [
+      [46, 24, 12],
+      [150, 62, 18],
+      [232, 118, 30],
+      [255, 190, 70],
+    ],
+  },
   flow: { idle: [120, 150, 170], full: [0, 230, 255] },
   series: {
     coal: [230, 103, 103],
@@ -50,12 +58,20 @@ export const LIGHT: Palette = {
   muted: [91, 98, 112],
   accent: [0, 122, 144],
   hz: { 50: [0, 122, 144], 60: [143, 95, 0] },
-  price: [
-    [252, 234, 218],
-    [242, 168, 100],
-    [200, 84, 22],
-    [110, 36, 6],
-  ],
+  price: {
+    50: [
+      [222, 232, 252],
+      [130, 160, 238],
+      [40, 84, 196],
+      [14, 32, 104],
+    ],
+    60: [
+      [252, 234, 218],
+      [242, 168, 100],
+      [200, 84, 22],
+      [110, 36, 6],
+    ],
+  },
   flow: { idle: [110, 122, 140], full: [0, 122, 144] },
   series: {
     coal: [227, 73, 72],
