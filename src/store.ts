@@ -59,8 +59,9 @@ const initial = (): State => ({
 
 export const useApp = create<State & Actions>((set) => ({
   ...initial(),
-  setDate: (date) => set({ date }),
-  setSlot: (slot) => set({ slot: clampSlot(slot) }),
+  // A day or a half hour chosen by hand pauses the playback, which otherwise would run on from it.
+  setDate: (date) => set({ date, playing: false }),
+  setSlot: (slot) => set({ slot: clampSlot(slot), playing: false }),
   selectArea: (area) => set({ area, plant: null }),
   pickPlant: (plant) => set({ plant, area: null }),
   setHiddenFuels: (hiddenFuels) => set({ hiddenFuels }),
