@@ -1,5 +1,5 @@
 import csv from '../test/fixtures/tepco-jukyu.csv?raw'
-import { exchangeMW, seriesMW, stackDay } from './stack'
+import { aboveMW, belowMW, exchangeMW, seriesMW, stackDay } from './stack'
 import { TEPCO } from './tepco'
 
 const day = TEPCO.parse(csv).get('2026-09-24')!
@@ -27,8 +27,11 @@ test('the bands stack from the bottom and the range rounds out to gigawatts arou
   expect(at.bands.nuclear).toEqual({ from: 5298, value: 1299 })
   expect(at.bands.hydro.from + at.bands.hydro.value).toBe(at.generatedMW)
   expect(at.generatedMW + at.exchangeMW).toBe(at.demandMW)
-  expect(stack.minMW).toBeLessThanOrEqual(0)
-  expect(stack.minMW % 1000).toBe(0)
+  expect(at.storageMW + at.linesMW).toBe(at.exchangeMW)
+  expect(aboveMW(at) + belowMW(at)).toBe(at.exchangeMW)
+  // Pumping at noon now reaches below the line, where storage and exports are drawn apart.
+  expect(stack.minMW).toBeLessThan(0)
+  expect(Number.isInteger(stack.minMW / 1000)).toBe(true)
   expect(stack.maxMW).toBeGreaterThanOrEqual(Math.max(...day.map((r) => r.demandMW)))
   expect(stack.maxMW % 1000).toBe(0)
 })

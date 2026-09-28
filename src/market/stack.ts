@@ -19,9 +19,20 @@ export function seriesMW(slot: RecordSlot): Record<Series, number> {
   }
 }
 
+/** Pumped storage and batteries as one signed figure, positive when they generate, negative when they charge. */
+export const storageMW = (slot: RecordSlot) => slot.bySource.pumped + slot.bySource.battery
+
 /** Storage and the interconnectors as one signed figure: what the area took in or sent out beyond what it generated. */
-export const exchangeMW = (slot: RecordSlot) =>
-  slot.bySource.pumped + slot.bySource.battery + slot.bySource.interconnector
+export const exchangeMW = (slot: RecordSlot) => storageMW(slot) + slot.bySource.interconnector
+
+const positive = (mw: number) => Math.max(0, mw)
+const negative = (mw: number) => Math.min(0, mw)
+
+/** What storage and the lines add on top of the generation: storage generating, then imports. */
+export const aboveMW = (s: StackedSlot) => positive(s.storageMW) + positive(s.linesMW)
+
+/** What went below the zero line: storage charging, then exports, as a negative figure. */
+export const belowMW = (s: StackedSlot) => negative(s.storageMW) + negative(s.linesMW)
 
 /** A slot of the day laid out for the chart: the running top of each band, from the bottom up. */
 export interface StackedSlot {
@@ -30,6 +41,10 @@ export interface StackedSlot {
   /** For each series, the MW under it and its own MW: the band runs from `from` to `from + value`. */
   bands: Record<Series, { from: number; value: number }>
   generatedMW: number
+  /** Pumped storage and batteries, positive generating, negative charging. */
+  storageMW: number
+  /** The interconnectors, positive importing, negative exporting. */
+  linesMW: number
   exchangeMW: number
   curtailedMW: number
 }
@@ -57,12 +72,14 @@ export function stackDay(day: readonly RecordSlot[]): DayStack {
       demandMW: r.demandMW,
       bands,
       generatedMW: from,
+      storageMW: storageMW(r),
+      linesMW: r.bySource.interconnector,
       exchangeMW: exchangeMW(r),
       curtailedMW: r.curtailedMW.solar + r.curtailedMW.wind,
     }
   })
-  const tops = slots.flatMap((s) => [s.demandMW, s.generatedMW + Math.max(0, s.exchangeMW) + s.curtailedMW])
-  const bottoms = slots.map((s) => Math.min(0, s.exchangeMW))
+  const tops = slots.flatMap((s) => [s.demandMW, s.generatedMW + aboveMW(s) + s.curtailedMW])
+  const bottoms = slots.map(belowMW)
   return {
     slots,
     minMW: Math.floor(Math.min(0, ...bottoms) / GW) * GW,

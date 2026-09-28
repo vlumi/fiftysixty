@@ -198,7 +198,9 @@ function Lines({ area, flows }: { area: PricedArea; flows: ReadonlyMap<string, F
   if (!rows.length) return null
   return (
     <section aria-label={s.readout.lines}>
-      <h3>{s.readout.lines}</h3>
+      <h3>
+        {s.readout.lines} <span className="muted">· {s.readout.forecast}</span>
+      </h3>
       <dl className={styles.rows}>
         {rows.map((r) => (
           <Fragment key={r.id}>

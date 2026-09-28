@@ -22,6 +22,7 @@
   --src-gas: #d95926;
   --src-hydro: #3987e5;
   --src-exchange: #8a90a0;
+  --src-storage: #c4c8d2;
 
   font:
     16px/1.5 system-ui,
@@ -54,6 +55,7 @@
   --src-gas: #eb6834;
   --src-hydro: #2a78d6;
   --src-exchange: #5b6270;
+  --src-storage: #9aa1ae;
   color-scheme: light;
 }
 

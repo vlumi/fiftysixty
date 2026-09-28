@@ -94,7 +94,8 @@ test("what ran in a picked area is the chart's key with the half hour's figures,
     .map((r) => within(r).getByRole('rowheader').textContent)
   expect(rows).toEqual([
     'Demand',
-    'Storage and imports',
+    'Imports',
+    'From storage',
     'Hydro',
     'Gas',
     'Wind',
@@ -103,7 +104,8 @@ test("what ran in a picked area is the chart's key with the half hour's figures,
     'Geothermal and biomass',
     'Nuclear',
     'Coal',
-    'Sent out, below the line',
+    'Into storage',
+    'Exports',
   ])
   expect(within(mix).getByRole('row', { name: /^Demand/ })).toHaveTextContent(/\d{2},\d{3}/)
   expect(screen.getByRole('slider', { name: 'Supply over the day' })).toHaveAttribute('aria-valuenow', '47')
@@ -127,7 +129,7 @@ test("a picked area's lines: flow in or out against the limit, and where the mar
   const names = [...lines.querySelectorAll('dt')].map((d) => d.textContent?.trim())
   expect(names).toEqual(['Kansai fence', 'Kansai–Chugoku split', 'Anan–Kihoku split'])
   const values = [...lines.querySelectorAll('dd')].map((d) => d.textContent)
-  expect(values).toEqual(['out 1,290 of 1,830', 'in 6,580 of 6,580', 'in 550 of 550'])
+  expect(values).toEqual(['out 1,290 of 1,830', 'in 3,290 of 3,290', 'in 550 of 550'])
 })
 
 test('a picked plant: its capacity and fuel, and that its output is not public', () => {

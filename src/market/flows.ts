@@ -25,7 +25,9 @@ export async function loadFlows(month: string, base = '/data'): Promise<FlowDays
 
 /**
  * Parses OCCTO's 広域予備率連系線情報 CSV: an update line, then a quoted header, then one row per line and half hour,
- * the time naming the end of the half hour. Circuits sharing an id are summed, a split on either counting.
+ * the time naming the end of the half hour. Rows sharing an id are one line monitored at two sections, as OCCTO gives
+ * Kansai–Chugoku: the same power crosses both, so the flow is taken once, the tighter section's capacity and free
+ * capacity bind, and a split at either counts.
  */
 export function parseFlows(csv: string): FlowDays {
   const rows = csv
@@ -74,11 +76,10 @@ export function parseFlows(csv: string): FlowDays {
     }
     if (!at) slots.push(next)
     else {
-      at.capacityMW.forward += next.capacityMW.forward
-      at.capacityMW.reverse += next.capacityMW.reverse
-      at.flowMW += next.flowMW
-      at.freeMW.forward += next.freeMW.forward
-      at.freeMW.reverse += next.freeMW.reverse
+      at.capacityMW.forward = Math.min(at.capacityMW.forward, next.capacityMW.forward)
+      at.capacityMW.reverse = Math.min(at.capacityMW.reverse, next.capacityMW.reverse)
+      at.freeMW.forward = Math.min(at.freeMW.forward, next.freeMW.forward)
+      at.freeMW.reverse = Math.min(at.freeMW.reverse, next.freeMW.reverse)
       at.split ||= next.split
     }
   }

@@ -2,7 +2,7 @@ import { useMemo, type KeyboardEvent, type PointerEvent } from 'react'
 import type { RecordSlot } from '../market/record'
 import { useStrings } from '../i18n/useStrings'
 import { SLOTS } from '../market/jepx'
-import { SERIES, stackDay, type StackedSlot } from '../market/stack'
+import { aboveMW, SERIES, stackDay, type StackedSlot } from '../market/stack'
 import { clampSlot, slotRange } from '../time/slots'
 import styles from './SupplyChart.module.css'
 
@@ -15,6 +15,44 @@ const LEFT = 34
 const PLOT = HEIGHT - TOP - BOTTOM
 const SPAN = WIDTH - LEFT
 const GW = 1000
+
+const up = (mw: number) => Math.max(0, mw)
+const down = (mw: number) => Math.min(0, mw)
+
+/**
+ * Storage and the lines, apart: above the generation, storage generating and then imports; below the zero line,
+ * storage charging and then exports. Each is a band of its own with its own row in the key.
+ */
+const EXCHANGE = [
+  {
+    key: 'storageOut',
+    color: 'var(--src-storage)',
+    top: (t: StackedSlot) => t.generatedMW + up(t.storageMW),
+    bottom: (t: StackedSlot) => t.generatedMW,
+    mw: (t: StackedSlot) => up(t.storageMW),
+  },
+  {
+    key: 'imports',
+    color: 'var(--src-exchange)',
+    top: (t: StackedSlot) => t.generatedMW + up(t.storageMW) + up(t.linesMW),
+    bottom: (t: StackedSlot) => t.generatedMW + up(t.storageMW),
+    mw: (t: StackedSlot) => up(t.linesMW),
+  },
+  {
+    key: 'storageIn',
+    color: 'var(--src-storage)',
+    top: () => 0,
+    bottom: (t: StackedSlot) => down(t.storageMW),
+    mw: (t: StackedSlot) => up(-t.storageMW),
+  },
+  {
+    key: 'exports',
+    color: 'var(--src-exchange)',
+    top: (t: StackedSlot) => down(t.storageMW),
+    bottom: (t: StackedSlot) => down(t.storageMW) + down(t.linesMW),
+    mw: (t: StackedSlot) => up(-t.linesMW),
+  },
+] as const
 
 interface Props {
   day: readonly RecordSlot[]
@@ -90,32 +128,17 @@ export default function SupplyChart({ day, slot, onSlot }: Props) {
             <title>{s.chart.series[x]}</title>
           </path>
         ))}
-        <path
-          className={styles.band}
-          style={{ fill: 'var(--src-exchange)' }}
-          d={band(
-            (t) => t.generatedMW + Math.max(0, t.exchangeMW),
-            (t) => t.generatedMW,
-          )}
-        >
-          <title>{s.chart.storage}</title>
-        </path>
-        <path
-          className={styles.band}
-          style={{ fill: 'var(--src-exchange)' }}
-          d={band(
-            () => 0,
-            (t) => Math.min(0, t.exchangeMW),
-          )}
-        >
-          <title>{s.chart.sentOut}</title>
-        </path>
+        {EXCHANGE.map(({ key, color, top, bottom }) => (
+          <path key={key} className={styles.band} style={{ fill: color }} d={band(top, bottom)}>
+            <title>{s.chart[key]}</title>
+          </path>
+        ))}
         {curtailed && (
           <path
             className={styles.curtailed}
             d={band(
-              (t) => t.generatedMW + Math.max(0, t.exchangeMW) + t.curtailedMW,
-              (t) => t.generatedMW + Math.max(0, t.exchangeMW),
+              (t) => t.generatedMW + aboveMW(t) + t.curtailedMW,
+              (t) => t.generatedMW + aboveMW(t),
             )}
           >
             <title>{s.chart.curtailed}</title>
@@ -154,11 +177,17 @@ export default function SupplyChart({ day, slot, onSlot }: Props) {
 
 /**
  * The chart's key and the half hour's figures in one table, read top down as the chart stacks: demand, curtailment,
- * what came in, the sources, and what went out below the line. Without a record for the half hour, the figures are
+ * imports and storage generating, the sources, then storage charging and exports below the line. Without a record for the half hour, the figures are
  * dashes and the key still stands.
  */
 function MixKey({ at, curtailed }: { at: StackedSlot | undefined; curtailed: boolean }) {
   const s = useStrings()
+  const row = (e: (typeof EXCHANGE)[number]) => ({
+    key: e.key,
+    name: s.chart[e.key],
+    color: e.color,
+    mw: at && e.mw(at),
+  })
   const rows: { key: string; name: string; color: string; mw: number | undefined; kind?: 'line' | 'hatched' }[] = [
     { key: 'demand', name: s.chart.demand, color: 'var(--text)', mw: at?.demandMW, kind: 'line' },
     ...(curtailed
@@ -172,14 +201,14 @@ function MixKey({ at, curtailed }: { at: StackedSlot | undefined; curtailed: boo
           },
         ]
       : []),
-    { key: 'storage', name: s.chart.storage, color: 'var(--src-exchange)', mw: at && Math.max(0, at.exchangeMW) },
+    ...[EXCHANGE[1], EXCHANGE[0]].map(row),
     ...[...SERIES].reverse().map((x) => ({
       key: x,
       name: s.chart.series[x],
       color: `var(--src-${x})`,
       mw: at?.bands[x].value,
     })),
-    { key: 'sentOut', name: s.chart.sentOut, color: 'var(--src-exchange)', mw: at && Math.max(0, -at.exchangeMW) },
+    ...[EXCHANGE[2], EXCHANGE[3]].map(row),
   ]
   return (
     <section aria-label={s.readout.whatRan}>
