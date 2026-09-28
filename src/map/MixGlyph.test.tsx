@@ -22,6 +22,16 @@ test('a column of the bands, capped by the curtailment, with a stub below the li
   expect(onPick).toHaveBeenCalled()
 })
 
+test('the column scales with the map, and far out the figure is left off', () => {
+  render(<MixGlyph name="Kyushu" record={noon} scale={0.5} onPick={vi.fn()} />)
+  const glyph = screen.getByRole('button', { name: 'Kyushu mix' })
+  const svg = glyph.querySelector('svg')!
+  expect(Number(svg.getAttribute('width'))).toBe(9)
+  const generated = 2960 + 526 + 1056 + 88 + 148 + 346 + 126 + 608 + 6562 + 116 + 310
+  expect(Number(svg.getAttribute('height'))).toBeCloseTo((generated + 1877 + 218 + 1106 + 1944) / 500 / 2, 3)
+  expect(glyph).not.toHaveTextContent('GW')
+})
+
 test('a source reported negative does not take a band below zero height', () => {
   const odd = { ...noon, bySource: { ...noon.bySource, other: -50 } }
   render(<MixGlyph name="Kyushu" record={odd} onPick={vi.fn()} />)

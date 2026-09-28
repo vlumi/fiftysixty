@@ -6,6 +6,7 @@ import { OCCTO_LINE_IDS } from '../regions/interconnectors'
 import type { Palette, Rgba } from '../shared/palette'
 import { lerpRgb } from '../shared/scale'
 import type { Interleaved } from './layers'
+import { FULL_SIZE_ZOOM, mapScale } from './scale'
 
 /** A line for the slot, laid from where the power comes to where it goes. */
 export interface FlowDatum {
@@ -84,11 +85,11 @@ const COLUMN_HALF_PX = [12, 48]
 /** The most of a line the clearances and the head may take, so the shaft keeps the rest of a short line. */
 const CLEAR_SHARE = 0.6
 
-/** The line's width on screen, a pixel plus one per gigawatt. */
-export const widthOf = (d: FlowDatum) => MIN_PX + d.mw / MW_PER_PX
+/** The line's width on screen, a pixel plus one per gigawatt at full size, scaled with the map. */
+export const widthOf = (d: FlowDatum, zoom = FULL_SIZE_ZOOM) => (MIN_PX + d.mw / MW_PER_PX) * mapScale(zoom)
 
 /** The arrowhead's size on screen, growing with the shaft. */
-export const headSize = (d: FlowDatum) => 8 + widthOf(d) * 3
+export const headSize = (d: FlowDatum, zoom = FULL_SIZE_ZOOM) => (8 + (MIN_PX + d.mw / MW_PER_PX) * 3) * mapScale(zoom)
 
 /** A triangle pointing right, its base on the left edge, drawn white to be tinted. */
 const HEAD_ICON = {
@@ -121,9 +122,10 @@ function frame([[x1, y1], [x2, y2]]: FlowDatum['path'], zoom: number) {
   return { dLon, dLat, ux: px / length, uy: py / length, length }
 }
 
-/** How far, in pixels, a line heading `ux, uy` runs from an anchor before it is out of the column drawn over it. */
-function clearance(ux: number, uy: number): number {
-  return Math.min(COLUMN_HALF_PX[0] / Math.abs(ux || 1e-9), COLUMN_HALF_PX[1] / Math.abs(uy || 1e-9))
+/** How far, in pixels, a line heading `ux, uy` runs from an anchor before it is out of the column drawn over it at the zoom. */
+function clearance(ux: number, uy: number, zoom: number): number {
+  const [halfWidth, halfHeight] = COLUMN_HALF_PX.map((px) => px * mapScale(zoom))
+  return Math.min(halfWidth / Math.abs(ux || 1e-9), halfHeight / Math.abs(uy || 1e-9))
 }
 
 /**
@@ -133,9 +135,9 @@ function clearance(ux: number, uy: number): number {
  */
 export function shaftEnds(d: FlowDatum, zoom: number): FlowDatum['path'] {
   const { dLon, dLat, ux, uy, length } = frame(d.path, zoom)
-  const clear = clearance(ux, uy)
+  const clear = clearance(ux, uy, zoom)
   let start = clear
-  let end = clear + headSize(d)
+  let end = clear + headSize(d, zoom)
   const room = length * CLEAR_SHARE
   if (start + end > room) {
     const share = room / (start + end)
@@ -159,8 +161,8 @@ export function taperPolygon(d: FlowDatum, zoom: number, extraPx = 0): [number, 
     p[0] + normal[0] * pixels * dLon,
     p[1] + normal[1] * pixels * dLat,
   ]
-  const h0 = (MIN_PX + extraPx) / 2
-  const h1 = (widthOf(d) + extraPx) / 2
+  const h0 = (MIN_PX * mapScale(zoom) + extraPx) / 2
+  const h1 = (widthOf(d, zoom) + extraPx) / 2
   return [offset(from, h0), offset(to, h1), offset(to, -h1), offset(from, -h0)]
 }
 
@@ -190,7 +192,7 @@ export function buildFlowLayers(
       id: 'flow-splits',
       beforeId,
       data: data.filter((d) => d.split),
-      getPolygon: (d) => taperPolygon(d, zoom, RIM_PX),
+      getPolygon: (d) => taperPolygon(d, zoom, RIM_PX * mapScale(zoom)),
       getFillColor: [...palette.text, 200],
       updateTriggers: { getPolygon: zoom, getFillColor: palette },
     }),
@@ -212,10 +214,10 @@ export function buildFlowLayers(
       getPosition: head,
       getAngle: (d) => heading(d.path),
       getColor: color,
-      getSize: headSize,
+      getSize: (d) => headSize(d, zoom),
       sizeUnits: 'pixels',
       billboard: false,
-      updateTriggers: { getPosition: zoom, getColor: palette },
+      updateTriggers: { getPosition: zoom, getSize: zoom, getColor: palette },
     }),
   ]
 }

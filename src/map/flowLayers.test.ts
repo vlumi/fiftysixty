@@ -85,9 +85,12 @@ test('the shaft is one solid shape, a hair wide off the column and the flow widt
   expect(Math.abs(taperPolygon(east, zoom, 4)[1][1] - taperPolygon(east, zoom, 4)[2][1]) / perLatPixel).toBeCloseTo(
     widthOf(east) + 4,
   )
+  // A level in, the pixels are half the degrees and the shaft has grown by half, so three quarters in degrees.
   expect(Math.abs(taperPolygon(east, zoom + 1)[1][1] - taperPolygon(east, zoom + 1)[2][1])).toBeCloseTo(
-    Math.abs(b[1] - c[1]) / 2,
+    Math.abs(b[1] - c[1]) * 0.75,
   )
+  // A level out, the shaft is half the pixels.
+  expect(widthOf(east, zoom - 1)).toBeCloseTo(widthOf(east) / 2)
 })
 
 test('the arrow heads along the path, the shapes take color from the load, split lines get a rim, the head sits at the shaft end in the same color', () => {
@@ -125,6 +128,7 @@ test('the arrow heads along the path, the shapes take color from the load, split
   if (typeof position !== 'function') throw new Error('accessor')
   expect(position(kc, context)).toEqual(shaftEnds(kc, 5)[1])
   expect(headSize(kc)).toBeCloseTo(8 + (1 + 6.58) * 3)
+  expect(headSize(kc, 4)).toBeCloseTo((8 + (1 + 6.58) * 3) / 2)
   const headColor = heads.props.getColor
   if (typeof headColor !== 'function') throw new Error('accessor')
   expect(headColor(kc, context)).toEqual([...DARK.flow.full, 230])
@@ -153,10 +157,10 @@ test('the shaft starts and the head ends clear of the columns by pixels, so a ph
   ])
   const perLatPixel = perLonPixel * Math.cos((35 * Math.PI) / 180)
   expect((shaftEnds(north, 5)[0][1] - 30) / perLatPixel).toBeCloseTo(48)
-  // Zoomed out, the same line is half as long on screen and the pixels clear stay, so the shaft is what shortens.
+  // Zoomed out, the line and the column are half the pixels, so the pixels clear and the shaft halve with them.
   const [farFrom, farTo] = shaftEnds(east, 4)
-  expect((farFrom[0] - 130) / degreesPerPixel(4)).toBeCloseTo(12)
-  expect(farTo[0] - farFrom[0]).toBeLessThan(to[0] - from[0])
+  expect((farFrom[0] - 130) / degreesPerPixel(4)).toBeCloseTo(6)
+  expect((farTo[0] - farFrom[0]) / degreesPerPixel(4)).toBeCloseTo((to[0] - from[0]) / degreesPerPixel(5) / 2)
   // A short line keeps two fifths of itself as the shaft, the clearances and the head sharing the rest.
   const short = line([
     [135, 35],
