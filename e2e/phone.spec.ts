@@ -25,7 +25,7 @@ test('on a phone a picked area opens on its headline row, the rest a tap on it a
   await expect(readout.getByRole('region', { name: 'What ran' })).toBeVisible()
   await expect(page.locator('.maplibregl-ctrl-compass')).toBeVisible()
   await page.getByRole('button', { name: 'About and credits' }).click()
-  await expect(page.getByRole('dialog', { name: 'Credits' })).toContainText('OpenStreetMap')
+  await expect(page.getByRole('dialog', { name: 'About' })).toContainText('OpenStreetMap')
   await page.getByRole('dialog').getByRole('button', { name: 'Close' }).click()
   await expect(page.getByRole('dialog')).toHaveCount(0)
 })

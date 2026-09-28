@@ -3,7 +3,7 @@ import { useStrings } from '../i18n/useStrings'
 import CloseButton from './CloseButton'
 import styles from './Credits.module.css'
 
-/** Where the map, the shapes and the figures come from, behind the header's ⓘ; the map's own attribution is off. */
+/** What the page is and where the map, the shapes and the figures come from, behind the header's ⓘ; the map's own attribution is off. */
 export default function Credits({ onClose }: { onClose: () => void }) {
   const s = useStrings()
   useEffect(() => {
@@ -11,7 +11,13 @@ export default function Credits({ onClose }: { onClose: () => void }) {
       if (e.key === 'Escape') onClose()
     }
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    // The page must not scroll under the modal, as a phone would let it.
+    const overflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.body.style.overflow = overflow
+    }
   }, [onClose])
   return (
     <div className={styles.backdrop} onClick={onClose}>
@@ -24,6 +30,8 @@ export default function Credits({ onClose }: { onClose: () => void }) {
       >
         <CloseButton onClick={onClose} />
         <h2 id="credits-title">{s.credits.title}</h2>
+        <p className={styles.about}>{s.credits.about}</p>
+        <h3>{s.credits.credits}</h3>
         <dl className={styles.rows}>
           <dt>{s.credits.map}</dt>
           <dd>
