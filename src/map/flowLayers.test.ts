@@ -22,7 +22,7 @@ test('a line is laid from where the power comes: Kansai–Chugoku from Chugoku, 
   const data = flowData(noon)
   const kc = data.find((d) => d.id === 'kansai-chugoku')!
   expect(kc.path).toEqual([AREA_BY_ID.chugoku.anchor, AREA_BY_ID.kansai.anchor])
-  expect(kc.mw).toBe(6580)
+  expect(kc.mw).toBe(3290)
   expect(kc.load).toBe(1)
   const kitahon = data.find((d) => d.id === 'kitahon')!
   expect(kitahon.path).toEqual([AREA_BY_ID.hokkaido.anchor, AREA_BY_ID.tohoku.anchor])
@@ -103,7 +103,7 @@ test('the arrow heads along the path, the shapes take color from the load, the h
   const [shafts, heads] = buildFlowLayers(noon, DARK, 5) as [SolidPolygonLayer<FlowDatum>, IconLayer<FlowDatum>]
   expect([shafts.id, heads.id]).toEqual(['flows', 'flow-heads'])
   const kc = flowData(noon).find((d) => d.id === 'kansai-chugoku')!
-  expect(widthOf(kc)).toBeCloseTo(1 + 6.58)
+  expect(widthOf(kc)).toBeCloseTo(1 + 3.29)
   const context = { index: 0, data: [], target: [] }
   const color = shafts.props.getFillColor
   if (typeof color !== 'function') throw new Error('accessor')
@@ -111,8 +111,8 @@ test('the arrow heads along the path, the shapes take color from the load, the h
   const position = heads.props.getPosition
   if (typeof position !== 'function') throw new Error('accessor')
   expect(position(kc, context)).toEqual(shaftEnds(kc, 5)[1])
-  expect(headSize(kc)).toBeCloseTo(8 + (1 + 6.58) * 3)
-  expect(headSize(kc, 4)).toBeCloseTo((8 + (1 + 6.58) * 3) / 2)
+  expect(headSize(kc)).toBeCloseTo(8 + (1 + 3.29) * 3)
+  expect(headSize(kc, 4)).toBeCloseTo((8 + (1 + 3.29) * 3) / 2)
   const headColor = heads.props.getColor
   if (typeof headColor !== 'function') throw new Error('accessor')
   expect(headColor(kc, context)).toEqual([...DARK.flow.full, 230])

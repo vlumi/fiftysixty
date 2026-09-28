@@ -127,7 +127,7 @@ test("a picked area's lines: flow in or out against the limit, and where the mar
   const names = [...lines.querySelectorAll('dt')].map((d) => d.textContent?.trim())
   expect(names).toEqual(['Kansai fence', 'Kansai–Chugoku split', 'Anan–Kihoku split'])
   const values = [...lines.querySelectorAll('dd')].map((d) => d.textContent)
-  expect(values).toEqual(['out 1,290 of 1,830', 'in 6,580 of 6,580', 'in 550 of 550'])
+  expect(values).toEqual(['out 1,290 of 1,830', 'in 3,290 of 3,290', 'in 550 of 550'])
 })
 
 test('a picked plant: its capacity and fuel, and that its output is not public', () => {

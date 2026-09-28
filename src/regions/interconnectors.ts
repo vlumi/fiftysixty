@@ -32,10 +32,10 @@ export function neighbors(area: Area): Area[] {
 export type FlowEnd = Area | 'middle'
 
 /**
- * A line as OCCTO publishes it, with its forward direction, which runs north to south and east to west; the two
- * Kansai–Chugoku circuits share an id and are summed. Around the Chubu, Hokuriku and Kansai triangle OCCTO publishes
- * fences, each area's boundary against the other two, with 'middle' standing for the far end; the map resolves them
- * into flows between the neighbors.
+ * A line as OCCTO publishes it, with its forward direction, which runs north to south and east to west. Kansai–Chugoku
+ * is one line OCCTO monitors at two sections, east and west, sharing an id: one flow, the tighter section's limits.
+ * Around the Chubu, Hokuriku and Kansai triangle OCCTO publishes fences, each area's boundary against the other two,
+ * with 'middle' standing for the far end; the map resolves them into flows between the neighbors.
  */
 export interface OcctoLine {
   name: string
@@ -59,7 +59,7 @@ export const OCCTO_LINES: readonly OcctoLine[] = [
   { name: '関門連系線', id: 'chugoku-kyushu', label: 'Kanmon', from: 'chugoku', to: 'kyushu' },
 ]
 
-/** OCCTO's lines once each, the circuits folded, in table order. */
+/** OCCTO's lines once each, the two Kansai–Chugoku sections folded, in table order. */
 export const OCCTO_LINE_IDS: readonly OcctoLine[] = OCCTO_LINES.filter(
   (l, i) => OCCTO_LINES.findIndex((m) => m.id === l.id) === i,
 )

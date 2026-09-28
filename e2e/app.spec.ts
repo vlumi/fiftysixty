@@ -91,7 +91,7 @@ test("the holiday noon: Kansai's lines full from the west and the market split o
   await page.locator('.maplibregl-canvas').click({ position: await kansai(page) })
   const lines = page.getByRole('complementary', { name: 'Readout' }).getByRole('region', { name: 'Lines' })
   await expect(lines).toContainText('Kansai–Chugoku split')
-  await expect(lines).toContainText('in 6,580 of 6,580')
+  await expect(lines).toContainText('in 3,290 of 3,290')
 })
 
 /** A spot in Hyogo, west of the column on Kansai's anchor, as a position on the canvas. */
