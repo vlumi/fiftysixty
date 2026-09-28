@@ -140,3 +140,9 @@ test('the basemap labels follow the language', () => {
     ['get', 'name'],
   ])
 })
+
+test('the map leaves the arrow keys to the page', async () => {
+  const { Map } = await import('maplibre-gl')
+  render(<MapView theme="dark" lang="en" regions={regions} onPick={vi.fn()} onPickPlant={vi.fn()} />)
+  expect(vi.mocked(Map).mock.lastCall![0]).toMatchObject({ keyboard: false })
+})
