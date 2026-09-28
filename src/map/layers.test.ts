@@ -16,6 +16,37 @@ const regions: Regions = {
     ],
   },
   split: { type: 'FeatureCollection', features: [] },
+  borders: {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        properties: { line: 'tokyo-kansai', a: 'tokyo', b: 'kansai', sea: false },
+        geometry: {
+          type: 'MultiLineString',
+          coordinates: [
+            [
+              [137, 35],
+              [137, 36],
+            ],
+          ],
+        },
+      },
+      {
+        type: 'Feature',
+        properties: { line: 'kansai-okinawa', a: 'kansai', b: 'okinawa', sea: true },
+        geometry: {
+          type: 'MultiLineString',
+          coordinates: [
+            [
+              [130, 30],
+              [130, 28],
+            ],
+          ],
+        },
+      },
+    ],
+  },
 }
 
 test('nothing is drawn before the regions arrive', () => {
@@ -37,14 +68,14 @@ test('the areas are filled by their frequency and the split line drawn in the ac
   expect(under.props.beforeId).toBe('x')
 })
 
-test('with prices the areas take the price scale and Okinawa, which has none, is muted', () => {
+test('with prices the areas take the ramp of their half of the grid, and Okinawa, which has none, is muted', () => {
   const prices = { tokyo: 30, kansai: 5 } as AreaPrices
   const [areas] = buildLayers(regions, DARK, { prices }) as GeoJsonLayer<AreaProps, Interleaved>[]
   const fill = areas.props.getFillColor
   if (typeof fill !== 'function') throw new Error('the fill is an accessor')
   const context = { index: 0, data: regions.areas.features, target: [] }
-  expect(fill(regions.areas.features[0], context)).toEqual([...priceColor(30, DARK.price), 170])
-  expect(fill(regions.areas.features[1], context)).toEqual([...priceColor(5, DARK.price), 170])
+  expect(fill(regions.areas.features[0], context)).toEqual([...priceColor(30, DARK.price[50]), 170])
+  expect(fill(regions.areas.features[1], context)).toEqual([...priceColor(5, DARK.price[60]), 170])
   expect(fill(regions.areas.features[2], context)).toEqual([...DARK.muted, 40])
 })
 
@@ -60,5 +91,15 @@ test('the selected area is outlined strongly', () => {
 test('with flows, the arrows follow the areas and the split line', () => {
   const flows = flowsAt(parseFlows(flowsCsv), '2026-09-23', 24)
   const layers = buildLayers(regions, DARK, { flows })
-  expect(layers.map((l) => l.id)).toEqual(['areas', 'split', 'flow-splits', 'flows', 'flow-heads'])
+  expect(layers.map((l) => l.id)).toEqual(['areas', 'split', 'flows', 'flow-heads'])
+})
+
+test('a wall stands on the border between two areas priced apart, none where they cleared together or one has no price', () => {
+  const ids = (prices: AreaPrices) => buildLayers(regions, DARK, { prices }).map((l) => l.id)
+  expect(ids({ tokyo: 30, kansai: 5 } as AreaPrices)).toEqual(['areas', 'split', 'walls'])
+  const [, , walls] = buildLayers(regions, DARK, { prices: { tokyo: 30, kansai: 5 } as AreaPrices }) as GeoJsonLayer[]
+  const data = walls.props.data as unknown as { features: { properties: { line: string } }[] }
+  expect(data.features.map((f) => f.properties.line)).toEqual(['tokyo-kansai'])
+  expect(ids({ tokyo: 12, kansai: 12 } as AreaPrices)).toEqual(['areas', 'split'])
+  expect(ids({ tokyo: 12 } as AreaPrices)).toEqual(['areas', 'split'])
 })

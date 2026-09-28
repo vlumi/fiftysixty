@@ -24,7 +24,6 @@ test('a line is laid from where the power comes: Kansai–Chugoku from Chugoku, 
   expect(kc.path).toEqual([AREA_BY_ID.chugoku.anchor, AREA_BY_ID.kansai.anchor])
   expect(kc.mw).toBe(6580)
   expect(kc.load).toBe(1)
-  expect(kc.split).toBe(true)
   const kitahon = data.find((d) => d.id === 'kitahon')!
   expect(kitahon.path).toEqual([AREA_BY_ID.hokkaido.anchor, AREA_BY_ID.tohoku.anchor])
   expect(data.map((d) => d.id)).not.toContain('chubu-fence')
@@ -37,7 +36,6 @@ test('the fences resolve into flows between the neighbors: at that noon Kansai a
     ['chubu-hokuriku', 539, [AREA_BY_ID.hokuriku.anchor, AREA_BY_ID.chubu.anchor]],
     ['chubu-kansai', 1290, [AREA_BY_ID.kansai.anchor, AREA_BY_ID.chubu.anchor]],
   ])
-  expect(pairs[1].split).toBe(true)
   expect(pairs[1].load).toBe(1)
   expect(pairs[1].label).toBe('Kansai–Chubu')
 })
@@ -72,7 +70,6 @@ test('the shaft is one solid shape, a hair wide off the column and the flow widt
     ],
     mw: 3000,
     load: 0.5,
-    split: false,
   }
   const zoom = 5
   const [a, b, c, d] = taperPolygon(east, zoom)
@@ -82,9 +79,6 @@ test('the shaft is one solid shape, a hair wide off the column and the flow widt
   const perLatPixel = degreesPerPixel(zoom) * Math.cos((35 * Math.PI) / 180)
   expect(Math.abs(a[1] - d[1]) / perLatPixel).toBeCloseTo(1)
   expect(Math.abs(b[1] - c[1]) / perLatPixel).toBeCloseTo(widthOf(east))
-  expect(Math.abs(taperPolygon(east, zoom, 4)[1][1] - taperPolygon(east, zoom, 4)[2][1]) / perLatPixel).toBeCloseTo(
-    widthOf(east) + 4,
-  )
   // A level in, the pixels are half the degrees and the shaft has grown by half, so three quarters in degrees.
   expect(Math.abs(taperPolygon(east, zoom + 1)[1][1] - taperPolygon(east, zoom + 1)[2][1])).toBeCloseTo(
     Math.abs(b[1] - c[1]) * 0.75,
@@ -93,7 +87,7 @@ test('the shaft is one solid shape, a hair wide off the column and the flow widt
   expect(widthOf(east, zoom - 1)).toBeCloseTo(widthOf(east) / 2)
 })
 
-test('the arrow heads along the path, the shapes take color from the load, split lines get a rim, the head sits at the shaft end in the same color', () => {
+test('the arrow heads along the path, the shapes take color from the load, the head sits at the shaft end in the same color', () => {
   expect(
     heading([
       [130, 35],
@@ -106,24 +100,14 @@ test('the arrow heads along the path, the shapes take color from the load, split
       [135, 40],
     ]),
   ).toBeCloseTo(90)
-  const [rims, shafts, heads] = buildFlowLayers(noon, DARK, 5) as [
-    SolidPolygonLayer<FlowDatum>,
-    SolidPolygonLayer<FlowDatum>,
-    IconLayer<FlowDatum>,
-  ]
-  expect([rims.id, shafts.id, heads.id]).toEqual(['flow-splits', 'flows', 'flow-heads'])
+  const [shafts, heads] = buildFlowLayers(noon, DARK, 5) as [SolidPolygonLayer<FlowDatum>, IconLayer<FlowDatum>]
+  expect([shafts.id, heads.id]).toEqual(['flows', 'flow-heads'])
   const kc = flowData(noon).find((d) => d.id === 'kansai-chugoku')!
   expect(widthOf(kc)).toBeCloseTo(1 + 6.58)
   const context = { index: 0, data: [], target: [] }
   const color = shafts.props.getFillColor
   if (typeof color !== 'function') throw new Error('accessor')
   expect(color(kc, context)).toEqual([...DARK.flow.full, 230])
-  expect((rims.props.data as FlowDatum[]).map((d) => d.id)).toEqual(
-    flowData(noon)
-      .filter((d) => d.split)
-      .map((d) => d.id),
-  )
-  expect((rims.props.data as FlowDatum[]).length).toBeGreaterThan(0)
   const position = heads.props.getPosition
   if (typeof position !== 'function') throw new Error('accessor')
   expect(position(kc, context)).toEqual(shaftEnds(kc, 5)[1])
@@ -141,7 +125,6 @@ test('the shaft starts and the head ends clear of the columns by pixels, so a ph
     path,
     mw,
     load: 0.5,
-    split: false,
   })
   const east = line([
     [130, 35],
