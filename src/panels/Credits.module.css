@@ -7,6 +7,7 @@
   justify-content: center;
   padding: 1rem;
   background: rgb(0 0 0 / 0.5);
+  touch-action: none;
 }
 
 .dialog {
@@ -15,6 +16,8 @@
   max-width: 24rem;
   max-height: 100%;
   overflow: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
   padding: 1rem 1.25rem;
   border-radius: 0.75rem;
   background: var(--panel);
@@ -27,6 +30,17 @@
   padding-right: 2rem;
   font-size: 1rem;
   font-weight: 600;
+}
+
+.dialog h3 {
+  margin: 1rem 0 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.about {
+  margin: 0;
+  line-height: 1.45;
 }
 
 .dialog a {

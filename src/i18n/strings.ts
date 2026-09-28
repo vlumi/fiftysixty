@@ -16,6 +16,8 @@ export interface Strings {
   credits: {
     label: string
     title: string
+    about: string
+    credits: string
     map: string
     regions: string
     plants: string
@@ -103,7 +105,10 @@ const en: Strings = {
   close: 'Close',
   credits: {
     label: 'About and credits',
-    title: 'Credits',
+    title: 'About',
+    about:
+      'The Japanese day-ahead power market on a map: the spot price of each area for each half hour, what ran in each area, the power forecast to flow between them, and the plants. Pick a day and a half hour under the map, an area or a plant for its numbers, and a story from the list for a day worth seeing.',
+    credits: 'Credits',
     map: 'Map',
     regions: 'Areas',
     plants: 'Plants',
@@ -239,7 +244,10 @@ const ja: Strings = {
   close: '閉じる',
   credits: {
     label: '情報とクレジット',
-    title: 'クレジット',
+    title: 'このサイトについて',
+    about:
+      '日本の前日スポット電力市場を地図に。エリアごと・コマごとのスポット価格、各エリアで何が動いたか、連系線を流れる見込みの電力、そして発電所。地図の下で日とコマを選び、エリアや発電所を選ぶとその数字が、一覧から選ぶと見どころの日が出ます。',
+    credits: 'クレジット',
     map: '地図',
     regions: 'エリア',
     plants: '発電所',
