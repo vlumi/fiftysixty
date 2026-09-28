@@ -147,25 +147,66 @@ export default function SupplyChart({ day, slot, onSlot }: Props) {
           </text>
         ))}
       </svg>
-      <figcaption className={styles.legend}>
-        {[...SERIES].reverse().map((x) => (
-          <Key key={x} color={`var(--src-${x})`} name={s.chart.series[x]} />
-        ))}
-        <Key color="var(--src-exchange)" name={s.chart.storage} />
-        <Key color="var(--src-exchange)" name={s.chart.sentOut} />
-        {curtailed && <Key color="var(--src-solar)" name={s.chart.curtailed} hatched />}
-        <Key color="var(--text)" name={s.chart.demand} line />
-      </figcaption>
+      <MixKey at={stack.slots.find((t) => t.slot === slot)} curtailed={curtailed} />
     </figure>
   )
 }
 
-function Key({ color, name, line, hatched }: { color: string; name: string; line?: boolean; hatched?: boolean }) {
-  const className = line ? styles.lineKey : hatched ? styles.hatchedKey : styles.swatch
+/**
+ * The chart's key and the half hour's figures in one table, read top down as the chart stacks: demand, curtailment,
+ * what came in, the sources, and what went out below the line. Without a record for the half hour, the figures are
+ * dashes and the key still stands.
+ */
+function MixKey({ at, curtailed }: { at: StackedSlot | undefined; curtailed: boolean }) {
+  const s = useStrings()
+  const rows: { key: string; name: string; color: string; mw: number | undefined; kind?: 'line' | 'hatched' }[] = [
+    { key: 'demand', name: s.chart.demand, color: 'var(--text)', mw: at?.demandMW, kind: 'line' },
+    ...(curtailed
+      ? [
+          {
+            key: 'curtailed',
+            name: s.chart.curtailed,
+            color: 'var(--src-solar)',
+            mw: at?.curtailedMW,
+            kind: 'hatched' as const,
+          },
+        ]
+      : []),
+    { key: 'storage', name: s.chart.storage, color: 'var(--src-exchange)', mw: at && Math.max(0, at.exchangeMW) },
+    ...[...SERIES].reverse().map((x) => ({
+      key: x,
+      name: s.chart.series[x],
+      color: `var(--src-${x})`,
+      mw: at?.bands[x].value,
+    })),
+    { key: 'sentOut', name: s.chart.sentOut, color: 'var(--src-exchange)', mw: at && Math.max(0, -at.exchangeMW) },
+  ]
   return (
-    <span className={styles.key}>
-      <span className={className} style={{ background: line ? undefined : color, borderColor: color }} />
-      {name}
-    </span>
+    <section aria-label={s.readout.whatRan}>
+      <table className={styles.key}>
+        <thead>
+          <tr>
+            <td />
+            <th scope="col">{s.readout.mw}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.key} className={r.mw === 0 ? styles.idle : r.key === 'demand' ? styles.demandRow : undefined}>
+              <th scope="row">
+                <span
+                  className={
+                    r.kind === 'line' ? styles.lineKey : r.kind === 'hatched' ? styles.hatchedKey : styles.swatch
+                  }
+                  style={{ background: r.kind === 'line' ? undefined : r.color, borderColor: r.color }}
+                />
+                {r.name}
+              </th>
+              <td>{r.mw === undefined ? '–' : Math.round(r.mw).toLocaleString('en-US')}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
   )
 }

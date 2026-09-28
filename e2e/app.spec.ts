@@ -43,7 +43,9 @@ test('a click on Tokyo reads out its price against the system and its neighbors,
   await expect(page.getByRole('button', { name: 'Tokyo mix, no data' })).toBeVisible()
   await page.getByRole('button', { name: 'Previous day' }).click()
   await page.getByRole('slider', { name: 'Half hour' }).fill('1')
-  await expect(readout.getByRole('region', { name: 'What ran' })).toContainText('Demand 25,609 MW')
+  await expect(readout.getByRole('region', { name: 'What ran' }).getByRole('row', { name: /^Demand/ })).toContainText(
+    '25,609',
+  )
   await expect(page.getByRole('button', { name: 'Tokyo mix' })).toBeVisible()
   const chart = readout.getByRole('slider', { name: 'Supply over the day' })
   await expect(chart).toHaveAttribute('aria-valuenow', '1')
@@ -62,7 +64,9 @@ test('a curtailed noon in Kyushu shows in the mix and on the chart, and its glyp
   const readout = page.getByRole('complementary', { name: 'Readout' })
   await expect(readout).toContainText('Kyushu')
   await expect(page.getByRole('status')).toHaveText('4 days ago 11:00–11:30 JST')
-  await expect(readout.getByRole('region', { name: 'What ran' })).toContainText('Solar curtailed1,877')
+  await expect(
+    readout.getByRole('region', { name: 'What ran' }).getByRole('row', { name: /^Curtailed/ }),
+  ).toContainText('2,095')
   await expect(
     readout.getByRole('slider', { name: 'Supply over the day' }).locator('path > title', { hasText: 'Curtailed' }),
   ).toBeAttached()

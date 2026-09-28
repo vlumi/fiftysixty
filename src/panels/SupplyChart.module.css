@@ -64,22 +64,53 @@
   fill: var(--text);
 }
 
-/* Read down the columns: the bands from the top of the stack, then the exchange, curtailment and the line. */
-.legend {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-auto-flow: column;
-  grid-template-rows: repeat(7, auto);
-  gap: 0.1rem 0.75rem;
-  margin-top: 0.4rem;
-  font-size: 0.75rem;
+/* The key with the half hour's figures, a row a series in the chart's order from the top; idle ones muted. */
+.key {
+  width: 100%;
+  margin-top: 0.5rem;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.key th,
+.key td {
+  padding: 0.1rem 0;
+  font-weight: 400;
+}
+
+.key thead th {
+  color: var(--muted);
+  font-size: 0.7rem;
+  text-align: right;
+}
+
+.key tbody th {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  text-align: left;
+}
+
+.key td {
+  text-align: right;
+}
+
+.idle {
   color: var(--muted);
 }
 
-.key {
-  display: flex;
-  align-items: baseline;
-  gap: 0.35rem;
+.idle .swatch {
+  opacity: 0.4;
+}
+
+.demandRow {
+  font-weight: 600;
+}
+
+.demandRow th,
+.demandRow td {
+  font-weight: 600;
 }
 
 .swatch,
