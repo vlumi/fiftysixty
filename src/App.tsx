@@ -168,7 +168,7 @@ export default function App() {
         </button>
       </header>
       {credits && <Credits onClose={() => setCredits(false)} />}
-      <main style={{ '--bar-inset': `${barHeight + 12}px` } as CSSProperties}>
+      <main style={{ '--bar-inset': `${barHeight + 16}px` } as CSSProperties}>
         <Suspense fallback={null}>
           <MapView
             theme={theme}

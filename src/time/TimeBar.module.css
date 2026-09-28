@@ -98,15 +98,22 @@
   color: var(--hz60);
 }
 
-@media (max-width: 720px) {
+/* Narrower than its one row, the bar spans the foot and wraps rather than clip; a phone gets a little more of the width. */
+@media (max-width: 1024px) {
   .bar {
-    left: 0.5rem;
-    right: 0.5rem;
+    right: 0.75rem;
     flex-wrap: wrap;
   }
 
   .bar input[type='range'] {
     flex: 1 1 8rem;
     width: auto;
+  }
+}
+
+@media (max-width: 720px) {
+  .bar {
+    left: 0.5rem;
+    right: 0.5rem;
   }
 }
