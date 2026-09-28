@@ -28,6 +28,18 @@ export interface Strings {
     source: string
   }
   language: string
+  /** The keyboard scheme's help, by what each key does; see shortcuts.ts. */
+  help: {
+    title: string
+    slot: string
+    day: string
+    area: string
+    playPause: string
+    now: string
+    theme: string
+    escape: string
+    about: string
+  }
   time: {
     day: string
     halfHour: string
@@ -118,6 +130,17 @@ const en: Strings = {
     source: 'Source on GitHub',
   },
   language: 'Language',
+  help: {
+    title: 'Keyboard',
+    slot: 'Half hour back or forward',
+    day: 'Previous or next day',
+    area: 'Walk the areas north to south',
+    playPause: 'Play or pause',
+    now: 'Now',
+    theme: 'Light or dark',
+    escape: 'Let the area or plant go',
+    about: 'This',
+  },
   time: {
     day: 'Delivery day',
     halfHour: 'Half hour',
@@ -256,6 +279,17 @@ const ja: Strings = {
     source: 'GitHub のソース',
   },
   language: '言語',
+  help: {
+    title: 'キーボード',
+    slot: 'コマを前後に',
+    day: '前の日・次の日',
+    area: 'エリアを北から南へ',
+    playPause: '再生・停止',
+    now: '現在へ',
+    theme: 'ライト / ダーク',
+    escape: 'エリアや発電所の選択を外す',
+    about: 'この画面',
+  },
   time: {
     day: '受渡日',
     halfHour: 'コマ',

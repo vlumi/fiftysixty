@@ -1,5 +1,6 @@
-import { useEffect } from 'react'
+import { Fragment, useEffect } from 'react'
 import { useStrings } from '../i18n/useStrings'
+import { SHORTCUTS } from '../shortcuts'
 import CloseButton from './CloseButton'
 import styles from './Credits.module.css'
 
@@ -57,6 +58,17 @@ export default function Credits({ onClose }: { onClose: () => void }) {
           <dd>
             <a href="https://web-kohyo.occto.or.jp/kks-web-public/">OCCTO</a>
           </dd>
+        </dl>
+        <h3>{s.help.title}</h3>
+        <dl className={styles.rows}>
+          {SHORTCUTS.map(({ keys, does }) => (
+            <Fragment key={keys}>
+              <dt>
+                <kbd>{keys}</kbd>
+              </dt>
+              <dd>{s.help[does]}</dd>
+            </Fragment>
+          ))}
         </dl>
         <p className={styles.source}>
           <a href="https://github.com/vlumi/fiftysixty">{s.credits.source}</a>
