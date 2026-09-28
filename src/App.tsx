@@ -139,11 +139,11 @@ export default function App() {
   const mixes = useMemo(
     () =>
       Object.fromEntries(
-        Object.keys(ADAPTERS).flatMap((a) => {
-          const at = recordSlot(a && month ? records.get(`${a}/${month}`) : undefined, date, slot)
-          return at ? [[a, at]] : []
-        }),
-      ) as Partial<Record<Area, RecordSlot>>,
+        Object.keys(ADAPTERS).map((a) => [
+          a,
+          recordSlot(a && month ? records.get(`${a}/${month}`) : undefined, date, slot) ?? null,
+        ]),
+      ) as Partial<Record<Area, RecordSlot | null>>,
     [records, month, date, slot],
   )
 

@@ -40,6 +40,7 @@ test('a click on Tokyo reads out its price against the system and its neighbors,
   await expect(readout).toContainText('Chubu')
   await page.getByRole('button', { name: 'Next day' }).click()
   await expect(readout).toContainText('No record for this half hour yet.')
+  await expect(page.getByRole('button', { name: 'Tokyo mix, no data' })).toBeVisible()
   await page.getByRole('button', { name: 'Previous day' }).click()
   await page.getByRole('slider', { name: 'Half hour' }).fill('1')
   await expect(readout.getByRole('region', { name: 'What ran' })).toContainText('Demand 25,609 MW')
@@ -67,10 +68,16 @@ test('a curtailed noon in Kyushu shows in the mix and on the chart, and its glyp
   ).toBeAttached()
 })
 
-/** Where the Kanto plain falls on the canvas at the opening view of the desktop project. */
+/** A spot on the Kanto plain, east of the column on Tokyo's anchor, as a position on the canvas. */
 async function tokyo(page: Page) {
-  const box = (await page.locator('.maplibregl-canvas').boundingBox())!
-  return { x: box.width * 0.58, y: box.height * 0.65 }
+  return beside(page, 'Tokyo', 40)
+}
+
+/** A canvas position `dx` pixels from the middle of an area's column, which stands on its anchor. */
+async function beside(page: Page, area: string, dx: number) {
+  const canvas = (await page.locator('.maplibregl-canvas').boundingBox())!
+  const glyph = (await page.getByRole('button', { name: new RegExp(`^${area} mix`) }).boundingBox())!
+  return { x: glyph.x + glyph.width / 2 + dx - canvas.x, y: glyph.y + glyph.height / 2 - canvas.y }
 }
 
 test("the holiday noon: Kansai's lines full from the west and the market split on them", async ({ page }) => {
@@ -83,10 +90,9 @@ test("the holiday noon: Kansai's lines full from the west and the market split o
   await expect(lines).toContainText('in 6,580 of 6,580')
 })
 
-/** The middle of Kansai on the canvas at the opening view of the desktop project. */
+/** A spot in Hyogo, west of the column on Kansai's anchor, as a position on the canvas. */
 async function kansai(page: Page) {
-  const box = (await page.locator('.maplibregl-canvas').boundingBox())!
-  return { x: box.width * 0.465, y: box.height * 0.72 }
+  return beside(page, 'Kansai', -30)
 }
 
 test('a story day is a jump away: the day the data found most at the floor', async ({ page }) => {

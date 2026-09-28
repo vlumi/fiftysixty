@@ -99,13 +99,14 @@ test('a recorded area gets a glyph on its anchor, which picks the area, and lose
       theme="dark"
       lang="en"
       regions={regions}
-      mixes={{ tokyo: record }}
+      mixes={{ tokyo: record, kansai: null }}
       onPick={onPick}
       onPickPlant={vi.fn()}
     />,
   )
-  expect(markers).toHaveLength(1)
+  expect(markers).toHaveLength(2)
   expect(markers[0].lngLat).toEqual([139.6, 36.1])
+  expect(markers[1].element.querySelector('button')).toHaveAccessibleName('Kansai mix, no data')
   const glyph = markers[0].element.querySelector('button')!
   expect(glyph).toHaveAccessibleName('Tokyo mix')
   glyph.click()

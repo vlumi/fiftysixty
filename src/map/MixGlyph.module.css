@@ -30,6 +30,17 @@
   stroke-dasharray: 3 2;
 }
 
+.empty {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1;
+  stroke-dasharray: 3 2;
+}
+
+.muted {
+  color: var(--muted);
+}
+
 .baseline {
   stroke: var(--text);
   stroke-width: 1;
