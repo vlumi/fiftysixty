@@ -65,7 +65,7 @@
 /* Read down the columns: the bands from the top of the stack, then the exchange, curtailment and the line. */
 .legend {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   grid-auto-flow: column;
   grid-template-rows: repeat(7, auto);
   gap: 0.1rem 0.75rem;
@@ -75,10 +75,9 @@
 }
 
 .key {
-  display: inline-flex;
-  align-items: center;
+  display: flex;
+  align-items: baseline;
   gap: 0.35rem;
-  white-space: nowrap;
 }
 
 .swatch,
