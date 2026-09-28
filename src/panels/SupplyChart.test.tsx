@@ -38,8 +38,11 @@ test('the arrow keys move the half hour and a pointer picks it by position', () 
   expect(onSlot).toHaveBeenLastCalledWith(24)
   chart.getBoundingClientRect = () => ({ left: 0, width: 480 }) as DOMRect
   chart.setPointerCapture = vi.fn()
-  fireEvent.pointerDown(chart, { clientX: 470, pointerId: 1 })
+  fireEvent.pointerDown(chart, { clientX: 478, pointerId: 1 })
   expect(onSlot).toHaveBeenLastCalledWith(48)
+  fireEvent.pointerMove(chart, { clientX: 52, buttons: 1 })
+  expect(onSlot).toHaveBeenLastCalledWith(1)
+  // The gutter left of the plot, where the labels sit, is the first half hour too.
   fireEvent.pointerMove(chart, { clientX: 5, buttons: 1 })
   expect(onSlot).toHaveBeenLastCalledWith(1)
 })

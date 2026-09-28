@@ -10,7 +10,10 @@ const WIDTH = 320
 const HEIGHT = 150
 const TOP = 6
 const BOTTOM = 16
+/** The gutter on the left where the gigawatt labels sit, off the bands. */
+const LEFT = 34
 const PLOT = HEIGHT - TOP - BOTTOM
+const SPAN = WIDTH - LEFT
 const GW = 1000
 
 interface Props {
@@ -26,7 +29,7 @@ interface Props {
 export default function SupplyChart({ day, slot, onSlot }: Props) {
   const s = useStrings()
   const stack = useMemo(() => stackDay(day), [day])
-  const x = (s: number) => ((s - 0.5) / SLOTS) * WIDTH
+  const x = (s: number) => LEFT + ((s - 0.5) / SLOTS) * SPAN
   const y = (mw: number) => TOP + ((stack.maxMW - mw) / (stack.maxMW - stack.minMW)) * PLOT
   const band = (top: (s: StackedSlot) => number, bottom: (s: StackedSlot) => number) => {
     const up = stack.slots.map((s) => `${x(s.slot).toFixed(1)},${y(top(s)).toFixed(1)}`)
@@ -42,7 +45,8 @@ export default function SupplyChart({ day, slot, onSlot }: Props) {
 
   const slotAt = (e: PointerEvent<SVGSVGElement>) => {
     const rect = e.currentTarget.getBoundingClientRect()
-    return clampSlot(((e.clientX - rect.left) / rect.width) * SLOTS + 0.5)
+    const px = ((e.clientX - rect.left) / rect.width) * WIDTH
+    return clampSlot(((px - LEFT) / SPAN) * SLOTS + 0.5)
   }
   const onKey = (e: KeyboardEvent<SVGSVGElement>) => {
     const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0
@@ -71,7 +75,7 @@ export default function SupplyChart({ day, slot, onSlot }: Props) {
         onKeyDown={onKey}
       >
         {gridlines.map((mw) => (
-          <line key={mw} className={styles.grid} x1={0} x2={WIDTH} y1={y(mw)} y2={y(mw)} />
+          <line key={mw} className={styles.grid} x1={LEFT} x2={WIDTH} y1={y(mw)} y2={y(mw)} />
         ))}
         {SERIES.map((x) => (
           <path
@@ -118,9 +122,15 @@ export default function SupplyChart({ day, slot, onSlot }: Props) {
           </path>
         )}
         <path className={styles.demand} d={line((t) => t.demandMW)} />
-        <line className={styles.zero} x1={0} x2={WIDTH} y1={y(0)} y2={y(0)} />
+        <line className={styles.zero} x1={LEFT} x2={WIDTH} y1={y(0)} y2={y(0)} />
         {gridlines.map((mw) => (
-          <text key={mw} className={styles.gridLabel} x={2} y={y(mw) < 14 ? y(mw) + 9 : y(mw) - 2}>
+          <text
+            key={mw}
+            className={mw === 0 ? styles.zeroLabel : styles.gridLabel}
+            x={LEFT - 4}
+            y={y(mw) + 3}
+            textAnchor="end"
+          >
             {mw / GW} {s.chart.gw}
           </text>
         ))}
@@ -129,7 +139,7 @@ export default function SupplyChart({ day, slot, onSlot }: Props) {
           <text
             key={h}
             className={styles.hour}
-            x={(h / 24) * WIDTH}
+            x={LEFT + (h / 24) * SPAN}
             y={HEIGHT - 4}
             textAnchor={h === 0 ? 'start' : h === 24 ? 'end' : 'middle'}
           >
