@@ -1,22 +1,23 @@
 import type { IconLayer, SolidPolygonLayer } from '@deck.gl/layers'
 import csv from '../test/fixtures/occto-renkei.csv?raw'
 import { flowsAt, parseFlows } from '../market/flows'
+import { forkOf, planned } from '../market/interchange'
 import { AREA_BY_ID } from '../regions/areas'
 import { DARK } from '../shared/palette'
 import {
   buildFlowLayers,
   degreesPerPixel,
   flowData,
+  forkData,
   headSize,
   heading,
   shaftEnds,
   taperPolygon,
-  triangleFlows,
   widthOf,
   type FlowDatum,
 } from './flowLayers'
 
-const noon = flowsAt(parseFlows(csv), '2026-09-23', 24)
+const noon = planned(flowsAt(parseFlows(csv), '2026-09-23', 24))
 
 test('a line is laid from where the power comes: Kansai–Chugoku from Chugoku, Kitahon from Hokkaido', () => {
   const data = flowData(noon)
@@ -27,49 +28,46 @@ test('a line is laid from where the power comes: Kansai–Chugoku from Chugoku, 
   const kitahon = data.find((d) => d.id === 'kitahon')!
   expect(kitahon.path).toEqual([AREA_BY_ID.hokkaido.anchor, AREA_BY_ID.tohoku.anchor])
   expect(data.map((d) => d.id)).not.toContain('chubu-fence')
-  expect(data).toHaveLength(7 + 2)
+  expect(data).toHaveLength(7 + 3)
 })
 
-test('the fences resolve into flows between the neighbors: at that noon Kansai and Hokuriku both feed Chubu', () => {
-  const pairs = triangleFlows(noon)
-  expect(pairs.map((p) => [p.id, p.mw, p.path])).toEqual([
-    ['chubu-hokuriku', 539, [AREA_BY_ID.hokuriku.anchor, AREA_BY_ID.chubu.anchor]],
-    ['chubu-kansai', 1290, [AREA_BY_ID.kansai.anchor, AREA_BY_ID.chubu.anchor]],
+test("the plan's Chubu, Hokuriku and Kansai loop is a fork into Chubu: two thin tails meeting, then one arrow", () => {
+  const data = flowData(noon)
+  const fork = data.filter((d) => d.id.startsWith('chubu-hokuriku-kansai'))
+  expect(fork.map((d) => [d.id, d.head, d.px ?? null, d.mw])).toEqual([
+    ['chubu-hokuriku-kansai/0', false, 2, 0],
+    ['chubu-hokuriku-kansai/1', false, 2, 0],
+    ['chubu-hokuriku-kansai', true, null, 1830],
   ])
-  expect(pairs[1].load).toBe(1)
-  expect(pairs[1].label).toBe('Kansai–Chubu')
+  const [, , shaft] = fork
+  expect(shaft.path[1]).toEqual(AREA_BY_ID.chubu.anchor)
+  expect(shaft.clear).toEqual([false, true])
 })
 
-test('with one sender and two receivers the flows fan out from it, and with a fence missing none are drawn', () => {
-  const fence = (flowMW: number) => ({
-    slot: 1,
-    capacityMW: { forward: 2000, reverse: 2000 },
-    flowMW,
-    freeMW: { forward: 0, reverse: 0 },
-    split: false,
-  })
-  const spreading = new Map([
-    ['chubu-fence', fence(1000)],
-    ['hokuriku-fence', fence(300)],
-    ['kansai-fence', fence(700)],
+test('a fork out of an area runs one arrow to the junction and a headed tail to each of the other two', () => {
+  const out = forkOf('x', { hokuriku: -500, chubu: 200, kansai: 300 })!
+  const [a, b, shaft] = forkData(out)
+  expect(shaft).toMatchObject({ head: false, clear: [true, false], mw: 500 })
+  expect(shaft.path[0]).toEqual(AREA_BY_ID.hokuriku.anchor)
+  expect([a, b].map((t) => [t.head, t.clear, t.path[1]])).toEqual([
+    [true, [false, true], AREA_BY_ID.chubu.anchor],
+    [true, [false, true], AREA_BY_ID.kansai.anchor],
   ])
-  expect(triangleFlows(spreading).map((p) => [p.id, p.mw])).toEqual([
-    ['chubu-hokuriku', 300],
-    ['chubu-kansai', 700],
-  ])
-  expect(triangleFlows(new Map([['chubu-fence', fence(1000)]]))).toEqual([])
+  expect(widthOf(a)).toBe(2)
+  expect(taperPolygon(a, 5)[0]).not.toEqual(taperPolygon(a, 5)[3])
 })
 
 test('the shaft is one solid shape, a hair wide off the column and the flow width at the head, in degrees for the zoom', () => {
   const east: FlowDatum = {
     id: 'x',
-    label: 'x',
     path: [
       [130, 35],
       [140, 35],
     ],
     mw: 3000,
     load: 0.5,
+    head: true,
+    clear: [true, true],
   }
   const zoom = 5
   const [a, b, c, d] = taperPolygon(east, zoom)
@@ -107,7 +105,7 @@ test('the arrow heads along the path, the shapes take color from the load, the h
   const context = { index: 0, data: [], target: [] }
   const color = shafts.props.getFillColor
   if (typeof color !== 'function') throw new Error('accessor')
-  expect(color(kc, context)).toEqual([...DARK.flow.full, 230])
+  expect(color(kc, context)).toEqual([...DARK.flow.planned.full, 230])
   const position = heads.props.getPosition
   if (typeof position !== 'function') throw new Error('accessor')
   expect(position(kc, context)).toEqual(shaftEnds(kc, 5)[1])
@@ -115,16 +113,17 @@ test('the arrow heads along the path, the shapes take color from the load, the h
   expect(headSize(kc, 4)).toBeCloseTo((8 + (1 + 3.29) * 3) / 2)
   const headColor = heads.props.getColor
   if (typeof headColor !== 'function') throw new Error('accessor')
-  expect(headColor(kc, context)).toEqual([...DARK.flow.full, 230])
+  expect(headColor(kc, context)).toEqual([...DARK.flow.planned.full, 230])
 })
 
 test('the shaft starts and the head ends clear of the columns by pixels, so a phone tucks no head under a column', () => {
   const line = (path: FlowDatum['path'], mw = 1000): FlowDatum => ({
     id: 'x',
-    label: 'x',
     path,
     mw,
     load: 0.5,
+    head: true,
+    clear: [true, true],
   })
   const east = line([
     [130, 35],
@@ -154,5 +153,6 @@ test('the shaft starts and the head ends clear of the columns by pixels, so a ph
 })
 
 test('no flows, no layers', () => {
-  expect(buildFlowLayers(new Map(), DARK, 5)).toEqual([])
+  expect(buildFlowLayers(null, DARK, 5)).toEqual([])
+  expect(buildFlowLayers({ source: 'planned', links: [], forks: [] }, DARK, 5)).toEqual([])
 })

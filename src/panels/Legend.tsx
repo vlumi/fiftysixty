@@ -30,8 +30,10 @@ export default function Legend({ palette }: { palette: Palette }) {
         </div>
       </div>
       <div className={styles.arrows}>
-        <Arrow width={2} color={cssRgb(palette.flow.idle)} /> {s.key.flow}
-        <Arrow width={6} color={cssRgb(palette.flow.full)} /> {s.key.atLimit}
+        <Arrow width={2} color={cssRgb(palette.flow.planned.idle)} /> {s.key.planned}
+        <Arrow width={2} color={cssRgb(palette.flow.recorded.idle)} /> {s.key.recorded}
+        <Arrow width={6} color={cssRgb(palette.flow.planned.full)} /> {s.key.atLimit}
+        <ForkKey color={cssRgb(palette.flow.planned.idle)} /> {s.key.fork}
         <Wall /> {s.key.split}
       </div>
     </figure>
@@ -62,6 +64,17 @@ function Wall() {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+    </svg>
+  )
+}
+
+/** A fork as the map draws one: two thin tails meeting, then one arrow carrying the total. */
+function ForkKey({ color }: { color: string }) {
+  return (
+    <svg className={styles.arrowKey} width="52" height="24" viewBox="0 0 52 24" aria-hidden="true">
+      <path d="M2 4 L20 12 M2 20 L20 12" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+      <polygon points="20,11.5 32,10 32,14 20,12.5" fill={color} />
+      <polygon points="32,6 44,12 32,18" fill={color} />
     </svg>
   )
 }

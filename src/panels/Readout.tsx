@@ -2,10 +2,10 @@ import { Fragment, useState } from 'react'
 import { useStrings } from '../i18n/useStrings'
 import { useApp } from '../store'
 import type { PricedArea, SpotSlot } from '../market/jepx'
-import { capacityOf, type FlowSlot } from '../market/flows'
+import type { Interchange } from '../market/interchange'
 import type { RecordSlot } from '../market/record'
 import { AREA_BY_ID, PRICED_AREAS, type Area } from '../regions/areas'
-import { linesOf, neighbors } from '../regions/interconnectors'
+import { neighbors, OCCTO_LINE_IDS } from '../regions/interconnectors'
 import type { PlantProps } from '../regions/plants'
 import { mw, signed, yen } from '../shared/format'
 import { useNarrow } from '../shared/useNarrow'
@@ -19,7 +19,8 @@ interface Props {
   /** The same for the whole displayed day, as far as it is published. */
   day: readonly RecordSlot[] | undefined
   /** OCCTO's forecast for the slot's interconnectors, by line id. */
-  flows: ReadonlyMap<string, FlowSlot>
+  /** The half hour's flows between the areas, recorded or planned. */
+  interchange: Interchange | null
   area: Area | null
   /** A picked plant, shown instead of an area. */
   plant?: PlantProps | null
@@ -33,7 +34,7 @@ interface Props {
  * neighbors and what ran in it, or a picked plant. On a phone it is an accordion: the headline row alone until tapped,
  * remembered for what it was opened for, so another pick opens folded again.
  */
-export default function Readout({ slot, record, day, flows, area, plant, onBack, onSlot }: Props) {
+export default function Readout({ slot, record, day, interchange, area, plant, onBack, onSlot }: Props) {
   const s = useStrings()
   const narrow = useNarrow()
   const [openFor, setOpenFor] = useState<string | null>(null)
@@ -53,7 +54,7 @@ export default function Readout({ slot, record, day, flows, area, plant, onBack,
   ) : picked ? (
     <>
       <AreaRows area={picked} slot={slot} />
-      <Lines area={picked} flows={flows} />
+      <Lines area={picked} interchange={interchange} />
       {day?.length ? <SupplyChart day={day} slot={slot.slot} onSlot={onSlot} /> : null}
       {!record && <p className="muted">{s.readout.noRecord}</p>}
     </>
@@ -176,30 +177,47 @@ function Neighbor({ area, price, against }: { area: PricedArea; price: number; a
 }
 
 /** The area's lines for the slot as OCCTO forecast them: the flow toward or away from the area against the limit, and a split. */
-function Lines({ area, flows }: { area: PricedArea; flows: ReadonlyMap<string, FlowSlot> }) {
+function Lines({ area, interchange }: { area: PricedArea; interchange: Interchange | null }) {
   const s = useStrings()
   const lang = useApp((x) => x.lang)
-  const rows = linesOf(area).flatMap((line) => {
-    const at = flows.get(line.id)
-    if (!at) return []
-    const forward = at.flowMW >= 0
-    const inward = (line.to === area) === forward
+  if (!interchange) return null
+  const name = (a: Area) => (lang === 'ja' ? AREA_BY_ID[a].ja : AREA_BY_ID[a].name)
+  const lines = interchange.links
+    .filter((l) => l.from === area || l.to === area)
+    .map((l) => {
+      const line = OCCTO_LINE_IDS.find((x) => x.id === l.id)!
+      return {
+        id: l.id,
+        label: lang === 'ja' ? line.name : line.label,
+        inward: l.to === area,
+        mw: l.mw,
+        capacity: l.capacityMW,
+        split: l.split,
+      }
+    })
+  // A loop gives the area's total across its two lines of it, not how that divides between them.
+  const loops = interchange.forks.flatMap((f) => {
+    const total = f.totals[area]
+    if (total === undefined) return []
+    const [a, b] = (Object.keys(f.totals) as Area[]).filter((x) => x !== area)
     return [
       {
-        id: line.id,
-        label: lang === 'ja' ? line.name : line.label,
-        inward,
-        mw: Math.abs(at.flowMW),
-        capacity: capacityOf(at),
-        split: at.split,
+        id: f.id,
+        label: s.readout.loopWith(name(a), name(b)),
+        inward: total >= 0,
+        mw: Math.abs(total),
+        capacity: undefined,
+        split: false,
       },
     ]
   })
+  const rows = [...lines, ...loops]
   if (!rows.length) return null
   return (
     <section aria-label={s.readout.lines}>
       <h3>
-        {s.readout.lines} <span className="muted">· {s.readout.forecast}</span>
+        {s.readout.lines}{' '}
+        <span className="muted">· {interchange.source === 'recorded' ? s.readout.recorded : s.readout.planned}</span>
       </h3>
       <dl className={styles.rows}>
         {rows.map((r) => (
@@ -208,10 +226,13 @@ function Lines({ area, flows }: { area: PricedArea; flows: ReadonlyMap<string, F
               {r.label} {r.split && <span className={styles.split}>{s.readout.split}</span>}
             </dt>
             <dd>
-              <span className="muted">{r.inward ? s.readout.in : s.readout.out}</span> {mw(r.mw)}{' '}
-              <span className="muted">
-                {s.readout.of} {mw(r.capacity)}
-              </span>
+              <span className="muted">{r.inward ? s.readout.in : s.readout.out}</span> {mw(r.mw)}
+              {r.capacity !== undefined && (
+                <span className="muted">
+                  {' '}
+                  {s.readout.of} {mw(r.capacity)}
+                </span>
+              )}
             </dd>
           </Fragment>
         ))}
