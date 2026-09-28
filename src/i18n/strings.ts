@@ -1,5 +1,4 @@
 import type { Series } from '../market/stack'
-import type { Source } from '../market/record'
 import type { StoryId } from '../market/stories'
 import { readItem, storage, writeItem } from '../shared/storage'
 
@@ -11,6 +10,7 @@ export const LANGUAGE_NAMES: Record<Lang, string> = { en: 'English', ja: '日本
 /** Every visible word, by key, in each language; the layout never changes with the language, only the words. */
 export interface Strings {
   subtitle: string
+  map: string
   theme: string
   close: string
   credits: {
@@ -75,15 +75,11 @@ export interface Strings {
     in: string
     out: string
     of: string
-    demand: string
     mw: string
     whatRan: string
     noRecord: string
-    solarCurtailed: string
-    windCurtailed: string
     aPlant: string
     plantNote: string
-    sources: Record<Source, string>
   }
   chart: {
     label: string
@@ -113,6 +109,7 @@ export interface Strings {
 
 const en: Strings = {
   subtitle: 'The Japanese power market on a map',
+  map: 'Map',
   theme: 'Light theme',
   close: 'Close',
   credits: {
@@ -192,30 +189,11 @@ const en: Strings = {
     in: 'in',
     out: 'out',
     of: 'of',
-    demand: 'Demand',
     mw: 'MW',
     whatRan: 'What ran',
     noRecord: 'No record for this half hour yet.',
-    solarCurtailed: 'Solar curtailed',
-    windCurtailed: 'Wind curtailed',
     aPlant: 'A plant',
     plantNote: 'Capacity as mapped in OpenStreetMap; what it runs is not public.',
-    sources: {
-      nuclear: 'Nuclear',
-      lng: 'Gas',
-      coal: 'Coal',
-      oil: 'Oil',
-      otherThermal: 'Other thermal',
-      hydro: 'Hydro',
-      geothermal: 'Geothermal',
-      biomass: 'Biomass',
-      solar: 'Solar',
-      wind: 'Wind',
-      pumped: 'Pumped storage',
-      battery: 'Batteries',
-      interconnector: 'Interconnectors',
-      other: 'Other',
-    },
   },
   chart: {
     label: 'Supply over the day',
@@ -263,6 +241,7 @@ const en: Strings = {
 
 const ja: Strings = {
   subtitle: '地図で見る日本の電力市場',
+  map: '地図',
   theme: 'ライトテーマ',
   close: '閉じる',
   credits: {
@@ -342,30 +321,11 @@ const ja: Strings = {
     in: '受電',
     out: '送電',
     of: '/',
-    demand: '需要',
     mw: 'MW',
     whatRan: '需給実績',
     noRecord: 'このコマの実績はまだありません。',
-    solarCurtailed: '太陽光出力制御',
-    windCurtailed: '風力出力制御',
     aPlant: '発電所',
     plantNote: '出力は OpenStreetMap の記載による設備容量。実際の発電量は公開されていません。',
-    sources: {
-      nuclear: '原子力',
-      lng: '火力（LNG）',
-      coal: '火力（石炭）',
-      oil: '火力（石油）',
-      otherThermal: '火力（その他）',
-      hydro: '水力',
-      geothermal: '地熱',
-      biomass: 'バイオマス',
-      solar: '太陽光',
-      wind: '風力',
-      pumped: '揚水',
-      battery: '蓄電池',
-      interconnector: '連系線',
-      other: 'その他',
-    },
   },
   chart: {
     label: '一日の供給',

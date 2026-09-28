@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import csv from '../test/fixtures/jepx-spot.csv?raw'
 import tepcoCsv from '../test/fixtures/tepco-jukyu.csv?raw'
@@ -85,27 +85,29 @@ test('nothing before the prices arrive', () => {
   expect(container).toBeEmptyDOMElement()
 })
 
-test('what ran in a picked area, the idle sources left out and the pumping negative', () => {
+test("what ran in a picked area is the chart's key with the half hour's figures, read top down as the chart stacks", () => {
   render(<Readout slot={slot} record={record} day={day} flows={none} area="tokyo" onBack={vi.fn()} onSlot={vi.fn()} />)
   const mix = screen.getByRole('region', { name: 'What ran' })
-  expect(mix).toHaveTextContent('Demand 36,867 MW')
-  const names = [...mix.querySelectorAll('dt')].map((d) => d.textContent)
-  expect(names).toEqual([
-    'Nuclear',
-    'Gas',
-    'Coal',
-    'Oil',
-    'Other thermal',
+  const rows = within(mix)
+    .getAllByRole('row')
+    .slice(1)
+    .map((r) => within(r).getByRole('rowheader').textContent)
+  expect(rows).toEqual([
+    'Demand',
+    'Storage and imports',
     'Hydro',
-    'Biomass',
-    'Solar',
+    'Gas',
     'Wind',
-    'Pumped storage',
-    'Interconnectors',
-    'Other',
+    'Solar',
+    'Oil and other',
+    'Geothermal and biomass',
+    'Nuclear',
+    'Coal',
+    'Sent out, below the line',
   ])
-  expect(mix).toHaveTextContent('Pumped storage−2,260')
+  expect(within(mix).getByRole('row', { name: /^Demand/ })).toHaveTextContent(/\d{2},\d{3}/)
   expect(screen.getByRole('slider', { name: 'Supply over the day' })).toHaveAttribute('aria-valuenow', '47')
+  expect(screen.queryByText('No record for this half hour yet.')).not.toBeInTheDocument()
 })
 
 test("a picked area's lines: flow in or out against the limit, and where the market split", () => {

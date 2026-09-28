@@ -10,6 +10,7 @@ import type { PlantProps } from '../regions/plants'
 import type { AreaProps, Regions } from '../regions/geometry'
 import { PALETTES } from '../shared/palette'
 import type { Lang } from '../i18n/strings'
+import { useStrings } from '../i18n/useStrings'
 import { BASEMAPS, BELOW_LABELS, type Theme } from '../shared/theme'
 import { JAPAN_BOUNDS } from './basemap'
 import { buildLayers, type LayerOptions } from './layers'
@@ -48,6 +49,7 @@ export default function MapView({
   onPick,
   onPickPlant,
 }: Props) {
+  const words = useStrings()
   const container = useRef<HTMLDivElement>(null)
   const overlay = useRef<MapLibreOverlay>(null)
   const [map, setMap] = useState<MapLibre | null>(null)
@@ -128,7 +130,7 @@ export default function MapView({
 
   return (
     <>
-      <div ref={container} className="map" role="region" aria-label="Map" />
+      <div ref={container} className="map" role="region" aria-label={words.map} />
       {map &&
         (Object.entries(mixes) as [Area, RecordSlot | null][]).map(([area, record]) => (
           <AreaMarker key={area} map={map} area={area}>

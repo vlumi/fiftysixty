@@ -1,4 +1,4 @@
-import { Fragment, useEffect } from 'react'
+import { Fragment, useEffect, useRef } from 'react'
 import { useStrings } from '../i18n/useStrings'
 import { SHORTCUTS } from '../shortcuts'
 import CloseButton from './CloseButton'
@@ -7,9 +7,28 @@ import styles from './Credits.module.css'
 /** What the page is and where the map, the shapes and the figures come from, behind the header's ⓘ; the map's own attribution is off. */
 export default function Credits({ onClose }: { onClose: () => void }) {
   const s = useStrings()
+  const dialog = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    // Focus moves into the dialog and back to what opened it; Tab cycles within it.
+    const opener = document.activeElement as HTMLElement | null
+    dialog.current?.focus()
+    return () => opener?.focus()
+  }, [])
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
+      if (e.key !== 'Tab' || !dialog.current) return
+      const stops = [...dialog.current.querySelectorAll<HTMLElement>('a[href], button')]
+      if (!stops.length) return
+      const [first, last] = [stops[0], stops[stops.length - 1]]
+      const at = document.activeElement
+      if (e.shiftKey && (at === first || at === dialog.current)) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && at === last) {
+        e.preventDefault()
+        first.focus()
+      }
     }
     window.addEventListener('keydown', onKey)
     // The page must not scroll under the modal, as a phone would let it.
@@ -23,6 +42,8 @@ export default function Credits({ onClose }: { onClose: () => void }) {
   return (
     <div className={styles.backdrop} onClick={onClose}>
       <div
+        ref={dialog}
+        tabIndex={-1}
         className={styles.dialog}
         role="dialog"
         aria-modal="true"

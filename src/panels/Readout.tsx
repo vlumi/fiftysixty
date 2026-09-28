@@ -3,7 +3,7 @@ import { useStrings } from '../i18n/useStrings'
 import { useApp } from '../store'
 import type { PricedArea, SpotSlot } from '../market/jepx'
 import { capacityOf, type FlowSlot } from '../market/flows'
-import { SOURCES, type RecordSlot } from '../market/record'
+import type { RecordSlot } from '../market/record'
 import { AREA_BY_ID, PRICED_AREAS, type Area } from '../regions/areas'
 import { linesOf, neighbors } from '../regions/interconnectors'
 import type { PlantProps } from '../regions/plants'
@@ -55,7 +55,7 @@ export default function Readout({ slot, record, day, flows, area, plant, onBack,
       <AreaRows area={picked} slot={slot} />
       <Lines area={picked} flows={flows} />
       {day?.length ? <SupplyChart day={day} slot={slot.slot} onSlot={onSlot} /> : null}
-      <Mix record={record} />
+      {!record && <p className="muted">{s.readout.noRecord}</p>}
     </>
   ) : (
     <SystemNote slot={slot} okinawa={area === 'okinawa'} />
@@ -171,36 +171,6 @@ function Neighbor({ area, price, against }: { area: PricedArea; price: number; a
       <dd>
         {yen(price)} <span className="muted">{signed(price - against)}</span>
       </dd>
-    </>
-  )
-}
-
-/** What ran in the area for the slot, in MW, the sources that were idle left out; curtailment when there was any. */
-function Mix({ record }: { record: RecordSlot | undefined }) {
-  const s = useStrings()
-  if (!record) return <p className="muted">{s.readout.noRecord}</p>
-  const ran = SOURCES.filter((x) => record.bySource[x] !== 0)
-  return (
-    <section aria-label={s.readout.whatRan}>
-      <h3>
-        {s.readout.demand} {mw(record.demandMW)} <span className="muted">{s.readout.mw}</span>
-      </h3>
-      <dl className={styles.rows}>
-        {ran.map((x) => (
-          <Row key={x} name={s.readout.sources[x]} value={record.bySource[x]} />
-        ))}
-        {record.curtailedMW.solar > 0 && <Row name={s.readout.solarCurtailed} value={record.curtailedMW.solar} />}
-        {record.curtailedMW.wind > 0 && <Row name={s.readout.windCurtailed} value={record.curtailedMW.wind} />}
-      </dl>
-    </section>
-  )
-}
-
-function Row({ name, value }: { name: string; value: number }) {
-  return (
-    <>
-      <dt>{name}</dt>
-      <dd>{mw(value)}</dd>
     </>
   )
 }
