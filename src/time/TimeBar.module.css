@@ -117,3 +117,16 @@
     right: 0.5rem;
   }
 }
+
+/* A finger needs more than the mouse's slim buttons. */
+@media (pointer: coarse) {
+  .bar button,
+  .bar select,
+  .dateWords {
+    min-height: 2.25rem;
+  }
+
+  .bar button {
+    min-width: 2.25rem;
+  }
+}

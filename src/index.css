@@ -3,7 +3,7 @@
   --bg: #0b0d14;
   --panel: #141826;
   --text: #d6d9e0;
-  --muted: #8a90a0;
+  --muted: #9399aa;
   --accent: #00c6e6;
   --border: rgb(255 255 255 / 0.15);
   --border-strong: rgb(255 255 255 / 0.4);
@@ -166,4 +166,14 @@ main > .map {
 
 .muted {
   color: var(--muted);
+}
+
+/* Motion only where the reader has not asked for less. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
 }
