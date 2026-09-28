@@ -68,6 +68,8 @@ export default function MapView({
       style: BASEMAPS[styled.current],
       bounds: JAPAN_BOUNDS,
       attributionControl: false,
+      // The page's own keys own the arrows: the half hour, the day and the areas; the map pans by drag and zooms by its buttons.
+      keyboard: false,
       canvasContextAttributes: { antialias: true },
     })
     map.addControl(new NavigationControl({ visualizePitch: false }), 'top-right')
