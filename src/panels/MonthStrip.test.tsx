@@ -36,8 +36,9 @@ test('a bar a day, as tall as its supply against the month’s most, the display
   expect(b.className).not.toMatch(/partial/)
   expect((a.firstChild as HTMLElement).style.height).toBe('50%')
   expect((b.firstChild as HTMLElement).style.height).toBe('100%')
+  // The keys are the page's: an arrow steps the half hour, Shift and an arrow the day.
   fireEvent.keyDown(strip, { key: 'ArrowLeft' })
-  expect(onPick).toHaveBeenLastCalledWith('2026-09-23')
+  expect(onPick).not.toHaveBeenCalled()
   strip.getBoundingClientRect = () => ({ left: 0, width: 200 }) as DOMRect
   strip.setPointerCapture = vi.fn()
   fireEvent.pointerDown(strip, { clientX: 20, pointerId: 1 })

@@ -1,4 +1,4 @@
-import type { KeyboardEvent, PointerEvent } from 'react'
+import type { PointerEvent } from 'react'
 import { useStrings } from '../i18n/useStrings'
 import type { Area } from '../regions/areas'
 import { areaList } from '../regions/names'
@@ -26,8 +26,8 @@ interface Props {
 
 /**
  * The displayed month a day a bar, side by side to compare: each bar as tall as the day's supply and banded by the
- * sources as the chart stacks them, the displayed day marked. It is a slider: pressing and dragging across it, or the
- * arrow keys, move the map through the days.
+ * sources as the chart stacks them, the displayed day marked. It is a slider for the pointer: pressing and dragging across
+ * it moves the map through the days; the keys keep the page's scheme, Shift and an arrow for a day.
  */
 export default function MonthStrip({ days, date, onPick }: Props) {
   const s = useStrings()
@@ -47,21 +47,7 @@ export default function MonthStrip({ days, date, onPick }: Props) {
     const rect = e.currentTarget.getBoundingClientRect()
     return Math.floor(((e.clientX - rect.left) / rect.width) * days.length)
   }
-  const onKey = (e: KeyboardEvent<HTMLDivElement>) => {
-    const to =
-      e.key === 'ArrowRight'
-        ? at + 1
-        : e.key === 'ArrowLeft'
-          ? at - 1
-          : e.key === 'Home'
-            ? 0
-            : e.key === 'End'
-              ? days.length - 1
-              : null
-    if (to === null) return
-    e.preventDefault()
-    go(at < 0 && (e.key === 'ArrowRight' || e.key === 'ArrowLeft') ? days.length - 1 : to)
-  }
+
   const [year, month] = days[0].date.split('-').map(Number)
   return (
     <section className={styles.month} aria-label={s.day.month(year, month)}>
@@ -80,7 +66,6 @@ export default function MonthStrip({ days, date, onPick }: Props) {
           go(dayAt(e))
         }}
         onPointerMove={(e) => e.buttons && go(dayAt(e))}
-        onKeyDown={onKey}
       >
         {days.map((d) => (
           <span

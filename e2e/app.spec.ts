@@ -52,6 +52,10 @@ test('a click on Tokyo reads out its price against the system and its neighbors,
   await chart.focus()
   await page.keyboard.press('ArrowRight')
   await expect(page.getByRole('status')).toHaveText('Yesterday 00:30–01:00 JST')
+  // With the chart focused, Shift and an arrow still step the day.
+  await page.keyboard.press('Shift+ArrowRight')
+  await expect(page.getByLabel('Delivery day')).toHaveValue('2026-09-26')
+  await page.keyboard.press('Shift+ArrowLeft')
   await readout.getByRole('button', { name: 'Back' }).click()
   await expect(readout).toContainText('System price')
 })
