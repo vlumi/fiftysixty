@@ -170,3 +170,41 @@ test('on a phone a picked area opens on its headline, the rest a tap on the row 
   expect(screen.getByRole('region', { name: 'What ran' })).toBeInTheDocument()
   vi.unstubAllGlobals()
 })
+
+test("the day view: the switch shows the area's day in energy, and all Japan with none picked", async () => {
+  const { dayTotals } = await import('../market/daily')
+  const totals = dayTotals(day)
+  const { rerender } = render(
+    <Readout
+      slot={slot}
+      record={record}
+      day={day}
+      interchange={null}
+      area="tokyo"
+      dayTotals={totals}
+      dayPrice={12.34}
+      onBack={vi.fn()}
+      onSlot={vi.fn()}
+    />,
+  )
+  await userEvent.click(screen.getByRole('button', { name: 'Day' }))
+  const supply = screen.getByRole('region', { name: 'How the day was supplied' })
+  expect(within(supply).getByRole('row', { name: /^Nuclear/ })).toHaveTextContent(/\d+\.\d\d+%/)
+  expect(supply).toHaveTextContent('Price, weighted by demand12.34')
+  expect(screen.getByRole('button', { name: 'Day' })).toHaveAttribute('aria-pressed', 'true')
+  rerender(
+    <Readout
+      slot={slot}
+      record={record}
+      day={day}
+      interchange={null}
+      area={null}
+      dayTotals={null}
+      onBack={vi.fn()}
+      onSlot={vi.fn()}
+    />,
+  )
+  expect(screen.getByRole('heading', { name: 'All Japan' })).toBeInTheDocument()
+  expect(screen.getByText('Not every area has recorded the whole day yet.')).toBeInTheDocument()
+  await userEvent.click(screen.getByRole('button', { name: 'Half hour' }))
+})

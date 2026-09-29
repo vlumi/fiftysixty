@@ -2,6 +2,7 @@ import { Fragment, useState } from 'react'
 import { useStrings } from '../i18n/useStrings'
 import { useApp } from '../store'
 import type { PricedArea, SpotSlot } from '../market/jepx'
+import type { DayTotals } from '../market/daily'
 import type { Interchange } from '../market/interchange'
 import type { RecordSlot } from '../market/record'
 import { AREA_BY_ID, PRICED_AREAS, type Area } from '../regions/areas'
@@ -10,6 +11,8 @@ import type { PlantProps } from '../regions/plants'
 import { mw, signed, yen } from '../shared/format'
 import { useNarrow } from '../shared/useNarrow'
 import styles from './Readout.module.css'
+import DayView from './DayView'
+import MonthStrip from './MonthStrip'
 import SupplyChart from './SupplyChart'
 
 interface Props {
@@ -21,6 +24,14 @@ interface Props {
   /** OCCTO's forecast for the slot's interconnectors, by line id. */
   /** The half hour's flows between the areas, recorded or planned. */
   interchange: Interchange | null
+  /** The displayed day for the picked area, or for all Japan with none picked; its weighted price and its prices. */
+  dayTotals?: DayTotals | null
+  dayPrice?: number | null
+  spotDay?: readonly SpotSlot[]
+  /** The displayed month's whole days with their totals, for the strip under the day. */
+  monthDays?: readonly { date: string; totals: DayTotals }[]
+  date?: string | null
+  onDate?: (date: string) => void
   area: Area | null
   /** A picked plant, shown instead of an area. */
   plant?: PlantProps | null
@@ -34,8 +45,25 @@ interface Props {
  * neighbors and what ran in it, or a picked plant. On a phone it is an accordion: the headline row alone until tapped,
  * remembered for what it was opened for, so another pick opens folded again.
  */
-export default function Readout({ slot, record, day, interchange, area, plant, onBack, onSlot }: Props) {
+export default function Readout({
+  slot,
+  record,
+  day,
+  interchange,
+  area,
+  plant,
+  dayTotals = null,
+  dayPrice = null,
+  spotDay,
+  monthDays = [],
+  date = null,
+  onDate,
+  onBack,
+  onSlot,
+}: Props) {
   const s = useStrings()
+  const view = useApp((x) => x.view)
+  const setView = useApp((x) => x.setView)
   const narrow = useNarrow()
   const [openFor, setOpenFor] = useState<string | null>(null)
   if (!slot) return null
@@ -49,17 +77,37 @@ export default function Readout({ slot, record, day, interchange, area, plant, o
   ) : (
     <SystemHead slot={slot} />
   )
+  const views = (
+    <div className={styles.views} role="group" aria-label={s.day.view}>
+      {(['slot', 'day'] as const).map((v) => (
+        <button key={v} aria-pressed={view === v} onClick={() => setView(v)}>
+          {v === 'slot' ? s.day.halfHour : s.day.day}
+        </button>
+      ))}
+    </div>
+  )
   const body = plant ? (
     <p className="muted">{s.readout.plantNote}</p>
+  ) : view === 'day' ? (
+    <>
+      {views}
+      {!picked && <h3>{s.day.japan}</h3>}
+      <DayView totals={dayTotals} price={dayPrice} spot={spotDay} area={picked} />
+      {onDate && <MonthStrip days={monthDays} date={date} onPick={onDate} />}
+    </>
   ) : picked ? (
     <>
+      {views}
       <AreaRows area={picked} slot={slot} />
       <Lines area={picked} interchange={interchange} />
       {day?.length ? <SupplyChart day={day} slot={slot.slot} onSlot={onSlot} /> : null}
       {!record && <p className="muted">{s.readout.noRecord}</p>}
     </>
   ) : (
-    <SystemNote slot={slot} okinawa={area === 'okinawa'} />
+    <>
+      {area !== 'okinawa' && views}
+      <SystemNote slot={slot} okinawa={area === 'okinawa'} />
+    </>
   )
   return (
     <aside className={styles.panel} aria-label={s.readout.label}>

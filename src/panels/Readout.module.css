@@ -178,3 +178,38 @@ button.fold .price {
 .hydro {
   background: var(--src-hydro);
 }
+
+/* The half hour or the day, as a two-button switch. */
+.views {
+  display: inline-flex;
+  margin: 0.4rem 0 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.views button {
+  min-height: 1.9rem;
+  padding: 0 0.75rem;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.views button + button {
+  border-left: 1px solid var(--border);
+}
+
+.views button[aria-pressed='true'] {
+  background: var(--hover);
+  color: var(--text);
+}
+
+@media (pointer: coarse) {
+  .views button {
+    min-height: 2.25rem;
+  }
+}
