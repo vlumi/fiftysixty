@@ -1,4 +1,4 @@
-import { useMemo, type KeyboardEvent, type PointerEvent } from 'react'
+import { useMemo, type PointerEvent } from 'react'
 import { co2Intensity, dayTotals, renewableShare } from '../market/daily'
 import type { RecordSlot } from '../market/record'
 import { useStrings } from '../i18n/useStrings'
@@ -66,7 +66,7 @@ interface Props {
 
 /**
  * The day's supply stack under the demand line, the displayed half hour marked; pointing or dragging on it moves
- * the half hour, so the readout beside it is the tooltip.
+ * the half hour, and the page's arrow keys do the same with it focused, so the readout beside it is the tooltip.
  */
 export default function SupplyChart({ day, slot, onSlot }: Props) {
   const s = useStrings()
@@ -91,12 +91,6 @@ export default function SupplyChart({ day, slot, onSlot }: Props) {
     const px = ((e.clientX - rect.left) / rect.width) * WIDTH
     return clampSlot(((px - LEFT) / SPAN) * SLOTS + 0.5)
   }
-  const onKey = (e: KeyboardEvent<SVGSVGElement>) => {
-    const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0
-    if (!d) return
-    e.preventDefault()
-    onSlot(clampSlot(slot + d))
-  }
 
   return (
     <figure className={styles.figure}>
@@ -115,7 +109,6 @@ export default function SupplyChart({ day, slot, onSlot }: Props) {
           onSlot(slotAt(e))
         }}
         onPointerMove={(e) => e.buttons && onSlot(slotAt(e))}
-        onKeyDown={onKey}
       >
         {gridlines.map((mw) => (
           <line key={mw} className={styles.grid} x1={LEFT} x2={WIDTH} y1={y(mw)} y2={y(mw)} />

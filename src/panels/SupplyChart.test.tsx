@@ -30,14 +30,12 @@ test('eight bands, storage and the lines apart above and below, the demand line 
   expect(screen.queryByText('Curtailed')).not.toBeInTheDocument()
 })
 
-test('the arrow keys move the half hour and a pointer picks it by position', () => {
+test('a pointer picks the half hour by position; the keys are the page’s', () => {
   const onSlot = vi.fn()
   render(<SupplyChart day={day} slot={25} onSlot={onSlot} />)
   const chart = screen.getByRole('slider', { name: 'Supply over the day' })
   fireEvent.keyDown(chart, { key: 'ArrowRight' })
-  expect(onSlot).toHaveBeenLastCalledWith(26)
-  fireEvent.keyDown(chart, { key: 'ArrowLeft' })
-  expect(onSlot).toHaveBeenLastCalledWith(24)
+  expect(onSlot).not.toHaveBeenCalled()
   chart.getBoundingClientRect = () => ({ left: 0, width: 480 }) as DOMRect
   chart.setPointerCapture = vi.fn()
   fireEvent.pointerDown(chart, { clientX: 478, pointerId: 1 })

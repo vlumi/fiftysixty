@@ -89,7 +89,8 @@ test('a modal, a modifier, a focused field or a plain other key are left alone',
   slider.setAttribute('role', 'slider')
   const onSlider = new KeyboardEvent('keydown', { key: 'ArrowRight' })
   Object.defineProperty(onSlider, 'target', { value: slider })
-  expect(belongsToFocusedControl(onSlider)).toBe(true)
+  // The charts are sliders for the pointer, but the arrows keep their meaning on them: the half hour, and with Shift the day.
+  expect(belongsToFocusedControl(onSlider)).toBe(false)
   input.remove()
 })
 
