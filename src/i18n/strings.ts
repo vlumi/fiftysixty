@@ -86,6 +86,7 @@ export interface Strings {
     co2: string
     co2Intensity: string
     kt: string
+    estimated: string
   }
   readout: {
     label: string
@@ -237,6 +238,7 @@ const en: Strings = {
     co2: 'CO₂, estimated',
     co2Intensity: 'CO₂ per kWh generated',
     kt: 'kt',
+    estimated: 'estimated',
   },
   readout: {
     label: 'Readout',
@@ -405,6 +407,7 @@ const ja: Strings = {
     co2: 'CO₂（推計）',
     co2Intensity: '発電1kWhあたりCO₂',
     kt: '千t',
+    estimated: '推計',
   },
   readout: {
     label: '詳細',

@@ -1,4 +1,5 @@
 import { useMemo, type KeyboardEvent, type PointerEvent } from 'react'
+import { co2Intensity, dayTotals, renewableShare } from '../market/daily'
 import type { RecordSlot } from '../market/record'
 import { useStrings } from '../i18n/useStrings'
 import { SLOTS } from '../market/jepx'
@@ -15,6 +16,9 @@ const LEFT = 34
 const PLOT = HEIGHT - TOP - BOTTOM
 const SPAN = WIDTH - LEFT
 const GW = 1000
+
+/** The rows that supplied the half hour, whose shares are given: the sources, storage giving back and imports. */
+const SUPPLYING = new Set<string>(['storageOut', 'imports', ...SERIES])
 
 const up = (mw: number) => Math.max(0, mw)
 const down = (mw: number) => Math.min(0, mw)
@@ -173,6 +177,7 @@ export default function SupplyChart({ day, slot, onSlot }: Props) {
       </svg>
       <MixKey
         at={stack.slots.find((t) => t.slot === slot)}
+        record={day.find((r) => r.slot === slot)}
         curtailed={curtailed}
         lines={stack.slots.some((t) => t.linesMW !== 0)}
       />
@@ -186,8 +191,19 @@ export default function SupplyChart({ day, slot, onSlot }: Props) {
  * dashes and the key still stands.
  */
 /** `lines`: whether the day has border flows at all; all Japan has none, and its import and export rows are left out. */
-function MixKey({ at, curtailed, lines }: { at: StackedSlot | undefined; curtailed: boolean; lines: boolean }) {
+function MixKey({
+  at,
+  record,
+  curtailed,
+  lines,
+}: {
+  at: StackedSlot | undefined
+  record: RecordSlot | undefined
+  curtailed: boolean
+  lines: boolean
+}) {
   const s = useStrings()
+  const half = record && dayTotals([record])
   const row = (e: (typeof EXCHANGE)[number]) => ({
     key: e.key,
     name: s.chart[e.key],
@@ -216,6 +232,10 @@ function MixKey({ at, curtailed, lines }: { at: StackedSlot | undefined; curtail
     })),
     ...(lines ? [EXCHANGE[2], EXCHANGE[3]] : [EXCHANGE[2]]).map(row),
   ]
+  // A supplying row's share of all that supplied the half hour: the generation, storage giving back and imports.
+  const supplied = rows.filter((r) => SUPPLYING.has(r.key)).reduce((sum, r) => sum + (r.mw ?? 0), 0)
+  const share = (r: (typeof rows)[number]) =>
+    SUPPLYING.has(r.key) && r.mw !== undefined && supplied > 0 ? `${Math.round((r.mw / supplied) * 100)}%` : ''
   return (
     <section aria-label={s.readout.whatRan}>
       <table className={styles.key}>
@@ -223,6 +243,7 @@ function MixKey({ at, curtailed, lines }: { at: StackedSlot | undefined; curtail
           <tr>
             <td />
             <th scope="col">{s.readout.mw}</th>
+            <th scope="col">{s.day.share}</th>
           </tr>
         </thead>
         <tbody>
@@ -238,10 +259,21 @@ function MixKey({ at, curtailed, lines }: { at: StackedSlot | undefined; curtail
                 {r.name}
               </th>
               <td>{r.mw === undefined ? '–' : Math.round(r.mw).toLocaleString('en-US')}</td>
+              <td className={styles.share}>{share(r)}</td>
             </tr>
           ))}
         </tbody>
       </table>
+      {half && (
+        <dl className={styles.figures}>
+          <dt>{s.day.renewables}</dt>
+          <dd>{Math.round(renewableShare(half) * 100)}%</dd>
+          <dt>{s.day.co2Intensity}</dt>
+          <dd>
+            {Math.round(co2Intensity(half))} <span className="muted">g · {s.day.estimated}</span>
+          </dd>
+        </dl>
+      )}
     </section>
   )
 }
