@@ -17,8 +17,8 @@ test('a bar a day, as tall as its supply against the month’s most, the display
   render(
     <MonthStrip
       days={[
-        { date: '2026-09-23', totals: half },
-        { date: '2026-09-24', totals: day },
+        { date: '2026-09-23', totals: half, missing: ['hokkaido'] },
+        { date: '2026-09-24', totals: day, missing: [] },
       ]}
       date="2026-09-24"
       onPick={onPick}
@@ -30,6 +30,10 @@ test('a bar a day, as tall as its supply against the month’s most, the display
   expect(strip).toHaveAttribute('aria-valuetext', expect.stringMatching(/^2026-09-24 \(Thu\): \d+ GWh$/))
   const [a, b] = [...strip.children] as HTMLElement[]
   expect(b).toHaveAttribute('aria-current', 'date')
+  // A day with an area left out is marked, and says which.
+  expect(a.className).toMatch(/partial/)
+  expect(a.title).toMatch(/, without Hokkaido, not recorded yet$/)
+  expect(b.className).not.toMatch(/partial/)
   expect((a.firstChild as HTMLElement).style.height).toBe('50%')
   expect((b.firstChild as HTMLElement).style.height).toBe('100%')
   fireEvent.keyDown(strip, { key: 'ArrowLeft' })
@@ -44,6 +48,8 @@ test('a bar a day, as tall as its supply against the month’s most, the display
 })
 
 test('a single day is no month to compare', () => {
-  const { container } = render(<MonthStrip days={[{ date: '2026-09-24', totals: day }]} date={null} onPick={vi.fn()} />)
+  const { container } = render(
+    <MonthStrip days={[{ date: '2026-09-24', totals: day, missing: [] }]} date={null} onPick={vi.fn()} />,
+  )
   expect(container).toBeEmptyDOMElement()
 })

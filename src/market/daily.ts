@@ -1,4 +1,5 @@
-import { SLOTS, type PricedArea, type SpotSlot } from './jepx'
+import type { Area } from '../regions/areas'
+import type { PricedArea, SpotSlot } from './jepx'
 import { SOURCES, type RecordSlot } from './record'
 import { SERIES, seriesMW, storageMW, type Series } from './stack'
 
@@ -78,30 +79,45 @@ export function dayTotals(day: readonly RecordSlot[]): DayTotals {
 }
 
 /**
- * Japan's day as the sum of its areas' whole days, or null unless every area has one. The imports and exports are the
- * areas' own, so between them they count what crossed the borders inside Japan, twice over; the sum keeps only the
- * losses as their difference and they are left out of it. The peak is Japan's own, from the areas' half hours summed.
+ * Japan's day from the areas that recorded it: every half hour the areas' records summed, for one set of areas all day,
+ * those with any record of it, so no line jumps when an area's half hours stop; and the areas left out, by name. The
+ * interconnectors are left at none: between the areas they cancel, and what they do not is the loss on the way.
  */
-export function japanTotals(days: readonly (readonly RecordSlot[] | undefined)[]): DayTotals | null {
-  if (!days.length || days.some((d) => d?.length !== SLOTS)) return null
-  const areas = days.map((d) => dayTotals(d!))
-  const t = dayTotals([])
-  t.slots = SLOTS
-  for (const a of areas) {
-    t.demandMWh += a.demandMWh
-    t.generatedMWh += a.generatedMWh
-    t.storageOutMWh += a.storageOutMWh
-    t.storageInMWh += a.storageInMWh
-    t.curtailedMWh += a.curtailedMWh
-    t.co2t += a.co2t
-    for (const s of SERIES) t.bySeries[s] += a.bySeries[s]
+export interface JapanDay {
+  slots: RecordSlot[]
+  /** The areas with no record of the day, left out of every sum. */
+  missing: Area[]
+}
+
+export function japanDay(days: ReadonlyMap<Area, readonly RecordSlot[]>, areas: readonly Area[]): JapanDay {
+  const present = areas.filter((a) => days.get(a)?.length)
+  const missing = areas.filter((a) => !present.includes(a))
+  if (!present.length) return { slots: [], missing }
+  const bySlot = present.map((a) => new Map(days.get(a)!.map((r) => [r.slot, r])))
+  const slots = [...bySlot[0].keys()].filter((slot) => bySlot.every((m) => m.has(slot))).sort((a, b) => a - b)
+  return {
+    missing,
+    slots: slots.map((slot) => {
+      const rows = bySlot.map((m) => m.get(slot)!)
+      const bySource = Object.fromEntries(
+        SOURCES.map((x) => [x, x === 'interconnector' ? 0 : rows.reduce((sum, r) => sum + r.bySource[x], 0)]),
+      ) as RecordSlot['bySource']
+      return {
+        slot,
+        demandMW: rows.reduce((sum, r) => sum + r.demandMW, 0),
+        bySource,
+        curtailedMW: {
+          solar: rows.reduce((sum, r) => sum + r.curtailedMW.solar, 0),
+          wind: rows.reduce((sum, r) => sum + r.curtailedMW.wind, 0),
+        },
+      }
+    }),
   }
-  for (let slot = 1; slot <= SLOTS; slot++) {
-    const mw = days.reduce((sum, d) => sum + (d!.find((r) => r.slot === slot)?.demandMW ?? 0), 0)
-    if (mw > t.peak.mw) t.peak = { mw, slot }
-    if (mw < t.low.mw) t.low = { mw, slot }
-  }
-  return t
+}
+
+/** Japan's day in energy from its summed half hours, or null when no area has recorded it. */
+export function japanTotals(japan: JapanDay): DayTotals | null {
+  return japan.slots.length ? dayTotals(japan.slots) : null
 }
 
 /** The CO₂ per kWh the area generated, grams, estimated: tonnes per MWh are kilograms per MWh a thousandfold, so grams per kWh. */
@@ -136,29 +152,4 @@ export function weightedPrice(
 /** How many half hours of the day an area, or the system price when none is given, cleared at the floor. */
 export function floorSlots(spot: readonly SpotSlot[] | undefined, area?: PricedArea): number {
   return (spot ?? []).filter((s) => (area ? s.areaPrice[area] : s.systemPrice) <= FLOOR_YEN).length
-}
-
-/**
- * Japan's half hours, each the nine areas' records summed, for the half hours every area has. The interconnectors are
- * left at none: between the areas they cancel, and what they do not is the loss on the way.
- */
-export function japanDay(days: readonly (readonly RecordSlot[] | undefined)[]): RecordSlot[] {
-  if (!days.length || days.some((d) => !d?.length)) return []
-  const bySlot = days.map((d) => new Map(d!.map((r) => [r.slot, r])))
-  const slots = [...bySlot[0].keys()].filter((slot) => bySlot.every((m) => m.has(slot))).sort((a, b) => a - b)
-  return slots.map((slot) => {
-    const rows = bySlot.map((m) => m.get(slot)!)
-    const bySource = Object.fromEntries(
-      SOURCES.map((x) => [x, x === 'interconnector' ? 0 : rows.reduce((sum, r) => sum + r.bySource[x], 0)]),
-    ) as RecordSlot['bySource']
-    return {
-      slot,
-      demandMW: rows.reduce((sum, r) => sum + r.demandMW, 0),
-      bySource,
-      curtailedMW: {
-        solar: rows.reduce((sum, r) => sum + r.curtailedMW.solar, 0),
-        wind: rows.reduce((sum, r) => sum + r.curtailedMW.wind, 0),
-      },
-    }
-  })
 }

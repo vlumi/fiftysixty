@@ -1,7 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { ADAPTERS } from './market/adapters'
 import { flowsAt, loadFlows, type FlowDays } from './market/flows'
-import { interchangeAt } from './market/interchange'
+import { interchangeAt, RECORDED_AREAS } from './market/interchange'
 import { dayTotals, japanDay, japanTotals, weightedPrice } from './market/daily'
 import { fiscalYear, loadSpotYears, SLOTS, slotOf, type PricedArea, type SpotDays } from './market/jepx'
 import { stories } from './market/stories'
@@ -164,28 +164,33 @@ export default function App() {
   const monthDays = useMemo(() => {
     if (!month) return []
     const picked = area && area !== 'okinawa' ? (area as PricedArea) : null
-    const byArea = Object.keys(ADAPTERS).map((a) => records.get(`${a}/${month}`) ?? undefined)
     const dates = [...(records.get(`${picked ?? 'tokyo'}/${month}`)?.keys() ?? [])].sort()
     return dates.flatMap((d) => {
-      const totals = picked
-        ? (() => {
-            const day = records.get(`${picked}/${month}`)?.get(d)
-            return day?.length === SLOTS ? dayTotals(day) : null
-          })()
-        : japanTotals(byArea.map((r) => r?.get(d)))
-      return totals ? [{ date: d, totals }] : []
+      if (picked) {
+        const day = records.get(`${picked}/${month}`)?.get(d)
+        return day?.length === SLOTS ? [{ date: d, totals: dayTotals(day), missing: [] }] : []
+      }
+      const byArea = new Map(
+        RECORDED_AREAS.flatMap((a) => {
+          const day = records.get(`${a}/${month}`)?.get(d)
+          return day ? [[a, day] as const] : []
+        }),
+      )
+      const japan = japanDay(byArea, RECORDED_AREAS)
+      // Whole days only, so a bar is a day; one with an area missing is marked as such.
+      return japan.slots.length === SLOTS ? [{ date: d, totals: dayTotals(japan.slots), missing: japan.missing }] : []
     })
   }, [records, month, area])
-  const japan = useMemo(() => japanDay(Object.keys(ADAPTERS).map((a) => areaDays.get(a as PricedArea))), [areaDays])
+  const japan = useMemo(() => japanDay(areaDays, RECORDED_AREAS), [areaDays])
   const dayFigures = useMemo(() => {
     const picked = area && area !== 'okinawa' ? (area as PricedArea) : null
     if (picked) {
       const d = areaDays.get(picked)
       return { totals: d ? dayTotals(d) : null, price: d ? weightedPrice(spotDay, new Map([[picked, d]])) : null }
     }
-    const japan = japanTotals(Object.keys(ADAPTERS).map((a) => areaDays.get(a as PricedArea)))
-    return { totals: japan, price: japan ? weightedPrice(spotDay, areaDays) : null }
-  }, [area, areaDays, spotDay])
+    const totals = japanTotals(japan)
+    return { totals, price: totals ? weightedPrice(spotDay, areaDays) : null }
+  }, [area, areaDays, spotDay, japan])
 
   return (
     <>

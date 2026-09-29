@@ -82,6 +82,7 @@ export interface Strings {
     soFar: (time: string) => string
     japan: string
     notAll: string
+    without: (areas: string) => string
     month: (year: number, month: number) => string
     co2: string
     co2Intensity: string
@@ -233,7 +234,8 @@ const en: Strings = {
     floor: 'Half hours at the floor',
     soFar: (time) => `Through ${time} so far.`,
     japan: 'All Japan',
-    notAll: 'Not every area has recorded the whole day yet.',
+    notAll: 'No area has recorded the day yet.',
+    without: (areas) => `without ${areas}, not recorded yet`,
     month: (year, month) => `${new Date(year, month - 1).toLocaleString('en-US', { month: 'long' })} ${year}`,
     co2: 'CO₂, estimated',
     co2Intensity: 'CO₂ per kWh generated',
@@ -402,7 +404,8 @@ const ja: Strings = {
     floor: '最低価格のコマ',
     soFar: (time) => `${time}まで。`,
     japan: '全国',
-    notAll: 'まだ全エリアの1日分の実績がそろっていません。',
+    notAll: 'まだどのエリアもこの日の実績がありません。',
+    without: (areas) => `${areas}は実績未着のため除く`,
     month: (year, month) => `${year}年${month}月`,
     co2: 'CO₂（推計）',
     co2Intensity: '発電1kWhあたりCO₂',

@@ -1,5 +1,7 @@
 import type { KeyboardEvent, PointerEvent } from 'react'
 import { useStrings } from '../i18n/useStrings'
+import type { Area } from '../regions/areas'
+import { areaList } from '../regions/names'
 import type { DayTotals } from '../market/daily'
 import { SERIES } from '../market/stack'
 import { useApp } from '../store'
@@ -8,9 +10,16 @@ import styles from './MonthStrip.module.css'
 
 const GWH = 1000
 
+/** A whole day of the month with its totals, and for all Japan the areas left out of them. */
+export interface MonthDay {
+  date: string
+  totals: DayTotals
+  missing: readonly Area[]
+}
+
 interface Props {
-  /** The month's whole days in order, each with its totals. */
-  days: readonly { date: string; totals: DayTotals }[]
+  /** The month's whole days in order. */
+  days: readonly MonthDay[]
   date: string | null
   onPick: (date: string) => void
 }
@@ -27,8 +36,9 @@ export default function MonthStrip({ days, date, onPick }: Props) {
   const supplied = (t: DayTotals) => t.generatedMWh + t.storageOutMWh
   const top = Math.max(...days.map((d) => supplied(d.totals)))
   const at = days.findIndex((d) => d.date === date)
-  const describe = ({ date: d, totals }: (typeof days)[number]) =>
-    `${formatDay(d, lang)}: ${(totals.demandMWh / GWH).toFixed(0)} ${s.day.gwh}`
+  const describe = ({ date: d, totals, missing }: MonthDay) =>
+    `${formatDay(d, lang)}: ${(totals.demandMWh / GWH).toFixed(0)} ${s.day.gwh}` +
+    (missing.length ? `, ${s.day.without(areaList(missing, lang))}` : '')
   const go = (index: number) => {
     const day = days[Math.max(0, Math.min(days.length - 1, index))]
     if (day.date !== date) onPick(day.date)
@@ -75,7 +85,7 @@ export default function MonthStrip({ days, date, onPick }: Props) {
         {days.map((d) => (
           <span
             key={d.date}
-            className={styles.day}
+            className={d.missing.length ? `${styles.day} ${styles.partial}` : styles.day}
             aria-current={d.date === date ? 'date' : undefined}
             title={describe(d)}
           >

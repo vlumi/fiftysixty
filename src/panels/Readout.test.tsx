@@ -205,6 +205,6 @@ test("the day view: the switch shows the area's day in energy, and all Japan wit
     />,
   )
   expect(screen.getByRole('heading', { name: 'All Japan' })).toBeInTheDocument()
-  expect(screen.getByText('Not every area has recorded the whole day yet.')).toBeInTheDocument()
+  expect(screen.getByText('No area has recorded the day yet.')).toBeInTheDocument()
   await userEvent.click(screen.getByRole('button', { name: 'Half hour' }))
 })

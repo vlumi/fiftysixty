@@ -2,17 +2,18 @@ import { Fragment, useState } from 'react'
 import { useStrings } from '../i18n/useStrings'
 import { useApp } from '../store'
 import type { PricedArea, SpotSlot } from '../market/jepx'
-import type { DayTotals } from '../market/daily'
+import type { DayTotals, JapanDay } from '../market/daily'
 import type { Interchange } from '../market/interchange'
 import type { RecordSlot } from '../market/record'
 import { AREA_BY_ID, PRICED_AREAS, type Area } from '../regions/areas'
 import { neighbors, OCCTO_LINE_IDS } from '../regions/interconnectors'
+import { areaList } from '../regions/names'
 import type { PlantProps } from '../regions/plants'
 import { mw, signed, yen } from '../shared/format'
 import { useNarrow } from '../shared/useNarrow'
 import styles from './Readout.module.css'
 import DayView from './DayView'
-import MonthStrip from './MonthStrip'
+import MonthStrip, { type MonthDay } from './MonthStrip'
 import SupplyChart from './SupplyChart'
 
 interface Props {
@@ -29,9 +30,9 @@ interface Props {
   dayPrice?: number | null
   spotDay?: readonly SpotSlot[]
   /** All Japan's half hours of the displayed day, where every area has one, for the national readout. */
-  japan?: readonly RecordSlot[]
+  japan?: JapanDay
   /** The displayed month's whole days with their totals, for the strip under the day. */
-  monthDays?: readonly { date: string; totals: DayTotals }[]
+  monthDays?: readonly MonthDay[]
   date?: string | null
   onDate?: (date: string) => void
   area: Area | null
@@ -58,7 +59,7 @@ export default function Readout({
   dayPrice = null,
   spotDay,
   monthDays = [],
-  japan = [],
+  japan = { slots: [], missing: [] },
   date = null,
   onDate,
   onBack,
@@ -94,7 +95,7 @@ export default function Readout({
   ) : view === 'day' ? (
     <>
       {views}
-      {!picked && <h3>{s.day.japan}</h3>}
+      {!picked && <JapanHeading missing={japan.missing} />}
       <DayView totals={dayTotals} price={dayPrice} spot={spotDay} area={picked} />
       {onDate && <MonthStrip days={monthDays} date={date} onPick={onDate} />}
     </>
@@ -110,11 +111,11 @@ export default function Readout({
     <>
       {area !== 'okinawa' && views}
       <SystemNote slot={slot} okinawa={area === 'okinawa'} />
-      {area !== 'okinawa' && japan.length > 0 && (
+      {area !== 'okinawa' && japan.slots.length > 0 && (
         <>
-          <h3>{s.day.japan}</h3>
-          <SupplyChart day={japan} slot={slot.slot} onSlot={onSlot} />
-          {!japan.some((r) => r.slot === slot.slot) && <p className="muted">{s.readout.notAllSlot}</p>}
+          <JapanHeading missing={japan.missing} />
+          <SupplyChart day={japan.slots} slot={slot.slot} onSlot={onSlot} />
+          {!japan.slots.some((r) => r.slot === slot.slot) && <p className="muted">{s.readout.notAllSlot}</p>}
         </>
       )}
     </>
@@ -296,5 +297,17 @@ function Lines({ area, interchange }: { area: PricedArea; interchange: Interchan
         ))}
       </dl>
     </section>
+  )
+}
+
+/** All Japan, and the areas left out of its sums while their records are not in, by name. */
+function JapanHeading({ missing }: { missing: readonly Area[] }) {
+  const s = useStrings()
+  const lang = useApp((x) => x.lang)
+  return (
+    <h3>
+      {s.day.japan}
+      {missing.length > 0 && <span className={styles.without}> · {s.day.without(areaList(missing, lang))}</span>}
+    </h3>
   )
 }
