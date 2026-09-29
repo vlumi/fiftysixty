@@ -2,6 +2,16 @@
 
 One capture per milestone, taken with [`scripts/screenshot.mjs`](../../scripts/screenshot.mjs), newest first. The files carry a running number so they sort in order, then a name for what they show; the headings carry the dates. The README shows the latest desktop and phone captures; the rest stay here as a record of how the site grew.
 
+## 2026-09-29 · Recorded flows and whole days
+
+![Recorded flows](006-recorded.png)
+
+A clear Sunday noon, 2026-09-20 at 12:00, with all nine companies' records in, so the arrows are recorded, drawn violet: Kanmon carries 1,980 MW out of Kyushu at the price floor, walled off from Chugoku by the market split, and the loops show as forks where the records give only each area's total. The areas are shaded on a blue ramp for 50 Hz and an amber one for 60 Hz. Kyushu is picked: its chart with the gigawatt labels in a gutter, and the key carrying each source's MW and share, solar at 52%, with storage and the lines apart and the half hour's renewable share and estimated CO₂ under it.
+
+<img src="006-recorded-phone.png" alt="All Japan's day, on a phone" width="260">
+
+The same day on a phone (390×844), the readout switched to Day: all Japan's 1,920 GWh as one bar and a table of each source's share, then the peak, the low and the renewable share.
+
 ## 2026-09-25 · M5, closer in
 
 ![Closer in](005-closer-in.png)

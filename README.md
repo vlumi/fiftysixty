@@ -10,9 +10,9 @@ Unofficial demo project, built from public data; not affiliated with any exchang
 
 Live at [fiftysixty.misaki.fi](https://fiftysixty.misaki.fi). [SCOPE.md](SCOPE.md) is the plan; [ARCHITECTURE.md](ARCHITECTURE.md) explains how it works.
 
-![Closer in, in the light theme and Japanese: the plants along the Sea of Japan coast as dots by fuel and capacity, Kashiwazaki-Kariwa picked with its capacity, the plants panel with the fuels and their counts](docs/screenshots/005-closer-in.png)
+![A clear Sunday noon with the recorded flows: Kyushu picked at the price floor, its supply chart and key with each source's share, violet arrows and a market-split wall at Kanmon](docs/screenshots/006-recorded.png)
 
-<img src="docs/screenshots/005-closer-in-phone.png" alt="The same site on a phone in the light theme and Japanese: the columns and arrows on the map, the readout folded to its headline, the clock at the foot" width="260">
+<img src="docs/screenshots/006-recorded-phone.png" alt="All Japan's day on a phone: the day's supply as one bar and a table of each source's share, the peak and the renewable share" width="260">
 
 Every capture, one per milestone, is shown in [docs/screenshots](docs/screenshots/README.md). The interface comes in English and Japanese, dark and light.
 
