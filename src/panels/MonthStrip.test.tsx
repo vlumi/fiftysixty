@@ -1,5 +1,4 @@
-import { render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { fireEvent, render, screen } from '@testing-library/react'
 import csv from '../test/fixtures/tepco-jukyu.csv?raw'
 import { dayTotals } from '../market/daily'
 import { TEPCO } from '../market/tepco'
@@ -13,7 +12,7 @@ const half = {
   demandMWh: day.demandMWh / 2,
 }
 
-test('a bar a day, as tall as its supply against the month’s most, the displayed day marked, a tap to go there', async () => {
+test('a bar a day, as tall as its supply against the month’s most, the displayed day marked; it scrubs', async () => {
   const onPick = vi.fn()
   render(
     <MonthStrip
@@ -25,13 +24,23 @@ test('a bar a day, as tall as its supply against the month’s most, the display
       onPick={onPick}
     />,
   )
-  const [a, b] = screen.getAllByRole('button')
-  expect(a).toHaveAccessibleName(/^2026-09-23 \(Wed\): \d+ GWh$/)
+  expect(screen.getByRole('heading', { name: 'September 2026' })).toBeInTheDocument()
+  const strip = screen.getByRole('slider', { name: 'September 2026' })
+  expect(strip).toHaveAttribute('aria-valuenow', '2')
+  expect(strip).toHaveAttribute('aria-valuetext', expect.stringMatching(/^2026-09-24 \(Thu\): \d+ GWh$/))
+  const [a, b] = [...strip.children] as HTMLElement[]
   expect(b).toHaveAttribute('aria-current', 'date')
   expect((a.firstChild as HTMLElement).style.height).toBe('50%')
   expect((b.firstChild as HTMLElement).style.height).toBe('100%')
-  await userEvent.click(a)
-  expect(onPick).toHaveBeenCalledWith('2026-09-23')
+  fireEvent.keyDown(strip, { key: 'ArrowLeft' })
+  expect(onPick).toHaveBeenLastCalledWith('2026-09-23')
+  strip.getBoundingClientRect = () => ({ left: 0, width: 200 }) as DOMRect
+  strip.setPointerCapture = vi.fn()
+  fireEvent.pointerDown(strip, { clientX: 20, pointerId: 1 })
+  expect(onPick).toHaveBeenLastCalledWith('2026-09-23')
+  onPick.mockClear()
+  fireEvent.pointerMove(strip, { clientX: 190, buttons: 1 })
+  expect(onPick).not.toHaveBeenCalled()
 })
 
 test('a single day is no month to compare', () => {
