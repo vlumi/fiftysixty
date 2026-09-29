@@ -2,7 +2,8 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type
 import { ADAPTERS } from './market/adapters'
 import { flowsAt, loadFlows, type FlowDays } from './market/flows'
 import { interchangeAt } from './market/interchange'
-import { fiscalYear, loadSpotYears, slotOf, type SpotDays } from './market/jepx'
+import { dayTotals, japanTotals, weightedPrice } from './market/daily'
+import { fiscalYear, loadSpotYears, slotOf, type PricedArea, type SpotDays } from './market/jepx'
 import { stories } from './market/stories'
 import { loadRecord, monthOf, recordSlot, type RecordDays, type RecordSlot } from './market/record'
 import type { Area } from './regions/areas'
@@ -147,6 +148,27 @@ export default function App() {
     [records, month, date, slot],
   )
   const interchange = useMemo(() => interchangeAt(mixes, flows), [mixes, flows])
+  // The displayed day as a whole, for the readout's day view: the picked area's, or all Japan's with none picked.
+  const spotDay = date ? spot?.get(date) : undefined
+  const areaDays = useMemo(
+    () =>
+      new Map(
+        Object.keys(ADAPTERS).flatMap((a) => {
+          const d = date && month ? records.get(`${a}/${month}`)?.get(date) : undefined
+          return d?.length ? [[a as PricedArea, d] as const] : []
+        }),
+      ),
+    [records, month, date],
+  )
+  const dayFigures = useMemo(() => {
+    const picked = area && area !== 'okinawa' ? (area as PricedArea) : null
+    if (picked) {
+      const d = areaDays.get(picked)
+      return { totals: d ? dayTotals(d) : null, price: d ? weightedPrice(spotDay, new Map([[picked, d]])) : null }
+    }
+    const japan = japanTotals(Object.keys(ADAPTERS).map((a) => areaDays.get(a as PricedArea)))
+    return { totals: japan, price: japan ? weightedPrice(spotDay, areaDays) : null }
+  }, [area, areaDays, spotDay])
 
   return (
     <>
@@ -206,6 +228,9 @@ export default function App() {
           record={record}
           day={recordedDay}
           interchange={interchange}
+          dayTotals={dayFigures.totals}
+          dayPrice={dayFigures.price}
+          spotDay={spotDay}
           area={area}
           plant={plant}
           onBack={() => (plant ? pickPlant(null) : selectArea(null))}

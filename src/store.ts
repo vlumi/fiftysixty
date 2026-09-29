@@ -24,6 +24,8 @@ interface State {
   playing: boolean
   /** Whether the map draws the arrows and the columns. */
   layers: LayerChoice
+  /** The readout's figures for the displayed half hour or for its whole day. */
+  view: 'slot' | 'day'
   /** The fuels whose plants are hidden from the map; every fuel hidden is the plants off. */
   hiddenFuels: Series[]
   themeChoice: ThemeChoice
@@ -36,6 +38,7 @@ interface Actions {
   selectArea: (area: Area | null) => void
   pickPlant: (plant: string | null) => void
   toggleLayer: (layer: MapLayer) => void
+  setView: (view: 'slot' | 'day') => void
   toggleFuel: (fuel: Series) => void
   setHiddenFuels: (fuels: Series[]) => void
   setThemeChoice: (choice: ThemeChoice) => void
@@ -52,6 +55,7 @@ const initial = (): State => ({
   plant: null,
   playing: false,
   layers: loadLayerChoice(),
+  view: 'slot',
   hiddenFuels: loadHiddenFuels(),
   themeChoice: loadThemeChoice(),
   lang: loadLang(),
@@ -67,6 +71,7 @@ export const useApp = create<State & Actions>((set) => ({
   setHiddenFuels: (hiddenFuels) => set({ hiddenFuels }),
   setThemeChoice: (themeChoice) => set({ themeChoice }),
   setLang: (lang) => set({ lang }),
+  setView: (view) => set({ view }),
   toggleLayer: (layer) => set((s) => ({ layers: { ...s.layers, [layer]: !s.layers[layer] } })),
   toggleFuel: (fuel) =>
     set((s) => ({

@@ -1,0 +1,64 @@
+.day {
+  margin-top: 0.5rem;
+}
+
+/* The day's supply as one bar, each source's length its share, no gaps between. */
+.bar {
+  display: flex;
+  height: 0.9rem;
+  overflow: hidden;
+  border-radius: 0.25rem;
+}
+
+.bar span {
+  flex-basis: 0;
+}
+
+.table {
+  width: 100%;
+  margin-top: 0.5rem;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.table th,
+.table td {
+  padding: 0.1rem 0;
+  font-weight: 400;
+  text-align: right;
+}
+
+.table thead th {
+  padding-left: 0.75rem;
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.table tbody th {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  text-align: left;
+}
+
+.swatch {
+  flex: none;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 2px;
+}
+
+.figures {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: space-between;
+  gap: 0.15rem 1rem;
+  margin: 0.75rem 0 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.figures dd {
+  margin: 0;
+  text-align: right;
+}

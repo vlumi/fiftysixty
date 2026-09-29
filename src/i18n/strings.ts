@@ -59,6 +59,28 @@ export interface Strings {
     jst: string
   }
   stories: { name: Record<StoryId, string>; note: Record<StoryId, (value: number, other?: number) => string> }
+  day: {
+    view: string
+    halfHour: string
+    day: string
+    supply: string
+    gwh: string
+    share: string
+    demand: string
+    peak: string
+    low: string
+    renewables: string
+    curtailed: string
+    imported: string
+    exported: string
+    storedIn: string
+    storedOut: string
+    price: string
+    floor: string
+    soFar: (time: string) => string
+    japan: string
+    notAll: string
+  }
   readout: {
     label: string
     back: string
@@ -179,6 +201,28 @@ const en: Strings = {
       floor: (v) => `${v} area half hours at 0.01 ¥/kWh`,
       cheapest: (v) => `mean ${v.toFixed(2)} ¥/kWh`,
     },
+  },
+  day: {
+    view: 'View',
+    halfHour: 'Half hour',
+    day: 'Day',
+    supply: 'How the day was supplied',
+    gwh: 'GWh',
+    share: 'share',
+    demand: 'Demand',
+    peak: 'Peak',
+    low: 'Low',
+    renewables: 'Renewable share',
+    curtailed: 'Curtailed',
+    imported: 'Imported',
+    exported: 'Exported',
+    storedIn: 'Into storage',
+    storedOut: 'From storage',
+    price: 'Price, weighted by demand',
+    floor: 'Half hours at the floor',
+    soFar: (time) => `Through ${time} so far.`,
+    japan: 'All Japan',
+    notAll: 'Not every area has recorded the whole day yet.',
   },
   readout: {
     label: 'Readout',
@@ -318,6 +362,28 @@ const ja: Strings = {
       floor: (v) => `${v} エリアコマが 0.01 円/kWh`,
       cheapest: (v) => `平均 ${v.toFixed(2)} 円/kWh`,
     },
+  },
+  day: {
+    view: '表示',
+    halfHour: 'コマ',
+    day: '1日',
+    supply: '1日の供給',
+    gwh: 'GWh',
+    share: '比率',
+    demand: '需要',
+    peak: '最大',
+    low: '最小',
+    renewables: '再エネ比率',
+    curtailed: '出力制御',
+    imported: '受電',
+    exported: '送電',
+    storedIn: '揚水・蓄電池（充電）',
+    storedOut: '揚水・蓄電池（放電）',
+    price: '需要加重平均価格',
+    floor: '最低価格のコマ',
+    soFar: (time) => `${time}まで。`,
+    japan: '全国',
+    notAll: 'まだ全エリアの1日分の実績がそろっていません。',
   },
   readout: {
     label: '詳細',
