@@ -80,6 +80,7 @@ export interface Strings {
     soFar: (time: string) => string
     japan: string
     notAll: string
+    month: string
   }
   readout: {
     label: string
@@ -223,6 +224,7 @@ const en: Strings = {
     soFar: (time) => `Through ${time} so far.`,
     japan: 'All Japan',
     notAll: 'Not every area has recorded the whole day yet.',
+    month: 'The month, a day a bar',
   },
   readout: {
     label: 'Readout',
@@ -384,6 +386,7 @@ const ja: Strings = {
     soFar: (time) => `${time}まで。`,
     japan: '全国',
     notAll: 'まだ全エリアの1日分の実績がそろっていません。',
+    month: '今月の各日',
   },
   readout: {
     label: '詳細',

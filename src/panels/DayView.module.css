@@ -61,4 +61,5 @@
 .figures dd {
   margin: 0;
   text-align: right;
+  white-space: nowrap;
 }

@@ -12,6 +12,7 @@ import { mw, signed, yen } from '../shared/format'
 import { useNarrow } from '../shared/useNarrow'
 import styles from './Readout.module.css'
 import DayView from './DayView'
+import MonthStrip from './MonthStrip'
 import SupplyChart from './SupplyChart'
 
 interface Props {
@@ -27,6 +28,10 @@ interface Props {
   dayTotals?: DayTotals | null
   dayPrice?: number | null
   spotDay?: readonly SpotSlot[]
+  /** The displayed month's whole days with their totals, for the strip under the day. */
+  monthDays?: readonly { date: string; totals: DayTotals }[]
+  date?: string | null
+  onDate?: (date: string) => void
   area: Area | null
   /** A picked plant, shown instead of an area. */
   plant?: PlantProps | null
@@ -50,6 +55,9 @@ export default function Readout({
   dayTotals = null,
   dayPrice = null,
   spotDay,
+  monthDays = [],
+  date = null,
+  onDate,
   onBack,
   onSlot,
 }: Props) {
@@ -85,6 +93,7 @@ export default function Readout({
       {views}
       {!picked && <h3>{s.day.japan}</h3>}
       <DayView totals={dayTotals} price={dayPrice} spot={spotDay} area={picked} />
+      {onDate && <MonthStrip days={monthDays} date={date} onPick={onDate} />}
     </>
   ) : picked ? (
     <>
