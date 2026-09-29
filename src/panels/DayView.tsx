@@ -1,5 +1,5 @@
 import { useStrings } from '../i18n/useStrings'
-import { floorSlots, renewableShare, type DayTotals } from '../market/daily'
+import { co2Intensity, floorSlots, renewableShare, type DayTotals } from '../market/daily'
 import { SLOTS, type PricedArea, type SpotSlot } from '../market/jepx'
 import { SERIES } from '../market/stack'
 import { mw, yen } from '../shared/format'
@@ -85,6 +85,15 @@ export default function DayView({ totals, price, spot, area }: Props) {
         </dd>
         <dt>{s.day.renewables}</dt>
         <dd>{percent(renewableShare(totals))}</dd>
+        <dt>{s.day.co2}</dt>
+        <dd>
+          {(totals.co2t / 1000).toLocaleString('en-US', { maximumFractionDigits: 1, minimumFractionDigits: 1 })}{' '}
+          <span className="muted">{s.day.kt}</span>
+        </dd>
+        <dt>{s.day.co2Intensity}</dt>
+        <dd>
+          {Math.round(co2Intensity(totals))} <span className="muted">g</span>
+        </dd>
         {totals.curtailedMWh > 0 && (
           <>
             <dt>{s.day.curtailed}</dt>

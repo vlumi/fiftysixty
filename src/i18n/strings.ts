@@ -25,6 +25,8 @@ export interface Strings {
     records: string
     recordsBy: string
     lines: string
+    co2: string
+    co2By: string
     source: string
   }
   language: string
@@ -81,6 +83,9 @@ export interface Strings {
     japan: string
     notAll: string
     month: string
+    co2: string
+    co2Intensity: string
+    kt: string
   }
   readout: {
     label: string
@@ -155,6 +160,9 @@ const en: Strings = {
     records: 'Supply and demand',
     recordsBy: "The nine transmission companies, in OCCTO's format",
     lines: 'Interconnectors',
+    co2: 'CO₂',
+    co2By:
+      'Estimated from the fuel burnt, after CRIEPI (2016): coal 864, LNG 430, oil and other thermal 695 g/kWh; biomass as none.',
     source: 'Source on GitHub',
   },
   language: 'Language',
@@ -225,6 +233,9 @@ const en: Strings = {
     japan: 'All Japan',
     notAll: 'Not every area has recorded the whole day yet.',
     month: 'The month, a day a bar',
+    co2: 'CO₂, estimated',
+    co2Intensity: 'CO₂ per kWh generated',
+    kt: 'kt',
   },
   readout: {
     label: 'Readout',
@@ -317,6 +328,8 @@ const ja: Strings = {
     records: '需給実績',
     recordsBy: '一般送配電事業者9社、OCCTO の様式で',
     lines: '連系線',
+    co2: 'CO₂',
+    co2By: '燃料の燃焼分を電中研（2016）の係数で推計：石炭 864、LNG 430、石油・その他火力 695 g/kWh、バイオマスは 0。',
     source: 'GitHub のソース',
   },
   language: '言語',
@@ -387,6 +400,9 @@ const ja: Strings = {
     japan: '全国',
     notAll: 'まだ全エリアの1日分の実績がそろっていません。',
     month: '今月の各日',
+    co2: 'CO₂（推計）',
+    co2Intensity: '発電1kWhあたりCO₂',
+    kt: '千t',
   },
   readout: {
     label: '詳細',

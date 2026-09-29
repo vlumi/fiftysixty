@@ -1,6 +1,6 @@
 import csv from '../test/fixtures/tepco-jukyu.csv?raw'
 import spotCsv from '../test/fixtures/jepx-spot.csv?raw'
-import { dayTotals, floorSlots, japanTotals, renewableShare, weightedPrice } from './daily'
+import { co2Intensity, dayTotals, floorSlots, japanTotals, renewableShare, weightedPrice } from './daily'
 import { parseSpot } from './jepx'
 import type { RecordSlot } from './record'
 import { SERIES } from './stack'
@@ -40,4 +40,18 @@ test('the price as the demand weighs it, and the half hours at the floor', () =>
   expect(price).toBeLessThanOrEqual(Math.max(...prices))
   expect(weightedPrice(undefined, new Map([['tokyo', day]]))).toBeNull()
   expect(floorSlots([{ ...spot[0], systemPrice: 0.01 }, spot[1]])).toBe(1)
+})
+
+test('CO₂ is estimated from the fuel burnt, each fuel by its factor, and per kWh generated lies between gas and coal', () => {
+  const t = dayTotals(day)
+  const byHand = day.reduce(
+    (sum, r) =>
+      sum +
+      (r.bySource.coal * 0.864 + r.bySource.lng * 0.43 + r.bySource.oil * 0.695 + r.bySource.otherThermal * 0.695) / 2,
+    0,
+  )
+  expect(t.co2t).toBeCloseTo(byHand)
+  expect(co2Intensity(t)).toBeGreaterThan(0)
+  expect(co2Intensity(t)).toBeLessThan(864)
+  expect(japanTotals([day, day])!.co2t).toBeCloseTo(t.co2t * 2)
 })

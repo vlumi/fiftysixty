@@ -8,6 +8,14 @@ const HOURS_PER_SLOT = 0.5
 /** The exchange's floor, ¥/kWh: a half hour cleared at it had more on offer than anyone would take. */
 export const FLOOR_YEN = 0.01
 
+/**
+ * Tonnes of CO₂ per MWh for the fuel burnt at the plant, after CRIEPI's 2016 assessment of Japan's generation: coal 864,
+ * oil 695 g/kWh, LNG between its steam plants' 476 and combined cycle's 376, which most of the fleet is, taken as 430.
+ * The companies' other thermal column, mostly steelworks' gases, is taken as oil; biomass counts as none, as is usual.
+ * An estimate from the fuel mix, not a measurement.
+ */
+export const CO2_T_PER_MWH = { coal: 0.864, lng: 0.43, oil: 0.695, otherThermal: 0.695 } as const
+
 /** The sources that renew: sun, wind, water, the earth's heat and biomass. */
 const RENEWABLE: readonly Series[] = ['solar', 'wind', 'hydro', 'renewables']
 
@@ -23,6 +31,8 @@ export interface DayTotals {
   importMWh: number
   exportMWh: number
   curtailedMWh: number
+  /** CO₂ from the fuel the area burnt, tonnes, estimated; see CO2_T_PER_MWH. */
+  co2t: number
   /** The highest and lowest half hour of demand, MW, and when. */
   peak: { mw: number; slot: number }
   low: { mw: number; slot: number }
@@ -41,6 +51,7 @@ export function dayTotals(day: readonly RecordSlot[]): DayTotals {
     importMWh: 0,
     exportMWh: 0,
     curtailedMWh: 0,
+    co2t: 0,
     peak: { mw: -Infinity, slot: 0 },
     low: { mw: Infinity, slot: 0 },
   }
@@ -58,6 +69,8 @@ export function dayTotals(day: readonly RecordSlot[]): DayTotals {
     t.importMWh += Math.max(0, lines) * HOURS_PER_SLOT
     t.exportMWh += Math.max(0, -lines) * HOURS_PER_SLOT
     t.curtailedMWh += (r.curtailedMW.solar + r.curtailedMW.wind) * HOURS_PER_SLOT
+    for (const [fuel, factor] of Object.entries(CO2_T_PER_MWH))
+      t.co2t += Math.max(0, r.bySource[fuel as keyof typeof CO2_T_PER_MWH]) * factor * HOURS_PER_SLOT
     if (r.demandMW > t.peak.mw) t.peak = { mw: r.demandMW, slot: r.slot }
     if (r.demandMW < t.low.mw) t.low = { mw: r.demandMW, slot: r.slot }
   }
@@ -80,6 +93,7 @@ export function japanTotals(days: readonly (readonly RecordSlot[] | undefined)[]
     t.storageOutMWh += a.storageOutMWh
     t.storageInMWh += a.storageInMWh
     t.curtailedMWh += a.curtailedMWh
+    t.co2t += a.co2t
     for (const s of SERIES) t.bySeries[s] += a.bySeries[s]
   }
   for (let slot = 1; slot <= SLOTS; slot++) {
@@ -89,6 +103,9 @@ export function japanTotals(days: readonly (readonly RecordSlot[] | undefined)[]
   }
   return t
 }
+
+/** The CO₂ per kWh the area generated, grams, estimated: tonnes per MWh are kilograms per MWh a thousandfold, so grams per kWh. */
+export const co2Intensity = (t: DayTotals) => (t.generatedMWh > 0 ? (t.co2t / t.generatedMWh) * 1000 : 0)
 
 /** The share of the day's generation that came from renewable sources, 0 to 1. */
 export function renewableShare(t: DayTotals): number {

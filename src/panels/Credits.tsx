@@ -79,6 +79,8 @@ export default function Credits({ onClose }: { onClose: () => void }) {
           <dd>
             <a href="https://web-kohyo.occto.or.jp/kks-web-public/">OCCTO</a>
           </dd>
+          <dt>{s.credits.co2}</dt>
+          <dd>{s.credits.co2By}</dd>
         </dl>
         <h3>{s.help.title}</h3>
         <dl className={styles.rows}>
