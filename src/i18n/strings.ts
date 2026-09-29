@@ -86,6 +86,7 @@ export interface Strings {
     co2: string
     co2Intensity: string
     kt: string
+    estimated: string
   }
   readout: {
     label: string
@@ -109,6 +110,7 @@ export interface Strings {
     mw: string
     whatRan: string
     noRecord: string
+    notAllSlot: string
     aPlant: string
     plantNote: string
   }
@@ -236,6 +238,7 @@ const en: Strings = {
     co2: 'CO₂, estimated',
     co2Intensity: 'CO₂ per kWh generated',
     kt: 'kt',
+    estimated: 'estimated',
   },
   readout: {
     label: 'Readout',
@@ -259,6 +262,7 @@ const en: Strings = {
     mw: 'MW',
     whatRan: 'What ran',
     noRecord: 'No record for this half hour yet.',
+    notAllSlot: 'Not every area has recorded this half hour yet.',
     aPlant: 'A plant',
     plantNote: 'Capacity as mapped in OpenStreetMap; what it runs is not public.',
   },
@@ -403,6 +407,7 @@ const ja: Strings = {
     co2: 'CO₂（推計）',
     co2Intensity: '発電1kWhあたりCO₂',
     kt: '千t',
+    estimated: '推計',
   },
   readout: {
     label: '詳細',
@@ -426,6 +431,7 @@ const ja: Strings = {
     mw: 'MW',
     whatRan: '需給実績',
     noRecord: 'このコマの実績はまだありません。',
+    notAllSlot: 'まだ全エリアのこのコマの実績がそろっていません。',
     aPlant: '発電所',
     plantNote: '出力は OpenStreetMap の記載による設備容量。実際の発電量は公開されていません。',
   },

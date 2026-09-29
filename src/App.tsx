@@ -2,7 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type
 import { ADAPTERS } from './market/adapters'
 import { flowsAt, loadFlows, type FlowDays } from './market/flows'
 import { interchangeAt } from './market/interchange'
-import { dayTotals, japanTotals, weightedPrice } from './market/daily'
+import { dayTotals, japanDay, japanTotals, weightedPrice } from './market/daily'
 import { fiscalYear, loadSpotYears, SLOTS, slotOf, type PricedArea, type SpotDays } from './market/jepx'
 import { stories } from './market/stories'
 import { loadRecord, monthOf, recordSlot, type RecordDays, type RecordSlot } from './market/record'
@@ -176,6 +176,7 @@ export default function App() {
       return totals ? [{ date: d, totals }] : []
     })
   }, [records, month, area])
+  const japan = useMemo(() => japanDay(Object.keys(ADAPTERS).map((a) => areaDays.get(a as PricedArea))), [areaDays])
   const dayFigures = useMemo(() => {
     const picked = area && area !== 'okinawa' ? (area as PricedArea) : null
     if (picked) {
@@ -248,6 +249,7 @@ export default function App() {
           dayPrice={dayFigures.price}
           spotDay={spotDay}
           monthDays={monthDays}
+          japan={japan}
           date={date}
           onDate={setDate}
           area={area}

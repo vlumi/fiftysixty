@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import csv from '../test/fixtures/tepco-jukyu.csv?raw'
 import { TEPCO } from '../market/tepco'
 import SupplyChart from './SupplyChart'
@@ -60,4 +60,19 @@ test('an idle row reads 0, never a negative zero', () => {
   render(<SupplyChart day={idle} slot={25} onSlot={vi.fn()} />)
   for (const name of ['Into storage', 'Exports'])
     expect(screen.getByRole('row', { name: new RegExp(`^${name}`) })).toHaveTextContent(/^[^-]*0$/)
+})
+
+test("a supplying row's share of the half hour, and the half hour's renewable share and CO₂ per kWh", () => {
+  render(<SupplyChart day={day} slot={25} onSlot={vi.fn()} />)
+  const key = screen.getByRole('region', { name: 'What ran' })
+  const shares = within(key)
+    .getAllByRole('row')
+    .slice(1)
+    .map((r) => r.lastElementChild!.textContent)
+  const percents = shares.filter(Boolean).map((p) => Number(p!.replace('%', '')))
+  expect(shares[0]).toBe('')
+  expect(percents.reduce((a, b) => a + b, 0)).toBeGreaterThanOrEqual(97)
+  expect(percents.reduce((a, b) => a + b, 0)).toBeLessThanOrEqual(103)
+  expect(key).toHaveTextContent(/Renewable share\d+%/)
+  expect(key).toHaveTextContent(/CO₂ per kWh generated\d+ g · estimated/)
 })

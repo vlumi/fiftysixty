@@ -1,5 +1,5 @@
 import { SLOTS, type PricedArea, type SpotSlot } from './jepx'
-import type { RecordSlot } from './record'
+import { SOURCES, type RecordSlot } from './record'
 import { SERIES, seriesMW, storageMW, type Series } from './stack'
 
 /** A half hour's average MW over its half hour is half as many MWh. */
@@ -136,4 +136,29 @@ export function weightedPrice(
 /** How many half hours of the day an area, or the system price when none is given, cleared at the floor. */
 export function floorSlots(spot: readonly SpotSlot[] | undefined, area?: PricedArea): number {
   return (spot ?? []).filter((s) => (area ? s.areaPrice[area] : s.systemPrice) <= FLOOR_YEN).length
+}
+
+/**
+ * Japan's half hours, each the nine areas' records summed, for the half hours every area has. The interconnectors are
+ * left at none: between the areas they cancel, and what they do not is the loss on the way.
+ */
+export function japanDay(days: readonly (readonly RecordSlot[] | undefined)[]): RecordSlot[] {
+  if (!days.length || days.some((d) => !d?.length)) return []
+  const bySlot = days.map((d) => new Map(d!.map((r) => [r.slot, r])))
+  const slots = [...bySlot[0].keys()].filter((slot) => bySlot.every((m) => m.has(slot))).sort((a, b) => a - b)
+  return slots.map((slot) => {
+    const rows = bySlot.map((m) => m.get(slot)!)
+    const bySource = Object.fromEntries(
+      SOURCES.map((x) => [x, x === 'interconnector' ? 0 : rows.reduce((sum, r) => sum + r.bySource[x], 0)]),
+    ) as RecordSlot['bySource']
+    return {
+      slot,
+      demandMW: rows.reduce((sum, r) => sum + r.demandMW, 0),
+      bySource,
+      curtailedMW: {
+        solar: rows.reduce((sum, r) => sum + r.curtailedMW.solar, 0),
+        wind: rows.reduce((sum, r) => sum + r.curtailedMW.wind, 0),
+      },
+    }
+  })
 }
