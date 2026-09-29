@@ -52,6 +52,8 @@
 .figures {
   display: grid;
   grid-template-columns: auto auto;
+  /* A label that wraps keeps its value centered beside it, so the two read as one row. */
+  align-items: center;
   justify-content: space-between;
   gap: 0.15rem 1rem;
   margin: 0.75rem 0 0;
