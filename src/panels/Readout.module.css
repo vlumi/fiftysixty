@@ -215,3 +215,9 @@ button.fold .price {
     min-height: 2.25rem;
   }
 }
+
+/* The areas left out of all Japan's sums, plain to see beside its name. */
+.without {
+  color: var(--hz60);
+  font-weight: 400;
+}

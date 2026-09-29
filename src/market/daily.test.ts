@@ -21,14 +21,35 @@ test("a whole day in energy: half an hour's MW is half as many MWh, and the day 
   expect(renewableShare(t)).toBeLessThan(1)
 })
 
-test("Japan's day is its areas' whole days summed, its peak Japan's own; with an area short of a day there is none", () => {
+test("Japan's day is the recorded areas summed, one set of areas all day, the missing ones named", () => {
   const shifted = day.map((r): RecordSlot => ({ ...r, slot: ((r.slot + 23) % 48) + 1 }))
-  const japan = japanTotals([day, shifted])!
+  const both = japanDay(
+    new Map([
+      ['tokyo', day],
+      ['kansai', shifted],
+    ]),
+    ['tokyo', 'kansai'],
+  )
+  expect(both.missing).toEqual([])
+  const japan = japanTotals(both)!
   expect(japan.demandMWh).toBeCloseTo(dayTotals(day).demandMWh * 2)
   expect(japan.peak.mw).toBeLessThan(dayTotals(day).peak.mw * 2)
   expect(japan.importMWh).toBe(0)
-  expect(japanTotals([day, day.slice(0, 47)])).toBeNull()
-  expect(japanTotals([day, undefined])).toBeNull()
+  const without = japanDay(new Map([['tokyo', day]]), ['hokkaido', 'tokyo'])
+  expect(without.missing).toEqual(['hokkaido'])
+  expect(japanTotals(without)!.demandMWh).toBeCloseTo(dayTotals(day).demandMWh)
+  // An area further behind within the day cuts the day short for all, so no line jumps where it stops.
+  const behind = japanDay(
+    new Map([
+      ['tokyo', day],
+      ['kansai', day.slice(0, 30)],
+    ]),
+    ['tokyo', 'kansai'],
+  )
+  expect(behind.slots.map((r) => r.slot)).toEqual(day.slice(0, 30).map((r) => r.slot))
+  expect(behind.slots[0].demandMW).toBe(day[0].demandMW * 2)
+  expect(behind.slots[0].bySource.interconnector).toBe(0)
+  expect(japanTotals(japanDay(new Map(), ['tokyo']))).toBeNull()
 })
 
 test('the price as the demand weighs it, and the half hours at the floor', () => {
@@ -53,14 +74,15 @@ test('CO₂ is estimated from the fuel burnt, each fuel by its factor, and per k
   expect(t.co2t).toBeCloseTo(byHand)
   expect(co2Intensity(t)).toBeGreaterThan(0)
   expect(co2Intensity(t)).toBeLessThan(864)
-  expect(japanTotals([day, day])!.co2t).toBeCloseTo(t.co2t * 2)
-})
-
-test("Japan's half hours are the areas' summed, only those every area has, the interconnectors cancelled", () => {
-  const japan = japanDay([day, day.slice(0, 30)])
-  expect(japan.map((r) => r.slot)).toEqual(day.slice(0, 30).map((r) => r.slot))
-  expect(japan[0].demandMW).toBe(day[0].demandMW * 2)
-  expect(japan[0].bySource.coal).toBe(day[0].bySource.coal * 2)
-  expect(japan[0].bySource.interconnector).toBe(0)
-  expect(japanDay([day, undefined])).toEqual([])
+  expect(
+    japanTotals(
+      japanDay(
+        new Map([
+          ['tokyo', day],
+          ['kansai', day],
+        ]),
+        ['tokyo', 'kansai'],
+      ),
+    )!.co2t,
+  ).toBeCloseTo(t.co2t * 2)
 })
