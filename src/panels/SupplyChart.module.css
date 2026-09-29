@@ -142,6 +142,7 @@
 .figures {
   display: grid;
   grid-template-columns: auto auto;
+  align-items: center;
   justify-content: space-between;
   gap: 0.15rem 1rem;
   margin: 0.5rem 0 0;
