@@ -28,6 +28,8 @@ interface Props {
   dayTotals?: DayTotals | null
   dayPrice?: number | null
   spotDay?: readonly SpotSlot[]
+  /** All Japan's half hours of the displayed day, where every area has one, for the national readout. */
+  japan?: readonly RecordSlot[]
   /** The displayed month's whole days with their totals, for the strip under the day. */
   monthDays?: readonly { date: string; totals: DayTotals }[]
   date?: string | null
@@ -56,6 +58,7 @@ export default function Readout({
   dayPrice = null,
   spotDay,
   monthDays = [],
+  japan = [],
   date = null,
   onDate,
   onBack,
@@ -107,6 +110,13 @@ export default function Readout({
     <>
       {area !== 'okinawa' && views}
       <SystemNote slot={slot} okinawa={area === 'okinawa'} />
+      {area !== 'okinawa' && japan.length > 0 && (
+        <>
+          <h3>{s.day.japan}</h3>
+          <SupplyChart day={japan} slot={slot.slot} onSlot={onSlot} />
+          {!japan.some((r) => r.slot === slot.slot) && <p className="muted">{s.readout.notAllSlot}</p>}
+        </>
+      )}
     </>
   )
   return (

@@ -1,6 +1,6 @@
 import csv from '../test/fixtures/tepco-jukyu.csv?raw'
 import spotCsv from '../test/fixtures/jepx-spot.csv?raw'
-import { co2Intensity, dayTotals, floorSlots, japanTotals, renewableShare, weightedPrice } from './daily'
+import { co2Intensity, dayTotals, floorSlots, japanDay, japanTotals, renewableShare, weightedPrice } from './daily'
 import { parseSpot } from './jepx'
 import type { RecordSlot } from './record'
 import { SERIES } from './stack'
@@ -54,4 +54,13 @@ test('CO₂ is estimated from the fuel burnt, each fuel by its factor, and per k
   expect(co2Intensity(t)).toBeGreaterThan(0)
   expect(co2Intensity(t)).toBeLessThan(864)
   expect(japanTotals([day, day])!.co2t).toBeCloseTo(t.co2t * 2)
+})
+
+test("Japan's half hours are the areas' summed, only those every area has, the interconnectors cancelled", () => {
+  const japan = japanDay([day, day.slice(0, 30)])
+  expect(japan.map((r) => r.slot)).toEqual(day.slice(0, 30).map((r) => r.slot))
+  expect(japan[0].demandMW).toBe(day[0].demandMW * 2)
+  expect(japan[0].bySource.coal).toBe(day[0].bySource.coal * 2)
+  expect(japan[0].bySource.interconnector).toBe(0)
+  expect(japanDay([day, undefined])).toEqual([])
 })

@@ -76,7 +76,8 @@ export default function SupplyChart({ day, slot, onSlot }: Props) {
   }
   const line = (v: (s: StackedSlot) => number) =>
     `M${stack.slots.map((s) => `${x(s.slot).toFixed(1)},${y(v(s)).toFixed(1)}`).join('L')}`
-  const gridStep = (stack.maxMW - stack.minMW > 25 * GW ? 10 : 5) * GW
+  // About five gridlines whatever the range, from an area's few gigawatts to all Japan's ninety.
+  const gridStep = ([5, 10, 20, 50].find((gw) => (stack.maxMW - stack.minMW) / (gw * GW) <= 5) ?? 100) * GW
   const gridlines = []
   for (let mw = Math.ceil(stack.minMW / gridStep) * gridStep; mw <= stack.maxMW; mw += gridStep) gridlines.push(mw)
   const curtailed = stack.slots.some((s) => s.curtailedMW > 0)
@@ -170,7 +171,11 @@ export default function SupplyChart({ day, slot, onSlot }: Props) {
           </text>
         ))}
       </svg>
-      <MixKey at={stack.slots.find((t) => t.slot === slot)} curtailed={curtailed} />
+      <MixKey
+        at={stack.slots.find((t) => t.slot === slot)}
+        curtailed={curtailed}
+        lines={stack.slots.some((t) => t.linesMW !== 0)}
+      />
     </figure>
   )
 }
@@ -180,7 +185,8 @@ export default function SupplyChart({ day, slot, onSlot }: Props) {
  * imports and storage generating, the sources, then storage charging and exports below the line. Without a record for the half hour, the figures are
  * dashes and the key still stands.
  */
-function MixKey({ at, curtailed }: { at: StackedSlot | undefined; curtailed: boolean }) {
+/** `lines`: whether the day has border flows at all; all Japan has none, and its import and export rows are left out. */
+function MixKey({ at, curtailed, lines }: { at: StackedSlot | undefined; curtailed: boolean; lines: boolean }) {
   const s = useStrings()
   const row = (e: (typeof EXCHANGE)[number]) => ({
     key: e.key,
@@ -201,14 +207,14 @@ function MixKey({ at, curtailed }: { at: StackedSlot | undefined; curtailed: boo
           },
         ]
       : []),
-    ...[EXCHANGE[1], EXCHANGE[0]].map(row),
+    ...(lines ? [EXCHANGE[1], EXCHANGE[0]] : [EXCHANGE[0]]).map(row),
     ...[...SERIES].reverse().map((x) => ({
       key: x,
       name: s.chart.series[x],
       color: `var(--src-${x})`,
       mw: at?.bands[x].value,
     })),
-    ...[EXCHANGE[2], EXCHANGE[3]].map(row),
+    ...(lines ? [EXCHANGE[2], EXCHANGE[3]] : [EXCHANGE[2]]).map(row),
   ]
   return (
     <section aria-label={s.readout.whatRan}>
