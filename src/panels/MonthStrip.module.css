@@ -4,6 +4,8 @@
 
 .bars {
   display: flex;
+  touch-action: none;
+  cursor: ew-resize;
   align-items: flex-end;
   gap: 2px;
   height: 4rem;
@@ -20,11 +22,6 @@
   border: 0;
   border-radius: 2px;
   background: none;
-  cursor: pointer;
-}
-
-.day:hover {
-  background: var(--hover);
 }
 
 .day[aria-current='date'] {
@@ -51,4 +48,9 @@
   color: var(--muted);
   font-size: 0.7rem;
   font-variant-numeric: tabular-nums;
+}
+
+.bars:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
