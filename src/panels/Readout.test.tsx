@@ -224,6 +224,40 @@ test("a picked area's lines in or out against the limit, and its loop as the tot
   expect(values).toEqual(['in 3,290 of 3,290', 'in 550 of 550', 'out 1,290'])
 })
 
+test("a half's lines are the frequency converters alone, in or out of the half against their limit", () => {
+  const at = slotOf(parseSpot(csv), '2026-09-23', 24)!
+  useApp.getState().setHalf(50)
+  const { rerender } = render(
+    <Readout
+      slot={at}
+      record={undefined}
+      day={undefined}
+      interchange={noon}
+      area={null}
+      onBack={vi.fn()}
+      onSlot={vi.fn()}
+    />,
+  )
+  const rows = () => {
+    const lines = screen.getByRole('region', { name: 'Lines' })
+    return [...lines.querySelectorAll('dt, dd')].map((d) => d.textContent?.trim())
+  }
+  expect(rows()).toEqual(['Frequency converters', 'in 256 of 1,800'])
+  useApp.getState().setHalf(60)
+  rerender(
+    <Readout
+      slot={at}
+      record={undefined}
+      day={undefined}
+      interchange={noon}
+      area={null}
+      onBack={vi.fn()}
+      onSlot={vi.fn()}
+    />,
+  )
+  expect(rows()).toEqual(['Frequency converters', 'out 256 of 1,800'])
+})
+
 test('a picked plant: its capacity and fuel, and that its output is not public', () => {
   render(
     <Readout
