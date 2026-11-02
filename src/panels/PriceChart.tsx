@@ -24,14 +24,12 @@ interface Props {
 /**
  * The day's prices in the day charts' frame: the system price as a thin dashed line in the text color, and over it the
  * picked area's price in its half's hue, or every area's with none picked, so the day forks where the market split.
- * With none picked the key's two halves are buttons: one pressed draws that half's areas alone, since nine lines in
- * two colors cross; pressed again, both.
+ * With a half of the grid chosen, that half's areas alone, the other half's key dimmed.
  */
 export default function PriceChart({ day, area, slot, onSlot, hours }: Props) {
   const s = useStrings()
   const lang = useApp((x) => x.lang)
   const half = useApp((x) => x.half)
-  const setHalf = useApp((x) => x.setHalf)
   const areas = area ? [area] : AREAS.filter((a) => !half || AREA_BY_ID[a].hz === half)
   const { top, step } = priceAxis(Math.max(...day.flatMap((d) => [d.systemPrice, ...areas.map((a) => d.areaPrice[a])])))
   const y = (price: number) => TOP + (1 - price / top) * PLOT
@@ -70,17 +68,10 @@ export default function PriceChart({ day, area, slot, onSlot, hours }: Props) {
           </span>
         ) : (
           ([50, 60] as const).map((hz) => (
-            <button
-              key={hz}
-              type="button"
-              className={half && half !== hz ? `${styles.halfKey} ${styles.off}` : styles.halfKey}
-              aria-pressed={half === hz}
-              title={s.chart.onlyHalf}
-              onClick={() => setHalf(half === hz ? null : hz)}
-            >
+            <span key={hz} className={half && half !== hz ? styles.off : undefined}>
               <span className={`${styles.areaKey} ${styles[`hz${hz}`]}`} />
               {s.readout.hz(hz)}
-            </button>
+            </span>
           ))
         )}
         <span>

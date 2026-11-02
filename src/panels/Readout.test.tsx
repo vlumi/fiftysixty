@@ -8,6 +8,7 @@ import { planned } from '../market/interchange'
 import { parseSpot, slotOf } from '../market/jepx'
 import { recordSlot } from '../market/record'
 import { TEPCO } from '../market/tepco'
+import { resetApp, useApp } from '../store'
 import Readout from './Readout'
 
 const spot = parseSpot(csv)
@@ -17,6 +18,8 @@ const days = TEPCO.parse(tepcoCsv)
 const record = recordSlot(days, '2026-09-24', 25)
 const day = days.get('2026-09-24')!
 const noon = planned(flowsAt(parseFlows(flowsCsv), '2026-09-23', 24))
+
+afterEach(resetApp)
 
 test('without an area, the system price and the range across the areas', () => {
   render(
@@ -87,6 +90,47 @@ test('the day’s price curve above the supply chart, for an area, and over the 
   )
   expect(sliders()).toEqual(['Price over the day', 'Auction over the day'])
   expect(screen.getAllByText('18')).toHaveLength(1)
+})
+
+test('a half of the grid from its toggle: its spread as the headline, the system price noted, and its areas summed under its name', async () => {
+  const { japanDay } = await import('../market/daily')
+  const east = japanDay(new Map([['tokyo', day]]), ['hokkaido', 'tohoku', 'tokyo'])
+  const { rerender } = render(
+    <Readout
+      slot={slot}
+      record={undefined}
+      day={undefined}
+      interchange={null}
+      spotDay={spotDay}
+      japan={east}
+      area={null}
+      onBack={vi.fn()}
+      onSlot={vi.fn()}
+    />,
+  )
+  await userEvent.click(screen.getByRole('button', { name: '50 Hz' }))
+  expect(useApp.getState().half).toBe(50)
+  expect(screen.getByRole('heading', { name: '50 Hz' })).toBeInTheDocument()
+  expect(screen.getByText('10.45–22.02', { selector: 'p' })).toBeInTheDocument()
+  expect(screen.getByText(/System price 14.12\./)).toBeInTheDocument()
+  expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent(
+    '50 Hz · without Hokkaido and Tohoku, not recorded yet',
+  )
+  expect(screen.getByRole('button', { name: '50 Hz' })).toHaveAttribute('aria-pressed', 'true')
+  // The toggle is not for a picked area, which is in one half already.
+  rerender(
+    <Readout
+      slot={slot}
+      record={undefined}
+      day={undefined}
+      interchange={null}
+      spotDay={spotDay}
+      area="tokyo"
+      onBack={vi.fn()}
+      onSlot={vi.fn()}
+    />,
+  )
+  expect(screen.queryByRole('button', { name: '50 Hz' })).not.toBeInTheDocument()
 })
 
 test('Okinawa has no price to show', () => {
@@ -202,6 +246,26 @@ test('on a phone a picked area opens on its headline, the rest a tap on the row 
   expect(screen.getByRole('button', { expanded: true })).toBeInTheDocument()
   expect(screen.getByText('Tohoku')).toBeInTheDocument()
   expect(screen.getByRole('region', { name: 'What ran' })).toBeInTheDocument()
+  vi.unstubAllGlobals()
+})
+
+test('on a phone choosing a half from inside the open panel leaves it open', async () => {
+  vi.stubGlobal('matchMedia', () => ({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() }))
+  render(
+    <Readout
+      slot={slot}
+      record={undefined}
+      day={undefined}
+      interchange={null}
+      area={null}
+      onBack={vi.fn()}
+      onSlot={vi.fn()}
+    />,
+  )
+  await userEvent.click(screen.getByRole('button', { expanded: false }))
+  await userEvent.click(screen.getByRole('button', { name: '60 Hz' }))
+  expect(screen.getByRole('button', { expanded: true })).toHaveTextContent('60 Hz')
+  expect(screen.getByRole('button', { name: '60 Hz' })).toHaveAttribute('aria-pressed', 'true')
   vi.unstubAllGlobals()
 })
 

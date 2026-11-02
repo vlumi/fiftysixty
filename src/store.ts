@@ -28,7 +28,7 @@ interface State {
   /** Whether the map draws the arrows and the columns. */
   layers: LayerChoice
   view: View
-  /** With nothing picked, the half of the grid whose areas alone the price curve draws, or both. */
+  /** With nothing picked, the half of the grid the readout is scoped to, or all Japan. */
   half: Hz | null
   /** The fuels whose plants are hidden from the map; every fuel hidden is the plants off. */
   hiddenFuels: Series[]

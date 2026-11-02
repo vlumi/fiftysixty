@@ -137,6 +137,22 @@ test('with nothing picked, the auction behind the system price stands under the 
   await expect(chart).toHaveCount(0)
 })
 
+test('a half of the grid from its toggle: the east summed from its records, and Escape lets it go', async ({
+  page,
+}) => {
+  await open(page)
+  const readout = page.getByRole('complementary', { name: 'Readout' })
+  await page.getByRole('button', { name: '50 Hz' }).click()
+  await expect(readout.getByRole('heading', { level: 2 })).toHaveText(/^50 Hz/)
+  await expect(readout.getByRole('heading', { level: 3 })).toHaveText(
+    '50 Hz · without Hokkaido and Tohoku, not recorded yet',
+  )
+  await expect(readout.getByRole('slider', { name: 'Supply over the day' })).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(readout).toContainText('System price')
+  await expect(page.getByRole('button', { name: '50 Hz' })).toHaveAttribute('aria-pressed', 'false')
+})
+
 test('the history view: a press on the heatmap sets the day and the half hour', async ({ page }) => {
   await open(page)
   await page.getByRole('button', { name: 'History' }).click()

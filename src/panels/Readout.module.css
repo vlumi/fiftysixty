@@ -181,10 +181,17 @@ button.fold .price {
   background: var(--src-hydro);
 }
 
-/* The half hour or the day, as a two-button switch. */
+/* The view switch and, with nothing picked, the half's toggle beside it, wrapping on a narrow panel. */
+.switches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.4rem 0 0.25rem;
+}
+
+/* The half hour, the day or the history, and 50 Hz or 60 Hz, as button groups. */
 .views {
   display: inline-flex;
-  margin: 0.4rem 0 0.25rem;
   border: 1px solid var(--border);
   border-radius: 0.5rem;
   overflow: hidden;

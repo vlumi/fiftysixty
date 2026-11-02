@@ -32,7 +32,7 @@ test('the arrows step the half hour, and with Shift the day, within the priced d
   expect(state().date).toBe('2026-09-25')
 })
 
-test('up and down walk the areas from Hokkaido to Okinawa, and Escape lets the area, or a plant first, go', () => {
+test('up and down walk the areas from Hokkaido to Okinawa, and Escape lets the area, or a plant first, go, then the half', () => {
   dispatchShortcut(press('ArrowDown'), context)
   expect(state().area).toBe('hokkaido')
   dispatchShortcut(press('ArrowDown'), context)
@@ -47,8 +47,12 @@ test('up and down walk the areas from Hokkaido to Okinawa, and Escape lets the a
   expect(dispatchShortcut(press('Escape'), context)).toBe(true)
   expect(state().plant).toBeNull()
   state().selectArea('tokyo')
+  state().setHalf(50)
   dispatchShortcut(press('Escape'), context)
   expect(state().area).toBeNull()
+  expect(state().half).toBe(50)
+  dispatchShortcut(press('Escape'), context)
+  expect(state().half).toBeNull()
   expect(dispatchShortcut(press('Escape'), context)).toBe(false)
 })
 

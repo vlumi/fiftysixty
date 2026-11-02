@@ -6,7 +6,7 @@ import type { DayTotals, JapanDay } from '../market/daily'
 import type { HistoryDay } from '../market/history'
 import type { Interchange } from '../market/interchange'
 import type { RecordSlot } from '../market/record'
-import { AREA_BY_ID, PRICED_AREAS, type Area } from '../regions/areas'
+import { AREA_BY_ID, PRICED_AREAS, type Area, type Hz } from '../regions/areas'
 import { neighbors, OCCTO_LINE_IDS } from '../regions/interconnectors'
 import { areaList } from '../regions/names'
 import type { PlantProps } from '../regions/plants'
@@ -34,7 +34,7 @@ interface Props {
   dayPrice?: number | null
   /** The displayed day's auction, for the price curve and the day's price figures. */
   spotDay?: readonly SpotSlot[]
-  /** All Japan's half hours of the displayed day, where every area has one, for the national readout. */
+  /** All Japan's, or the chosen half's, half hours of the displayed day, where every area has one, for the readout with nothing picked. */
   japan?: JapanDay
   /** The displayed month's whole days with their totals, and its priced days with their figures, for the strip under the day. */
   monthDays?: readonly MonthDay[]
@@ -52,9 +52,10 @@ interface Props {
 }
 
 /**
- * The displayed slot in numbers: the system price and the spread across the areas, a picked area against its
- * neighbors and what ran in it, or a picked plant. On a phone it is an accordion: the headline row alone until tapped,
- * remembered for what it was opened for, so another pick opens folded again.
+ * The displayed slot in numbers: the system price and the spread across the areas, or with a half of the grid chosen
+ * from its toggle, that half's spread and what ran in it summed, a picked area against its neighbors and what ran in
+ * it, or a picked plant. On a phone it is an accordion: the headline row alone until tapped, remembered for what it
+ * was opened for, so another pick opens folded again.
  */
 export default function Readout({
   slot,
@@ -78,26 +79,42 @@ export default function Readout({
   const s = useStrings()
   const view = useApp((x) => x.view)
   const setView = useApp((x) => x.setView)
+  const half = useApp((x) => x.half)
+  const setHalf = useApp((x) => x.setHalf)
   const narrow = useNarrow()
   const [openFor, setOpenFor] = useState<string | null>(null)
   if (!slot) return null
   const picked = area && area !== 'okinawa' ? (area as PricedArea) : null
+  // A half is a scope, not a pick, so choosing one from inside the open panel leaves it open.
   const key = plant ? `plant/${plant.id}` : (picked ?? 'system')
   const open = !narrow || openFor === key
   const head = plant ? (
     <PlantHead plant={plant} />
   ) : picked ? (
     <AreaHead area={picked} slot={slot} />
+  ) : half ? (
+    <HalfHead half={half} slot={slot} />
   ) : (
     <SystemHead slot={slot} />
   )
   const views = (
-    <div className={styles.views} role="group" aria-label={s.day.view}>
-      {(['slot', 'day', 'history'] as const).map((v) => (
-        <button key={v} aria-pressed={view === v} onClick={() => setView(v)}>
-          {v === 'slot' ? s.day.halfHour : v === 'day' ? s.day.day : s.day.history}
-        </button>
-      ))}
+    <div className={styles.switches}>
+      <div className={styles.views} role="group" aria-label={s.day.view}>
+        {(['slot', 'day', 'history'] as const).map((v) => (
+          <button key={v} aria-pressed={view === v} onClick={() => setView(v)}>
+            {v === 'slot' ? s.day.halfHour : v === 'day' ? s.day.day : s.day.history}
+          </button>
+        ))}
+      </div>
+      {!picked && (
+        <div className={styles.views} role="group" aria-label={s.readout.half}>
+          {([50, 60] as const).map((hz) => (
+            <button key={hz} aria-pressed={half === hz} onClick={() => setHalf(half === hz ? null : hz)}>
+              {s.readout.hz(hz)}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   )
   const body = plant ? (
@@ -105,8 +122,8 @@ export default function Readout({
   ) : view === 'day' ? (
     <>
       {views}
-      <DayPrices spot={spotDay} area={picked} weighted={dayPrice} />
-      {!picked && <JapanHeading missing={japan.missing} />}
+      {!half && <DayPrices spot={spotDay} area={picked} weighted={dayPrice} />}
+      {!picked && <JapanHeading half={half} missing={japan.missing} />}
       <DaySupply totals={dayTotals} area={picked} />
       {onDate && (
         <MonthStrip
@@ -144,7 +161,7 @@ export default function Readout({
   ) : (
     <>
       {area !== 'okinawa' && views}
-      <SystemNote slot={slot} okinawa={area === 'okinawa'} />
+      <SystemNote slot={slot} half={half} okinawa={area === 'okinawa'} />
       {area !== 'okinawa' && spotDay && (
         <>
           <PriceChart day={spotDay} area={null} slot={slot.slot} onSlot={onSlot} hours={false} />
@@ -153,7 +170,7 @@ export default function Readout({
       )}
       {area !== 'okinawa' && japan.slots.length > 0 && (
         <>
-          <JapanHeading missing={japan.missing} />
+          <JapanHeading half={half} missing={japan.missing} />
           <SupplyChart day={japan.slots} slot={slot.slot} onSlot={onSlot} />
           {!japan.slots.some((r) => r.slot === slot.slot) && <p className="muted">{s.readout.notAllSlot}</p>}
         </>
@@ -218,16 +235,38 @@ function SystemHead({ slot }: { slot: SpotSlot }) {
   )
 }
 
-function SystemNote({ slot, okinawa }: { slot: SpotSlot; okinawa: boolean }) {
+/** The lowest and the highest area price of the half hour, across all the areas or a half's. */
+function spreadOf(slot: SpotSlot, half: Hz | null): [number, number] {
+  const prices = PRICED_AREAS.filter((a) => !half || a.hz === half).map((a) => slot.areaPrice[a.id as PricedArea])
+  return [Math.min(...prices), Math.max(...prices)]
+}
+
+function SystemNote({ slot, half, okinawa }: { slot: SpotSlot; half: Hz | null; okinawa: boolean }) {
   const s = useStrings()
-  const prices = PRICED_AREAS.map((a) => slot.areaPrice[a.id as PricedArea])
-  const low = Math.min(...prices)
-  const high = Math.max(...prices)
+  const [low, high] = spreadOf(slot, half)
   return (
     <p className="muted">
-      {low === high ? s.readout.everyAreaSystem : s.readout.spread(yen(low), yen(high))}{' '}
+      {half
+        ? s.readout.halfSystem(yen(slot.systemPrice))
+        : low === high
+          ? s.readout.everyAreaSystem
+          : s.readout.spread(yen(low), yen(high))}{' '}
       {okinawa ? s.readout.okinawa : s.readout.pickArea}
     </p>
+  )
+}
+
+/** A half of the grid as the headline: its areas' price when they agree, else the spread across them. */
+function HalfHead({ half, slot }: { half: Hz; slot: SpotSlot }) {
+  const s = useStrings()
+  const [low, high] = spreadOf(slot, half)
+  return (
+    <>
+      <h2>{s.readout.hz(half)}</h2>
+      <p className={styles.price}>
+        {low === high ? yen(low) : `${yen(low)}–${yen(high)}`} <span className="muted">{s.readout.yenPerKwh}</span>
+      </p>
+    </>
   )
 }
 
@@ -340,13 +379,13 @@ function Lines({ area, interchange }: { area: PricedArea; interchange: Interchan
   )
 }
 
-/** All Japan, and the areas left out of its sums while their records are not in, by name. */
-function JapanHeading({ missing }: { missing: readonly Area[] }) {
+/** All Japan, or the chosen half, and the areas left out of its sums while their records are not in, by name. */
+function JapanHeading({ half, missing }: { half: Hz | null; missing: readonly Area[] }) {
   const s = useStrings()
   const lang = useApp((x) => x.lang)
   return (
     <h3>
-      {s.day.japan}
+      {half ? s.readout.hz(half) : s.day.japan}
       {missing.length > 0 && <span className={styles.without}> · {s.day.without(areaList(missing, lang))}</span>}
     </h3>
   )
