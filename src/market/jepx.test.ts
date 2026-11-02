@@ -8,6 +8,8 @@ test('four real days parse into 48 slots each, found by column name', () => {
   expect(days.get('2026-09-26')![46]).toEqual({
     slot: 47,
     systemPrice: 14.12,
+    sellKWh: 33097400,
+    buyKWh: 22091650,
     volumeKWh: 18827400,
     areaPrice: {
       hokkaido: 10.45,
