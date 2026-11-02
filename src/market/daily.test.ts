@@ -8,6 +8,7 @@ import {
   japanTotals,
   priceStats,
   renewableShare,
+  spreadStats,
   weightedPrice,
 } from './daily'
 import { parseSpot } from './jepx'
@@ -108,4 +109,15 @@ test("a day's price in figures: the mean, and the low and the high with their ha
   expect(system.high.price).toBe(Math.max(...spot.map((s) => s.systemPrice)))
   expect(priceStats(undefined)).toBeNull()
   expect(priceStats([])).toBeNull()
+})
+
+test("a half's spread: the lowest and the highest across its areas with where and when, since a half has no price of its own", () => {
+  const spot = parseSpot(spotCsv).get('2026-09-22')!
+  const east = spreadStats(spot, ['hokkaido', 'tohoku', 'tokyo'])!
+  expect(east.high).toEqual({ price: 50.01, slot: 34, area: 'tokyo' })
+  const lows = spot.flatMap((s) => [s.areaPrice.hokkaido, s.areaPrice.tohoku, s.areaPrice.tokyo])
+  expect(east.low.price).toBe(Math.min(...lows))
+  expect(spot.find((s) => s.slot === east.low.slot)!.areaPrice[east.low.area]).toBe(east.low.price)
+  expect(spreadStats(spot, [])).toBeNull()
+  expect(spreadStats(undefined, ['tokyo'])).toBeNull()
 })

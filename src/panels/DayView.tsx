@@ -1,8 +1,10 @@
 import { useStrings } from '../i18n/useStrings'
-import { co2Intensity, floorSlots, priceStats, renewableShare, type DayTotals } from '../market/daily'
+import { co2Intensity, floorSlots, priceStats, renewableShare, spreadStats, type DayTotals } from '../market/daily'
 import { SLOTS, type PricedArea, type SpotSlot } from '../market/jepx'
 import { SERIES } from '../market/stack'
+import { AREA_BY_ID, PRICED_AREAS, type Hz } from '../regions/areas'
 import { mw, yen } from '../shared/format'
+import { useApp } from '../store'
 import { slotRange } from '../time/slots'
 import styles from './DayView.module.css'
 
@@ -119,19 +121,24 @@ export function DaySupply({ totals, area }: { totals: DayTotals | null; area: Pi
 /**
  * The displayed day in price: the mean, the price weighted by demand where the record allows it, the low and the high
  * with when, and the half hours at the floor; they stand for any priced day, since the auction runs a day ahead of
- * the record.
+ * the record. For a half of the grid, which has no price of its own, the figures JEPX's prices give: the lowest and
+ * the highest across its areas with where and when, the area half hours at the floor, and the weighted price.
  */
 export function DayPrices({
   spot,
   area,
+  half = null,
   weighted,
 }: {
   spot: readonly SpotSlot[] | undefined
   area: Picked
+  /** With nothing picked, the half of the grid the day is scoped to. */
+  half?: Hz | null
   /** The price weighted by demand, ¥/kWh, or null without the record. */
   weighted: number | null
 }) {
   const s = useStrings()
+  if (half && !area) return <HalfPrices spot={spot} half={half} weighted={weighted} />
   const stats = priceStats(spot, area ?? undefined)
   if (!stats) return null
   const floors = floorSlots(spot, area ?? undefined)
@@ -167,6 +174,59 @@ export function DayPrices({
         {floors > 0 && (
           <>
             <dt>{s.day.floor}</dt>
+            <dd>{floors}</dd>
+          </>
+        )}
+      </dl>
+    </section>
+  )
+}
+
+function HalfPrices({
+  spot,
+  half,
+  weighted,
+}: {
+  spot: readonly SpotSlot[] | undefined
+  half: Hz
+  weighted: number | null
+}) {
+  const s = useStrings()
+  const lang = useApp((x) => x.lang)
+  const areas = PRICED_AREAS.filter((a) => a.hz === half).map((a) => a.id as PricedArea)
+  const spread = spreadStats(spot, areas)
+  if (!spread) return null
+  const floors = areas.reduce((sum, a) => sum + floorSlots(spot, a), 0)
+  const name = (a: PricedArea) => (lang === 'ja' ? AREA_BY_ID[a].ja : AREA_BY_ID[a].name)
+  const where = ({ slot, area }: { slot: number; area: PricedArea }) => `${startOf(slot)} ${name(area)}`
+  return (
+    <section aria-label={s.day.prices}>
+      <dl className={styles.figures}>
+        {weighted !== null && (
+          <>
+            <dt>{s.day.price}</dt>
+            <dd>
+              {yen(weighted)} <span className="muted">{s.readout.yenPerKwh}</span>
+            </dd>
+          </>
+        )}
+        <dt>{s.day.lowPrice}</dt>
+        <dd>
+          {yen(spread.low.price)}{' '}
+          <span className="muted">
+            {s.readout.yenPerKwh} · {where(spread.low)}
+          </span>
+        </dd>
+        <dt>{s.day.highPrice}</dt>
+        <dd>
+          {yen(spread.high.price)}{' '}
+          <span className="muted">
+            {s.readout.yenPerKwh} · {where(spread.high)}
+          </span>
+        </dd>
+        {floors > 0 && (
+          <>
+            <dt>{s.day.floorArea}</dt>
             <dd>{floors}</dd>
           </>
         )}

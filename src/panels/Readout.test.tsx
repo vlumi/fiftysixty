@@ -112,7 +112,13 @@ test('a half of the grid from its toggle: its spread as the headline, the system
   expect(useApp.getState().half).toBe(50)
   expect(screen.getByRole('heading', { name: '50 Hz' })).toBeInTheDocument()
   expect(screen.getByText('10.45–22.02', { selector: 'p' })).toBeInTheDocument()
-  expect(screen.getByText(/System price 14.12\./)).toBeInTheDocument()
+  // The system price, then each of the half's areas against it, before the supply key's figures.
+  expect(
+    screen
+      .getAllByRole('definition')
+      .slice(0, 4)
+      .map((d) => d.textContent),
+  ).toEqual(['14.12', '10.45 −3.67', '10.45 −3.67', '22.02 +7.90'])
   expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent(
     '50 Hz · without Hokkaido and Tohoku, not recorded yet',
   )
