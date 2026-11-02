@@ -42,6 +42,11 @@ test('without a record the column is an empty dashed box that says so, and still
   expect(onPick).toHaveBeenCalled()
 })
 
+test('an area of the other half, while a half is chosen, is faded', () => {
+  render(<MixGlyph name="Kyushu" record={noon} dim onPick={vi.fn()} />)
+  expect(screen.getByRole('button', { name: 'Kyushu mix' }).className).toMatch(/dim/)
+})
+
 test('a source reported negative does not take a band below zero height', () => {
   const odd = { ...noon, bySource: { ...noon.bySource, other: -50 } }
   render(<MixGlyph name="Kyushu" record={odd} onPick={vi.fn()} />)

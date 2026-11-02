@@ -148,8 +148,11 @@ test('a half of the grid from its toggle: the east summed from its records, and 
     '50 Hz · without Hokkaido and Tohoku, not recorded yet',
   )
   await expect(readout.getByRole('slider', { name: 'Supply over the day' })).toBeVisible()
+  await expect(page.getByRole('button', { name: /^Kyushu mix/ })).toHaveCSS('opacity', '0.35')
+  await expect(page.getByRole('button', { name: /^Tokyo mix/ })).toHaveCSS('opacity', '1')
   await page.keyboard.press('Escape')
   await expect(readout).toContainText('System price')
+  await expect(page.getByRole('button', { name: /^Kyushu mix/ })).toHaveCSS('opacity', '1')
   await expect(page.getByRole('button', { name: '50 Hz' })).toHaveAttribute('aria-pressed', 'false')
   await expect(page.getByRole('button', { name: 'All Japan' })).toHaveAttribute('aria-pressed', 'true')
 })

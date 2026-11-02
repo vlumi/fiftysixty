@@ -279,6 +279,7 @@ export default function App() {
             regions={regions}
             prices={displayed?.areaPrice}
             selected={area}
+            half={area ? null : half}
             interchange={layers.flows ? interchange : null}
             plants={plants}
             selectedPlant={plantId}

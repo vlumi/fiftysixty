@@ -64,6 +64,7 @@ test('the shaft is one solid shape, a hair wide off the column and the flow widt
       [130, 35],
       [140, 35],
     ],
+    areas: ['tokyo', 'chubu'],
     mw: 3000,
     load: 0.5,
     head: true,
@@ -120,6 +121,7 @@ test('the shaft starts and the head ends clear of the columns by pixels, so a ph
   const line = (path: FlowDatum['path'], mw = 1000): FlowDatum => ({
     id: 'x',
     path,
+    areas: ['tokyo', 'chubu'],
     mw,
     load: 0.5,
     head: true,
@@ -150,6 +152,32 @@ test('the shaft starts and the head ends clear of the columns by pixels, so a ph
   ])
   const [nearFrom, nearTo] = shaftEnds(short, 4)
   expect((nearTo[0] - nearFrom[0]) / 0.5).toBeCloseTo(0.4)
+})
+
+test("with a half chosen, an arrow between two areas of the other half is dimmed; one that touches the half, such as the frequency converters', is not", () => {
+  const [shafts, heads] = buildFlowLayers(noon, DARK, 5, 'water_name', 50) as [
+    SolidPolygonLayer<FlowDatum>,
+    IconLayer<FlowDatum>,
+  ]
+  const color = shafts.props.getFillColor
+  const headColor = heads.props.getColor
+  if (typeof color !== 'function' || typeof headColor !== 'function') throw new Error('accessor')
+  const context = { index: 0, data: [], target: [] }
+  const alpha = (id: string) =>
+    color(
+      flowData(noon).find((d) => d.id === id)!,
+      context,
+    )[3]
+  expect([alpha('kansai-chugoku'), alpha('kitahon'), alpha('fc'), alpha('chubu-hokuriku-kansai')]).toEqual([
+    70, 230, 230, 70,
+  ])
+  expect(
+    headColor(
+      flowData(noon).find((d) => d.id === 'kansai-chugoku')!,
+      context,
+    )[3],
+  ).toBe(70)
+  expect(shafts.props.updateTriggers.getFillColor).toEqual([DARK, 'planned', 50])
 })
 
 test('no flows, no layers', () => {
