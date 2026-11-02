@@ -1,5 +1,5 @@
 import type { Rgb } from './palette'
-import { cssRgb, lerpRgb, PRICE_DOMAIN, priceColor } from './scale'
+import { cssRgb, lerpRgb, PRICE_DOMAIN, priceColor, priceAxis } from './scale'
 
 const ramp: Rgb[] = [
   [0, 0, 0],
@@ -26,4 +26,12 @@ test('a color as CSS', () => {
 
 test('a color between two', () => {
   expect(lerpRgb([0, 0, 0], [100, 200, 50], 0.5)).toEqual([50, 100, 25])
+})
+
+test('the day chart’s axis: zero-based, about five gridlines, never under 20 yen', () => {
+  expect(priceAxis(12)).toEqual({ top: 20, step: 5 })
+  expect(priceAxis(28.41)).toEqual({ top: 30, step: 10 })
+  expect(priceAxis(40.01)).toEqual({ top: 50, step: 10 })
+  expect(priceAxis(63)).toEqual({ top: 80, step: 20 })
+  expect(priceAxis(201)).toEqual({ top: 250, step: 50 })
 })

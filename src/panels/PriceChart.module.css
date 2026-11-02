@@ -1,0 +1,58 @@
+.area,
+.areas,
+.system {
+  fill: none;
+  stroke-linejoin: round;
+}
+
+.area {
+  stroke-width: 2.25;
+}
+
+/* Every area at once: thinner and a little clear, so where the halves overlap both still show. */
+.areas {
+  stroke-width: 1.5;
+  stroke-opacity: 0.8;
+}
+
+.hz50 {
+  stroke: var(--price50);
+  border-color: var(--price50);
+}
+
+.hz60 {
+  stroke: var(--price60);
+  border-color: var(--price60);
+}
+
+.system {
+  stroke: var(--text);
+  stroke-width: 1;
+  stroke-dasharray: 3 2;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.9rem;
+  margin-top: 0.35rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.areaKey,
+.systemKey {
+  display: inline-block;
+  width: 0.9rem;
+  border-top: 2px solid;
+}
+
+.systemKey {
+  border-top: 1px dashed var(--text);
+}
