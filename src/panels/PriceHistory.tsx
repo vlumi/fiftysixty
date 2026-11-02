@@ -13,6 +13,7 @@ import { formatDay } from '../time/days'
 import { slotRange } from '../time/slots'
 import { cellAt, heatmapPixels, labeled, monthStarts } from './heatmap'
 import styles from './PriceHistory.module.css'
+import { scrub } from '../shared/scrub'
 
 /** Room for a month's label along the foot, in CSS pixels. */
 const LABEL_PX = 30
@@ -98,11 +99,7 @@ export default function PriceHistory({ days, area, date, slot, onPick }: Props) 
           aria-valuetext={
             at >= 0 ? `${formatDay(date!, lang)} ${slotRange(slot)}: ${yen(price)} ${s.readout.yenPerKwh}` : undefined
           }
-          onPointerDown={(e) => {
-            e.currentTarget.setPointerCapture(e.pointerId)
-            pick(e)
-          }}
-          onPointerMove={(e) => e.buttons && pick(e)}
+          {...scrub<HTMLDivElement>(pick)}
         >
           <canvas ref={canvas} className={styles.canvas} />
           {at >= 0 && (

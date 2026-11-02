@@ -36,7 +36,7 @@
 .plot {
   position: relative;
   overflow: hidden;
-  touch-action: none;
+  touch-action: pan-y;
   cursor: crosshair;
   border-radius: 0.25rem;
 }

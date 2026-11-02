@@ -3,6 +3,7 @@ import { SLOTS } from '../market/jepx'
 import { slotRange } from '../time/slots'
 import styles from './DayChart.module.css'
 import { LEFT, SPAN, slotAtX, slotX, TOP, WIDTH } from './slotAxis'
+import { scrub } from '../shared/scrub'
 
 /** The row of hour labels along the foot. */
 const HOURS = 16
@@ -36,11 +37,7 @@ export default function DayChart({ label, plot, slot, onSlot, hours = true, chil
       aria-valuenow={slot}
       aria-valuetext={slotRange(slot)}
       tabIndex={0}
-      onPointerDown={(e) => {
-        e.currentTarget.setPointerCapture(e.pointerId)
-        onSlot(slotAtX(e.clientX, e.currentTarget.getBoundingClientRect()))
-      }}
-      onPointerMove={(e) => e.buttons && onSlot(slotAtX(e.clientX, e.currentTarget.getBoundingClientRect()))}
+      {...scrub<SVGSVGElement>((e) => onSlot(slotAtX(e.clientX, e.currentTarget.getBoundingClientRect())))}
     >
       {children}
       <line className={styles.marker} x1={slotX(slot)} x2={slotX(slot)} y1={TOP} y2={TOP + plot} />
