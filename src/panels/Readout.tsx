@@ -13,7 +13,7 @@ import type { PlantProps } from '../regions/plants'
 import { mw, signed, yen } from '../shared/format'
 import { useNarrow } from '../shared/useNarrow'
 import styles from './Readout.module.css'
-import DayView from './DayView'
+import { DayPrices, DaySupply } from './DayView'
 import MonthStrip, { type MonthDay, type MonthPrice } from './MonthStrip'
 import PriceChart from './PriceChart'
 import PriceHistory from './PriceHistory'
@@ -104,8 +104,9 @@ export default function Readout({
   ) : view === 'day' ? (
     <>
       {views}
+      <DayPrices spot={spotDay} area={picked} weighted={dayPrice} />
       {!picked && <JapanHeading missing={japan.missing} />}
-      <DayView totals={dayTotals} price={dayPrice} spot={spotDay} area={picked} />
+      <DaySupply totals={dayTotals} area={picked} />
       {onDate && (
         <MonthStrip
           days={monthDays}
