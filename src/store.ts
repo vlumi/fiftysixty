@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Area } from './regions/areas'
+import type { Area, Hz } from './regions/areas'
 import { clampSlot } from './time/slots'
 import { SLOTS } from './market/jepx'
 import type { Series } from './market/stack'
@@ -28,6 +28,8 @@ interface State {
   /** Whether the map draws the arrows and the columns. */
   layers: LayerChoice
   view: View
+  /** With nothing picked, the half of the grid whose areas alone the price curve draws, or both. */
+  half: Hz | null
   /** The fuels whose plants are hidden from the map; every fuel hidden is the plants off. */
   hiddenFuels: Series[]
   themeChoice: ThemeChoice
@@ -41,6 +43,7 @@ interface Actions {
   pickPlant: (plant: string | null) => void
   toggleLayer: (layer: MapLayer) => void
   setView: (view: View) => void
+  setHalf: (half: Hz | null) => void
   toggleFuel: (fuel: Series) => void
   setHiddenFuels: (fuels: Series[]) => void
   setThemeChoice: (choice: ThemeChoice) => void
@@ -58,6 +61,7 @@ const initial = (): State => ({
   playing: false,
   layers: loadLayerChoice(),
   view: 'slot',
+  half: null,
   hiddenFuels: loadHiddenFuels(),
   themeChoice: loadThemeChoice(),
   lang: loadLang(),
@@ -74,6 +78,7 @@ export const useApp = create<State & Actions>((set) => ({
   setThemeChoice: (themeChoice) => set({ themeChoice }),
   setLang: (lang) => set({ lang }),
   setView: (view) => set({ view }),
+  setHalf: (half) => set({ half }),
   toggleLayer: (layer) => set((s) => ({ layers: { ...s.layers, [layer]: !s.layers[layer] } })),
   toggleFuel: (fuel) =>
     set((s) => ({

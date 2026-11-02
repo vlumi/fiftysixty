@@ -135,6 +135,7 @@ export interface Strings {
     history: string
     yen: (price: number) => string
     auction: string
+    onlyHalf: string
     offered: string
     asked: string
     cleared: string
@@ -309,6 +310,7 @@ const en: Strings = {
     price: 'Price over the day',
     history: 'Price history',
     auction: 'Auction over the day',
+    onlyHalf: 'This half alone, or both again',
     offered: 'Offered',
     asked: 'Asked',
     cleared: 'Cleared',
@@ -492,6 +494,7 @@ const ja: Strings = {
     price: '一日の価格',
     history: '価格の推移',
     auction: '一日の入札',
+    onlyHalf: 'この周波数帯のみ表示、もう一度で両方',
     offered: '売り入札',
     asked: '買い入札',
     cleared: '約定',

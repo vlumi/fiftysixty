@@ -1,12 +1,16 @@
 import { fireEvent, render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import csv from '../test/fixtures/jepx-spot.csv?raw'
 import { parseSpot } from '../market/jepx'
+import { resetApp } from '../store'
 import PriceChart from './PriceChart'
 
 /** A split day: Hokkaido, Tokyo and the west each cleared apart from the system price overnight. */
 const day = parseSpot(csv).get('2026-09-22')!
 
 const titles = (chart: HTMLElement) => [...chart.querySelectorAll('path > title')].map((t) => t.textContent)
+
+afterEach(resetApp)
 
 test('with nothing picked, every area over the system price, the halves told apart in the key', () => {
   render(<PriceChart day={day} area={null} slot={1} onSlot={vi.fn()} />)
@@ -27,6 +31,23 @@ test('with nothing picked, every area over the system price, the halves told apa
   ])
   expect(chart.parentElement!.querySelector('figcaption')).toHaveTextContent('50 Hz60 HzSystem price')
   expect(screen.getByText('18')).toBeInTheDocument()
+})
+
+test('a half’s key pressed draws that half alone over the system price, the axis fitted to it; pressed again, both', async () => {
+  render(<PriceChart day={day} area={null} slot={1} onSlot={vi.fn()} />)
+  const chart = screen.getByRole('slider', { name: 'Price over the day' })
+  const west = screen.getByRole('button', { name: '60 Hz' })
+  await userEvent.click(west)
+  expect(west).toHaveAttribute('aria-pressed', 'true')
+  expect(screen.getByRole('button', { name: '50 Hz' }).className).toMatch(/off/)
+  expect(titles(chart)).toEqual(['Chubu', 'Hokuriku', 'Kansai', 'Chugoku', 'Shikoku', 'Kyushu', 'System price'])
+  // Without Tokyo's 50.01 the axis comes down.
+  expect([...chart.querySelectorAll('text')].map((t) => t.textContent)).toContain('¥30')
+  await userEvent.click(screen.getByRole('button', { name: '50 Hz' }))
+  expect(titles(chart)).toEqual(['Hokkaido', 'Tohoku', 'Tokyo', 'System price'])
+  await userEvent.click(screen.getByRole('button', { name: '50 Hz' }))
+  expect(titles(chart)).toHaveLength(10)
+  expect(screen.getByRole('button', { name: '60 Hz' })).toHaveAttribute('aria-pressed', 'false')
 })
 
 test('a picked area’s price over the system price, the axis fitted to the two', () => {
