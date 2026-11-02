@@ -9,6 +9,7 @@ import { priceAxis } from '../shared/scale'
 import { useApp } from '../store'
 import { formatDay } from '../time/days'
 import styles from './MonthStrip.module.css'
+import { scrub } from '../shared/scrub'
 
 const GWH = 1000
 
@@ -104,11 +105,7 @@ export default function MonthStrip({ days, prices = [], hz = null, weighted = fa
         aria-valuemax={length}
         aria-valuenow={at + 1}
         aria-valuetext={at >= 0 ? describe(all[at]) : undefined}
-        onPointerDown={(e) => {
-          e.currentTarget.setPointerCapture(e.pointerId)
-          go(dayAt(e))
-        }}
-        onPointerMove={(e) => e.buttons && go(dayAt(e))}
+        {...scrub<HTMLDivElement>((e) => go(dayAt(e)))}
       >
         {all.map((d) => {
           const day = supply.get(d)
