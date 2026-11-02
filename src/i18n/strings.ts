@@ -65,6 +65,7 @@ export interface Strings {
     view: string
     halfHour: string
     day: string
+    history: string
     supply: string
     gwh: string
     share: string
@@ -131,6 +132,7 @@ export interface Strings {
     demand: string
     gw: string
     price: string
+    history: string
     yen: (price: number) => string
   }
   key: {
@@ -225,6 +227,7 @@ const en: Strings = {
     view: 'View',
     halfHour: 'Half hour',
     day: 'Day',
+    history: 'History',
     supply: 'How the day was supplied',
     gwh: 'GWh',
     share: 'share',
@@ -300,6 +303,7 @@ const en: Strings = {
     demand: 'Demand',
     gw: 'GW',
     price: 'Price over the day',
+    history: 'Price history',
     yen: (price) => `¥${price}`,
   },
   key: {
@@ -402,6 +406,7 @@ const ja: Strings = {
     view: '表示',
     halfHour: 'コマ',
     day: '1日',
+    history: '推移',
     supply: '1日の供給',
     gwh: 'GWh',
     share: '比率',
@@ -477,6 +482,7 @@ const ja: Strings = {
     demand: '需要',
     gw: 'GW',
     price: '一日の価格',
+    history: '価格の推移',
     yen: (price) => `${price}円`,
   },
   key: {

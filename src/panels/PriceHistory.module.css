@@ -1,0 +1,117 @@
+.figure {
+  margin: 0.75rem 0 0;
+}
+
+/* The hours down the left, the plot, and the months along the foot under the plot alone. */
+.frame {
+  display: grid;
+  grid-template-columns: 1.4rem 1fr;
+  grid-template-rows: 6rem 1rem;
+  column-gap: 0.25rem;
+}
+
+.hours {
+  position: relative;
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.hours span {
+  position: absolute;
+  right: 0;
+  line-height: 1;
+  transform: translateY(-50%);
+}
+
+.hours span:first-child {
+  transform: none;
+}
+
+.hours span:last-child {
+  transform: translateY(-100%);
+}
+
+.plot {
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+  cursor: crosshair;
+  border-radius: 0.25rem;
+}
+
+.plot:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* A device pixel a column and a row a half hour, stretched to the plot without blurring the rows together. */
+.canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+
+/* The crosshair on the displayed day and half hour. */
+.column,
+.row {
+  position: absolute;
+  background: var(--accent);
+  pointer-events: none;
+}
+
+.column {
+  top: 0;
+  bottom: 0;
+  width: 1.5px;
+  transform: translateX(-50%);
+}
+
+.row {
+  right: 0;
+  left: 0;
+  height: 1.5px;
+  transform: translateY(-50%);
+}
+
+.months {
+  grid-column: 2;
+  position: relative;
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* A tick where a month begins, its name beside it where there is room. */
+.months span {
+  position: absolute;
+  top: 0;
+  height: 0.9rem;
+  padding-left: 0.2rem;
+  border-left: 1px solid var(--border-strong);
+  line-height: 0.9rem;
+  white-space: nowrap;
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.35rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.ramp {
+  flex: 1;
+  height: 0.5rem;
+  border-radius: 2px;
+}
+
+.ends {
+  display: flex;
+  gap: 0.5rem;
+  font-variant-numeric: tabular-nums;
+}

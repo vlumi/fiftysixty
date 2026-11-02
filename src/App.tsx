@@ -3,6 +3,7 @@ import { ADAPTERS } from './market/adapters'
 import { flowsAt, loadFlows, type FlowDays } from './market/flows'
 import { interchangeAt, RECORDED_AREAS } from './market/interchange'
 import { dayTotals, japanDay, japanTotals, priceStats, weightedPrice } from './market/daily'
+import { priceHistory } from './market/history'
 import { fiscalYear, loadSpotYears, SLOTS, slotOf, type PricedArea, type SpotDays } from './market/jepx'
 import { stories } from './market/stories'
 import { loadRecord, monthOf, recordSlot, type RecordDays, type RecordSlot } from './market/record'
@@ -191,6 +192,11 @@ export default function App() {
         return stats ? [{ date: d, stats }] : []
       })
   }, [spot, month, area])
+  // Every priced day held, the picked area's price or the system's, for the readout's history view.
+  const history = useMemo(
+    () => priceHistory(spot, area && area !== 'okinawa' ? (area as PricedArea) : undefined),
+    [spot, area],
+  )
   const japan = useMemo(() => japanDay(areaDays, RECORDED_AREAS), [areaDays])
   const dayFigures = useMemo(() => {
     const picked = area && area !== 'okinawa' ? (area as PricedArea) : null
@@ -265,6 +271,7 @@ export default function App() {
           spotDay={spotDay}
           monthDays={monthDays}
           monthPrices={monthPrices}
+          history={history}
           japan={japan}
           date={date}
           onDate={setDate}
