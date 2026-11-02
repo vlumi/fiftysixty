@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import csv from '../test/fixtures/jepx-spot.csv?raw'
 import tepcoCsv from '../test/fixtures/tepco-jukyu.csv?raw'
@@ -241,5 +241,36 @@ test("the day view: the switch shows the area's day in energy, and all Japan wit
   )
   expect(screen.getByRole('heading', { name: 'All Japan' })).toBeInTheDocument()
   expect(screen.getByText('No area has recorded the day yet.')).toBeInTheDocument()
+  await userEvent.click(screen.getByRole('button', { name: 'Half hour' }))
+})
+
+test('the history view: the heatmap over every priced day held, a press on it setting the day and the half hour', async () => {
+  const { priceHistory } = await import('../market/history')
+  const onDate = vi.fn()
+  const onSlot = vi.fn()
+  render(
+    <Readout
+      slot={slot}
+      record={undefined}
+      day={undefined}
+      interchange={null}
+      history={priceHistory(spot)}
+      date="2026-09-26"
+      onDate={onDate}
+      area={null}
+      onBack={vi.fn()}
+      onSlot={onSlot}
+    />,
+  )
+  await userEvent.click(screen.getByRole('button', { name: 'History' }))
+  const heat = screen.getByRole('slider', { name: 'Price history' })
+  expect(heat).toHaveAttribute('aria-valuenow', '4')
+  expect(heat).toHaveAttribute('aria-valuetext', '2026-09-26 (Sat) 23:00–23:30: 14.12 ¥/kWh')
+  expect(screen.queryByRole('slider', { name: 'Price over the day' })).not.toBeInTheDocument()
+  heat.getBoundingClientRect = () => ({ left: 0, top: 0, width: 200, height: 96 }) as DOMRect
+  heat.setPointerCapture = vi.fn()
+  fireEvent.pointerDown(heat, { clientX: 10, clientY: 1, pointerId: 1 })
+  expect(onDate).toHaveBeenCalledWith('2026-09-22')
+  expect(onSlot).toHaveBeenCalledWith(1)
   await userEvent.click(screen.getByRole('button', { name: 'Half hour' }))
 })
