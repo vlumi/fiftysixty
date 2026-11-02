@@ -76,7 +76,7 @@ Toolchain, CI, a map of Japan under the name, the data fetcher for JEPX and TEPC
 
 ### M8 — the halves
 
-- A half of the grid as a scope between all Japan and an area, chosen by a toggle in the readout rather than a pick on the map: the half's spread as its headline, and its supply summed from its areas' records in the half hour and the day, with the month strip to match (done 2026-11-02).
+- A half of the grid as a scope between all Japan and an area, chosen by a control in the readout rather than a pick on the map, all Japan or a half: the half's spread as its headline, and its supply summed from its areas' records in the half hour and the day, with the month strip to match (done 2026-11-02).
 - The half's prices kept to what JEPX publishes, since a half has no price of its own: its areas each against the system price in the half hour, the lowest and the highest across them with where and when in the day with the price weighted by demand, and the spread as the month's bars; no heatmap for a half (done 2026-11-02).
 - The half on the map: the other half dimmed and the half outlined.
 - The half's lines: the three frequency converters as its imports and exports, since nothing else crosses the middle.
