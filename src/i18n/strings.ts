@@ -77,6 +77,11 @@ export interface Strings {
     exported: string
     storedIn: string
     storedOut: string
+    prices: string
+    meanPrice: string
+    meanOf: (price: string) => string
+    lowPrice: string
+    highPrice: string
     price: string
     floor: string
     soFar: (time: string) => string
@@ -232,6 +237,11 @@ const en: Strings = {
     exported: 'Exported',
     storedIn: 'Into storage',
     storedOut: 'From storage',
+    prices: 'Prices',
+    meanPrice: 'Mean price',
+    meanOf: (price) => `mean ${price} ¥/kWh`,
+    lowPrice: 'Lowest price',
+    highPrice: 'Highest price',
     price: 'Price, weighted by demand',
     floor: 'Half hours at the floor',
     soFar: (time) => `Through ${time} so far.`,
@@ -404,8 +414,13 @@ const ja: Strings = {
     exported: '送電',
     storedIn: '揚水・蓄電池（充電）',
     storedOut: '揚水・蓄電池（放電）',
+    prices: '価格',
+    meanPrice: '平均価格',
+    meanOf: (price) => `平均 ${price} 円/kWh`,
+    lowPrice: '最低価格',
+    highPrice: '最高価格',
     price: '需要加重平均価格',
-    floor: '最低価格のコマ',
+    floor: '下限価格のコマ',
     soFar: (time) => `${time}まで。`,
     japan: '全国',
     notAll: 'まだどのエリアもこの日の実績がありません。',

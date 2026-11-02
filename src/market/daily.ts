@@ -149,6 +149,28 @@ export function weightedPrice(
   return mwh > 0 ? yen / mwh : null
 }
 
+/** A day's price in figures: the mean over its half hours, and the lowest and the highest half hour with when. */
+export interface PriceStats {
+  mean: number
+  low: { price: number; slot: number }
+  high: { price: number; slot: number }
+}
+
+/** The day's price figures for an area, or for the system price with none given; null without half hours. */
+export function priceStats(spot: readonly SpotSlot[] | undefined, area?: PricedArea): PriceStats | null {
+  if (!spot?.length) return null
+  let sum = 0
+  let low = { price: Infinity, slot: 0 }
+  let high = { price: -Infinity, slot: 0 }
+  for (const s of spot) {
+    const price = area ? s.areaPrice[area] : s.systemPrice
+    sum += price
+    if (price < low.price) low = { price, slot: s.slot }
+    if (price > high.price) high = { price, slot: s.slot }
+  }
+  return { mean: sum / spot.length, low, high }
+}
+
 /** How many half hours of the day an area, or the system price when none is given, cleared at the floor. */
 export function floorSlots(spot: readonly SpotSlot[] | undefined, area?: PricedArea): number {
   return (spot ?? []).filter((s) => (area ? s.areaPrice[area] : s.systemPrice) <= FLOOR_YEN).length
