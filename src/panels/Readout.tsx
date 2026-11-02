@@ -53,8 +53,8 @@ interface Props {
 
 /**
  * The displayed slot in numbers: the system price and the spread across the areas, or with a half of the grid chosen
- * from its toggle, that half's spread and what ran in it summed, a picked area against its neighbors and what ran in
- * it, or a picked plant. On a phone it is an accordion: the headline row alone until tapped, remembered for what it
+ * from its control, that half's spread, its areas against the system price, the frequency converters as its lines
+ * and what ran in it summed, a picked area against its neighbors and what ran in it, or a picked plant. On a phone it is an accordion: the headline row alone until tapped, remembered for what it
  * was opened for, so another pick opens folded again.
  */
 export default function Readout({
@@ -167,7 +167,10 @@ export default function Readout({
     <>
       {area !== 'okinawa' && views}
       {half && area !== 'okinawa' ? (
-        <HalfRows half={half} slot={slot} />
+        <>
+          <HalfRows half={half} slot={slot} />
+          <Lines area={null} half={half} interchange={interchange} />
+        </>
       ) : (
         <SystemNote slot={slot} okinawa={area === 'okinawa'} />
       )}
@@ -339,19 +342,32 @@ function Neighbor({ area, price, against }: { area: PricedArea; price: number; a
 }
 
 /** The area's lines for the slot as OCCTO forecast them: the flow toward or away from the area against the limit, and a split. */
-function Lines({ area, interchange }: { area: PricedArea; interchange: Interchange | null }) {
+/**
+ * The lines across the picked area's borders, or across the half's, which are the frequency converters alone, since
+ * nothing else crosses the middle: each in or out against its limit, and for an area its loop as the total.
+ */
+function Lines({
+  area,
+  half = null,
+  interchange,
+}: {
+  area: PricedArea | null
+  half?: Hz | null
+  interchange: Interchange | null
+}) {
   const s = useStrings()
   const lang = useApp((x) => x.lang)
   if (!interchange) return null
   const name = (a: Area) => (lang === 'ja' ? AREA_BY_ID[a].ja : AREA_BY_ID[a].name)
+  const mine = (x: Area) => (area ? x === area : AREA_BY_ID[x].hz === half)
   const lines = interchange.links
-    .filter((l) => l.from === area || l.to === area)
+    .filter((l) => mine(l.from) !== mine(l.to))
     .map((l) => {
       const line = OCCTO_LINE_IDS.find((x) => x.id === l.id)!
       return {
         id: l.id,
         label: lang === 'ja' ? line.name : line.label,
-        inward: l.to === area,
+        inward: mine(l.to),
         mw: l.mw,
         capacity: l.capacityMW,
         split: l.split,
@@ -359,8 +375,8 @@ function Lines({ area, interchange }: { area: PricedArea; interchange: Interchan
     })
   // A loop gives the area's total across its two lines of it, not how that divides between them.
   const loops = interchange.forks.flatMap((f) => {
-    const total = f.totals[area]
-    if (total === undefined) return []
+    const total = area && f.totals[area]
+    if (total === undefined || total === null) return []
     const [a, b] = (Object.keys(f.totals) as Area[]).filter((x) => x !== area)
     return [
       {

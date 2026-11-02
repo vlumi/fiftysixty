@@ -10,9 +10,9 @@ Unofficial demo project, built from public data; not affiliated with any exchang
 
 Live at [fiftysixty.misaki.fi](https://fiftysixty.misaki.fi). [SCOPE.md](SCOPE.md) is the plan; [ARCHITECTURE.md](ARCHITECTURE.md) explains how it works.
 
-![A Sunday noon at the floor with nothing picked: the price curve of every area over the system price, the auction's offered, asked and cleared volumes under it, and all Japan's supply chart](docs/screenshots/007-price-over-time.png)
+![A Sunday noon at the floor from the 50 Hz point of view: the east outlined and the west muted on the map, and the readout scoped to the half, its spread, its areas against the system price, the frequency converters as its lines, its price curve and its supply summed](docs/screenshots/008-the-halves.png)
 
-<img src="docs/screenshots/007-price-over-time-phone.png" alt="Kyushu's price history on a phone: every priced day across and the half hours down as a heatmap in the 60 Hz ramp" width="260">
+<img src="docs/screenshots/008-the-halves-phone.png" alt="The 60 Hz half on a phone: the three-way control, the west's six areas against the system price, the frequency converters as its lines, and its price curve" width="260">
 
 Every capture, one per milestone, is shown in [docs/screenshots](docs/screenshots/README.md). The interface comes in English and Japanese, dark and light.
 

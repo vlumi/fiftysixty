@@ -2,6 +2,16 @@
 
 One capture per milestone, taken with [`scripts/screenshot.mjs`](../../scripts/screenshot.mjs), newest first. The files carry a running number so they sort in order, then a name for what they show; the headings carry the dates. The README shows the latest desktop and phone captures; the rest stay here as a record of how the site grew.
 
+## 2026-11-02 · M8, the halves
+
+![The halves](008-the-halves.png)
+
+The same Sunday noon, 2026-11-01 at 12:00, from the 50 Hz point of view: the east outlined in its cyan, the west muted with its arrows and columns faded, and the readout scoped to the half. Its headline is the spread across its areas, 0.01 to 11.65 ¥/kWh, Tokyo priced apart from Hokkaido and Tohoku at the floor with the Tohoku–Tokyo line at its limit on the map; its lines are the frequency converters alone, 300 MW of 900 coming in across the market split; the price curve draws the half's areas over the system price, and the supply is the half's areas summed, without Hokkaido, not recorded yet.
+
+<img src="008-the-halves-phone.png" alt="The 60 Hz half on a phone" width="260">
+
+The 60 Hz half on a phone (390×844) with the readout open: the three-way control in the halves' hues, the system price and each of the west's six areas against it, all at the floor, the converters sending 300 MW of 900 east, and the west's price curve over the system price, the half's yellow outline on the map behind.
+
 ## 2026-11-02 · M7, the price over time
 
 ![The price over time](007-price-over-time.png)

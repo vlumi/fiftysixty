@@ -4,7 +4,7 @@ The Japanese power market on a map, from public data. A sibling of [nebulosa](ht
 
 **The name:** 50 Hz east, 60 Hz west, and the three converter stations between them that cap the flow across the middle of the country; also Nykänen's *fifty-sixty*, "more or less", which is what a day-ahead price is. Styled 50/60.
 
-**Status:** unofficial demo project, not affiliated with JEPX, OCCTO or any utility. Bootstrapped 2026-09-25 with the toolchain and a map of Japan; the same day, the day-ahead price on the map, what ran in every area, the flows between them, play and the story days, and the plants, the phone layout, the light theme and the Japanese interface: every milestone below through M5 landed on the first day, M6, whole days and the recorded flows, by 2026-09-29, and M7, the price over time, on 2026-11-02; M8, the halves, was begun the same day.
+**Status:** unofficial demo project, not affiliated with JEPX, OCCTO or any utility. Bootstrapped 2026-09-25 with the toolchain and a map of Japan; the same day, the day-ahead price on the map, what ran in every area, the flows between them, play and the story days, and the plants, the phone layout, the light theme and the Japanese interface: every milestone below through M5 landed on the first day, M6, whole days and the recorded flows, by 2026-09-29, and M7, the price over time, and M8, the halves, on 2026-11-02.
 
 ## Data
 
@@ -74,12 +74,12 @@ Toolchain, CI, a map of Japan under the name, the data fetcher for JEPX and TEPC
 - The price history as a heatmap, a day across and the 48 half hours down in the map's own ramp, a two-dimensional slider over the priced days held (done 2026-11-02).
 - The auction behind the system price with nothing picked: what was offered, asked and cleared each half hour, from the bid volumes in JEPX's file (done 2026-11-02).
 
-### M8 — the halves
+### M8 — the halves (done 2026-11-02)
 
 - A half of the grid as a scope between all Japan and an area, chosen by a control in the readout rather than a pick on the map, all Japan or a half: the half's spread as its headline, and its supply summed from its areas' records in the half hour and the day, with the month strip to match (done 2026-11-02).
 - The half's prices kept to what JEPX publishes, since a half has no price of its own: its areas each against the system price in the half hour, the lowest and the highest across them with where and when in the day with the price weighted by demand, and the spread as the month's bars; no heatmap for a half (done 2026-11-02).
 - The half on the map: the other half dimmed and the half outlined (done 2026-11-02).
-- The half's lines: the three frequency converters as its imports and exports, since nothing else crosses the middle.
+- The half's lines: the three frequency converters as its imports and exports, since nothing else crosses the middle (done 2026-11-02).
 
 ## Non-goals
 

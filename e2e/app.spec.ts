@@ -88,7 +88,9 @@ async function beside(page: Page, area: string, dx: number) {
   return { x: glyph.x + glyph.width / 2 + dx - canvas.x, y: glyph.y + glyph.height / 2 - canvas.y }
 }
 
-test("the holiday noon: Kansai's lines full from the west and the market split on them", async ({ page }) => {
+test("the holiday noon: Kansai's lines full from the west and the market split on them, and the east's the frequency converters alone", async ({
+  page,
+}) => {
   await open(page)
   await page.getByLabel('Delivery day').fill('2026-09-23')
   await page.getByRole('slider', { name: 'Half hour' }).fill('24')
@@ -96,6 +98,10 @@ test("the holiday noon: Kansai's lines full from the west and the market split o
   const lines = page.getByRole('complementary', { name: 'Readout' }).getByRole('region', { name: 'Lines' })
   await expect(lines).toContainText('Kansai–Chugoku split')
   await expect(lines).toContainText('in 3,290 of 3,290')
+  await page.keyboard.press('Escape')
+  await page.getByRole('button', { name: '50 Hz' }).click()
+  await expect(lines).toContainText('Frequency converters')
+  await expect(lines).toContainText('in 256 of 1,800')
 })
 
 /** A spot in Hyogo, west of the column on Kansai's anchor, as a position on the canvas. */
