@@ -181,7 +181,7 @@ button.fold .price {
   background: var(--src-hydro);
 }
 
-/* The view switch and, with nothing picked, the half's toggle beside it, wrapping on a narrow panel. */
+/* The scope, all Japan or a half, and the view switch, wrapping on a narrow panel. */
 .switches {
   display: flex;
   flex-wrap: wrap;
@@ -221,6 +221,30 @@ button.fold .price {
   .views button {
     min-height: 2.25rem;
   }
+}
+
+/* The halves in the hues of the name, so the scope reads apart from the view switch; pressed, a tint of the hue. */
+.hz50 {
+  color: var(--hz50);
+}
+
+.hz60 {
+  color: var(--hz60);
+}
+
+.scope button.hz50,
+.scope button.hz60 {
+  font-weight: 600;
+}
+
+.scope button.hz50[aria-pressed='true'] {
+  background: color-mix(in srgb, var(--hz50) 22%, transparent);
+  color: var(--hz50);
+}
+
+.scope button.hz60[aria-pressed='true'] {
+  background: color-mix(in srgb, var(--hz60) 22%, transparent);
+  color: var(--hz60);
 }
 
 /* The areas left out of all Japan's sums, plain to see beside its name. */

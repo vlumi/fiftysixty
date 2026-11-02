@@ -151,6 +151,7 @@ test('a half of the grid from its toggle: the east summed from its records, and 
   await page.keyboard.press('Escape')
   await expect(readout).toContainText('System price')
   await expect(page.getByRole('button', { name: '50 Hz' })).toHaveAttribute('aria-pressed', 'false')
+  await expect(page.getByRole('button', { name: 'All Japan' })).toHaveAttribute('aria-pressed', 'true')
 })
 
 test('the history view: a press on the heatmap sets the day and the half hour', async ({ page }) => {

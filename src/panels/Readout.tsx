@@ -99,6 +99,18 @@ export default function Readout({
   )
   const views = (
     <div className={styles.switches}>
+      {!picked && (
+        <div className={`${styles.views} ${styles.scope}`} role="group" aria-label={s.readout.half}>
+          <button aria-pressed={half === null} onClick={() => setHalf(null)}>
+            {s.day.japan}
+          </button>
+          {([50, 60] as const).map((hz) => (
+            <button key={hz} className={styles[`hz${hz}`]} aria-pressed={half === hz} onClick={() => setHalf(hz)}>
+              {s.readout.hz(hz)}
+            </button>
+          ))}
+        </div>
+      )}
       <div className={styles.views} role="group" aria-label={s.day.view}>
         {(['slot', 'day', 'history'] as const).map((v) => (
           <button key={v} aria-pressed={view === v} onClick={() => setView(v)}>
@@ -106,15 +118,6 @@ export default function Readout({
           </button>
         ))}
       </div>
-      {!picked && (
-        <div className={styles.views} role="group" aria-label={s.readout.half}>
-          {([50, 60] as const).map((hz) => (
-            <button key={hz} aria-pressed={half === hz} onClick={() => setHalf(half === hz ? null : hz)}>
-              {s.readout.hz(hz)}
-            </button>
-          ))}
-        </div>
-      )}
     </div>
   )
   const body = plant ? (
@@ -283,7 +286,7 @@ function HalfHead({ half, slot }: { half: Hz; slot: SpotSlot }) {
   const [low, high] = spreadOf(slot, half)
   return (
     <>
-      <h2>{s.readout.hz(half)}</h2>
+      <h2 className={styles[`hz${half}`]}>{s.readout.hz(half)}</h2>
       <p className={styles.price}>
         {low === high ? yen(low) : `${yen(low)}–${yen(high)}`} <span className="muted">{s.readout.yenPerKwh}</span>
       </p>

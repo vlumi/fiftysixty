@@ -108,8 +108,10 @@ test('a half of the grid from its toggle: its spread as the headline, the system
       onSlot={vi.fn()}
     />,
   )
+  expect(screen.getByRole('button', { name: 'All Japan' })).toHaveAttribute('aria-pressed', 'true')
   await userEvent.click(screen.getByRole('button', { name: '50 Hz' }))
   expect(useApp.getState().half).toBe(50)
+  expect(screen.getByRole('button', { name: 'All Japan' })).toHaveAttribute('aria-pressed', 'false')
   expect(screen.getByRole('heading', { name: '50 Hz' })).toBeInTheDocument()
   expect(screen.getByText('10.45–22.02', { selector: 'p' })).toBeInTheDocument()
   // The system price, then each of the half's areas against it, before the supply key's figures.
@@ -123,6 +125,9 @@ test('a half of the grid from its toggle: its spread as the headline, the system
     '50 Hz · without Hokkaido and Tohoku, not recorded yet',
   )
   expect(screen.getByRole('button', { name: '50 Hz' })).toHaveAttribute('aria-pressed', 'true')
+  await userEvent.click(screen.getByRole('button', { name: 'All Japan' }))
+  expect(useApp.getState().half).toBeNull()
+  await userEvent.click(screen.getByRole('button', { name: '50 Hz' }))
   // The toggle is not for a picked area, which is in one half already.
   rerender(
     <Readout
