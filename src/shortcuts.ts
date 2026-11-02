@@ -93,6 +93,7 @@ export function dispatchShortcut(
     case 'Escape':
       if (s.plant) s.pickPlant(null)
       else if (s.area) s.selectArea(null)
+      else if (s.half) s.setHalf(null)
       else return false
       return true
     case '?':

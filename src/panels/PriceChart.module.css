@@ -39,43 +39,15 @@
   font-size: 0.75rem;
 }
 
-.legend > span,
-.halfKey {
+.legend > span {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
 }
 
-/* A half's key as a button, padded out into its margins so the row stays as tall as the text. */
-.halfKey {
-  margin: -0.2rem -0.3rem;
-  padding: 0.2rem 0.3rem;
-  border: 0;
-  border-radius: 0.35rem;
-  background: none;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-}
-
-.halfKey:hover {
-  background: var(--hover);
-}
-
-.halfKey[aria-pressed='true'] {
-  color: var(--text);
-}
-
-/* The half left out while the other is pressed. */
+/* The half left out while the other is chosen. */
 .off {
   opacity: 0.5;
-}
-
-@media (pointer: coarse) {
-  .halfKey {
-    margin: -0.55rem -0.3rem;
-    padding: 0.55rem 0.3rem;
-  }
 }
 
 /* The keys take their color from the hue classes, so the border's color is left to them. */

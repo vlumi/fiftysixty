@@ -1,8 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import csv from '../test/fixtures/jepx-spot.csv?raw'
 import { parseSpot } from '../market/jepx'
-import { resetApp } from '../store'
+import { resetApp, useApp } from '../store'
 import PriceChart from './PriceChart'
 
 /** A split day: Hokkaido, Tokyo and the west each cleared apart from the system price overnight. */
@@ -33,21 +32,15 @@ test('with nothing picked, every area over the system price, the halves told apa
   expect(screen.getByText('18')).toBeInTheDocument()
 })
 
-test('a half’s key pressed draws that half alone over the system price, the axis fitted to it; pressed again, both', async () => {
+test('with a half chosen, that half alone over the system price, the axis fitted to it and the other key dimmed', () => {
+  useApp.setState({ half: 60 })
   render(<PriceChart day={day} area={null} slot={1} onSlot={vi.fn()} />)
   const chart = screen.getByRole('slider', { name: 'Price over the day' })
-  const west = screen.getByRole('button', { name: '60 Hz' })
-  await userEvent.click(west)
-  expect(west).toHaveAttribute('aria-pressed', 'true')
-  expect(screen.getByRole('button', { name: '50 Hz' }).className).toMatch(/off/)
   expect(titles(chart)).toEqual(['Chubu', 'Hokuriku', 'Kansai', 'Chugoku', 'Shikoku', 'Kyushu', 'System price'])
   // Without Tokyo's 50.01 the axis comes down.
   expect([...chart.querySelectorAll('text')].map((t) => t.textContent)).toContain('¥30')
-  await userEvent.click(screen.getByRole('button', { name: '50 Hz' }))
-  expect(titles(chart)).toEqual(['Hokkaido', 'Tohoku', 'Tokyo', 'System price'])
-  await userEvent.click(screen.getByRole('button', { name: '50 Hz' }))
-  expect(titles(chart)).toHaveLength(10)
-  expect(screen.getByRole('button', { name: '60 Hz' })).toHaveAttribute('aria-pressed', 'false')
+  expect(screen.getByText('50 Hz').className).toMatch(/off/)
+  expect(screen.getByText('60 Hz').className).not.toMatch(/off/)
 })
 
 test('a picked area’s price over the system price, the axis fitted to the two', () => {

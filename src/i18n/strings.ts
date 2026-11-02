@@ -102,9 +102,11 @@ export interface Strings {
     yenPerKwh: string
     spread: (low: string, high: string) => string
     everyAreaSystem: string
+    halfSystem: (price: string) => string
     pickArea: string
     okinawa: string
     hz: (hz: number) => string
+    half: string
     system: string
     lines: string
     recorded: string
@@ -135,7 +137,6 @@ export interface Strings {
     history: string
     yen: (price: number) => string
     auction: string
-    onlyHalf: string
     offered: string
     asked: string
     cleared: string
@@ -269,9 +270,11 @@ const en: Strings = {
     yenPerKwh: '¥/kWh',
     spread: (low, high) => `Areas from ${low} to ${high}.`,
     everyAreaSystem: 'Every area at the system price.',
+    halfSystem: (price) => `System price ${price}.`,
     pickArea: 'Pick an area for its price.',
     okinawa: 'Okinawa is not on the exchange.',
     hz: (hz) => `${hz} Hz`,
+    half: 'Half of the grid',
     system: 'System',
     lines: 'Lines',
     recorded: 'recorded',
@@ -310,7 +313,6 @@ const en: Strings = {
     price: 'Price over the day',
     history: 'Price history',
     auction: 'Auction over the day',
-    onlyHalf: 'This half alone, or both again',
     offered: 'Offered',
     asked: 'Asked',
     cleared: 'Cleared',
@@ -453,9 +455,11 @@ const ja: Strings = {
     yenPerKwh: '円/kWh',
     spread: (low, high) => `エリアプライスは ${low}〜${high}。`,
     everyAreaSystem: '全エリアがシステムプライス。',
+    halfSystem: (price) => `システムプライス ${price}。`,
     pickArea: 'エリアを選ぶと価格が出ます。',
     okinawa: '沖縄は取引所の対象外です。',
     hz: (hz) => `${hz} Hz`,
+    half: '周波数帯',
     system: 'システム',
     lines: '連系線',
     recorded: '実績',
@@ -494,7 +498,6 @@ const ja: Strings = {
     price: '一日の価格',
     history: '価格の推移',
     auction: '一日の入札',
-    onlyHalf: 'この周波数帯のみ表示、もう一度で両方',
     offered: '売り入札',
     asked: '買い入札',
     cleared: '約定',
