@@ -15,7 +15,7 @@ const half = {
   demandMWh: day.demandMWh / 2,
 }
 
-test('a bar a day, as tall as its supply against the month’s most, the displayed day marked; it scrubs', async () => {
+test('a column for every day of the month, a bar as tall as the day’s supply against the month’s most, the displayed day marked; it scrubs', async () => {
   const onPick = vi.fn()
   render(
     <MonthStrip
@@ -29,9 +29,14 @@ test('a bar a day, as tall as its supply against the month’s most, the display
   )
   expect(screen.getByRole('heading', { name: 'September 2026' })).toBeInTheDocument()
   const strip = screen.getByRole('slider', { name: 'September 2026' })
-  expect(strip).toHaveAttribute('aria-valuenow', '2')
+  expect(strip).toHaveAttribute('aria-valuemax', '30')
+  expect(strip).toHaveAttribute('aria-valuenow', '24')
   expect(strip).toHaveAttribute('aria-valuetext', expect.stringMatching(/^2026-09-24 \(Thu\): \d+ GWh$/))
-  const [a, b] = [...strip.children] as HTMLElement[]
+  expect(strip.children).toHaveLength(30)
+  const [a, b] = [...strip.children].slice(22, 24) as HTMLElement[]
+  // A day without data is a blank column, so the others keep their width as the month fills.
+  expect(strip.firstElementChild).not.toHaveAttribute('title')
+  expect(strip.firstElementChild!.firstElementChild).toBeEmptyDOMElement()
   expect(b).toHaveAttribute('aria-current', 'date')
   // A day with an area left out is marked, and says which.
   expect(a.className).toMatch(/partial/)
@@ -43,12 +48,13 @@ test('a bar a day, as tall as its supply against the month’s most, the display
   // The keys are the page's: an arrow steps the half hour, Shift and an arrow the day.
   fireEvent.keyDown(strip, { key: 'ArrowLeft' })
   expect(onPick).not.toHaveBeenCalled()
-  strip.getBoundingClientRect = () => ({ left: 0, width: 200 }) as DOMRect
+  // A press on a blank snaps to the nearest day with data.
+  strip.getBoundingClientRect = () => ({ left: 0, width: 300 }) as DOMRect
   strip.setPointerCapture = vi.fn()
   fireEvent.pointerDown(strip, { clientX: 20, pointerId: 1 })
   expect(onPick).toHaveBeenLastCalledWith('2026-09-23')
   onPick.mockClear()
-  fireEvent.pointerMove(strip, { clientX: 190, buttons: 1 })
+  fireEvent.pointerMove(strip, { clientX: 295, buttons: 1 })
   expect(onPick).not.toHaveBeenCalled()
 })
 
@@ -72,10 +78,10 @@ test('the price row: a bar a priced day from its low to its high over a scale fr
     />,
   )
   const strip = screen.getByRole('slider', { name: 'September 2026' })
-  expect(strip).toHaveAttribute('aria-valuemax', '3')
-  expect(strip).toHaveAttribute('aria-valuenow', '3')
+  expect(strip).toHaveAttribute('aria-valuemax', '30')
+  expect(strip).toHaveAttribute('aria-valuenow', '26')
   expect(strip).toHaveAttribute('aria-valuetext', `2026-09-26 (Sat): mean ${prices[1].stats.mean.toFixed(2)} ¥/kWh`)
-  const [recorded, , priced] = [...strip.children] as HTMLElement[]
+  const [recorded, , priced] = [...strip.children].slice(23, 26) as HTMLElement[]
   expect(recorded.title).toMatch(/GWh$/)
   expect(recorded.firstElementChild!).toBeEmptyDOMElement()
   const bar = priced.firstElementChild!.firstElementChild as HTMLElement
@@ -92,6 +98,6 @@ test('prices alone make a month too', () => {
   const prices = [...spot.keys()].sort().map((date) => ({ date, stats: priceStats(spot.get(date)!)! }))
   render(<MonthStrip days={[]} prices={prices} date={null} onPick={vi.fn()} />)
   const strip = screen.getByRole('slider', { name: 'September 2026' })
-  expect(strip.children).toHaveLength(4)
-  expect(strip.firstElementChild!.firstElementChild!.firstElementChild!.className).toMatch(/system/)
+  expect(strip.children).toHaveLength(30)
+  expect(strip.children[21].firstElementChild!.firstElementChild!.className).toMatch(/system/)
 })

@@ -39,9 +39,11 @@ interface Props {
 /**
  * The displayed month a day a column, side by side to compare: the day's price from its lowest half hour to its
  * highest with the mean as a tick, and under it, as the supply chart stands under the price curve, a bar as tall as
- * the day's supply and banded by the sources as the chart stacks them, the displayed day marked. The columns are the recorded whole days and the priced days together, so the
- * price row runs on into the days the records have not reached. It is a slider for the pointer: pressing and dragging
- * across it moves the map through the days; the keys keep the page's scheme, Shift and an arrow for a day.
+ * the day's supply and banded by the sources as the chart stacks them, the displayed day marked. Every day of the
+ * month has its column, the ones with neither a record nor a price left blank, so a column keeps its width as the
+ * month fills and the price row runs on into the days the records have not reached. It is a slider for the pointer:
+ * pressing and dragging across it moves the map through the days with data, a blank snapping to the nearest; the keys
+ * keep the page's scheme, Shift and an arrow for a day.
  */
 export default function MonthStrip({ days, prices = [], hz = null, date, onPick }: Props) {
   const s = useStrings()
@@ -50,10 +52,14 @@ export default function MonthStrip({ days, prices = [], hz = null, date, onPick 
   const priced = new Map(prices.map((p) => [p.date, p]))
   const dates = [...new Set([...supply.keys(), ...priced.keys()])].sort()
   if (dates.length < 2) return null
+  const [year, month] = dates[0].split('-').map(Number)
+  const length = new Date(Date.UTC(year, month, 0)).getUTCDate()
+  const all = Array.from({ length }, (_, i) => `${dates[0].slice(0, 8)}${String(i + 1).padStart(2, '0')}`)
+  const indexOf = (d: string) => Number(d.slice(8)) - 1
   const supplied = (t: DayTotals) => t.generatedMWh + t.storageOutMWh
   const top = Math.max(...days.map((d) => supplied(d.totals)))
   const ceiling = priceAxis(Math.max(...prices.map((p) => p.stats.high.price))).top
-  const at = date ? dates.indexOf(date) : -1
+  const at = date && all.includes(date) ? indexOf(date) : -1
   const describe = (d: string) => {
     const day = supply.get(d)
     const price = priced.get(d)
@@ -62,16 +68,16 @@ export default function MonthStrip({ days, prices = [], hz = null, date, onPick 
         `${(day.totals.demandMWh / GWH).toFixed(0)} ${s.day.gwh}` +
           (day.missing.length ? `, ${s.day.without(areaList(day.missing, lang))}` : ''),
       price && s.day.meanOf(yen(price.stats.mean)),
-    ]
-    return `${formatDay(d, lang)}: ${parts.filter(Boolean).join(', ')}`
+    ].filter(Boolean)
+    return parts.length ? `${formatDay(d, lang)}: ${parts.join(', ')}` : formatDay(d, lang)
   }
   const go = (index: number) => {
-    const day = dates[Math.max(0, Math.min(dates.length - 1, index))]
+    const day = dates.reduce((best, d) => (Math.abs(indexOf(d) - index) < Math.abs(indexOf(best) - index) ? d : best))
     if (day !== date) onPick(day)
   }
   const dayAt = (e: PointerEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect()
-    return Math.floor(((e.clientX - rect.left) / rect.width) * dates.length)
+    return Math.floor(((e.clientX - rect.left) / rect.width) * length)
   }
   const range = ({ low, high, mean }: PriceStats) => ({
     bottom: `${(low.price / ceiling) * 100}%`,
@@ -79,7 +85,6 @@ export default function MonthStrip({ days, prices = [], hz = null, date, onPick 
     mean: `${high.price > low.price ? ((mean - low.price) / (high.price - low.price)) * 100 : 0}%`,
   })
 
-  const [year, month] = dates[0].split('-').map(Number)
   return (
     <section className={styles.month} aria-label={s.day.month(year, month)}>
       <h3>{s.day.month(year, month)}</h3>
@@ -89,16 +94,16 @@ export default function MonthStrip({ days, prices = [], hz = null, date, onPick 
         tabIndex={0}
         aria-label={s.day.month(year, month)}
         aria-valuemin={1}
-        aria-valuemax={dates.length}
+        aria-valuemax={length}
         aria-valuenow={at + 1}
-        aria-valuetext={at >= 0 ? describe(dates[at]) : undefined}
+        aria-valuetext={at >= 0 ? describe(all[at]) : undefined}
         onPointerDown={(e) => {
           e.currentTarget.setPointerCapture(e.pointerId)
           go(dayAt(e))
         }}
         onPointerMove={(e) => e.buttons && go(dayAt(e))}
       >
-        {dates.map((d) => {
+        {all.map((d) => {
           const day = supply.get(d)
           const price = priced.get(d)
           return (
@@ -106,7 +111,7 @@ export default function MonthStrip({ days, prices = [], hz = null, date, onPick 
               key={d}
               className={day?.missing.length ? `${styles.day} ${styles.partial}` : styles.day}
               aria-current={d === date ? 'date' : undefined}
-              title={describe(d)}
+              title={supply.has(d) || priced.has(d) ? describe(d) : undefined}
             >
               {prices.length > 0 && (
                 <span className={styles.prices}>
@@ -137,8 +142,8 @@ export default function MonthStrip({ days, prices = [], hz = null, date, onPick 
         })}
       </div>
       <div className={styles.ends} aria-hidden="true">
-        <span>{Number(dates[0].slice(8))}</span>
-        <span>{Number(dates[dates.length - 1].slice(8))}</span>
+        <span>1</span>
+        <span>{length}</span>
       </div>
     </section>
   )
