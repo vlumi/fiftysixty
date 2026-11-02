@@ -2,6 +2,16 @@
 
 One capture per milestone, taken with [`scripts/screenshot.mjs`](../../scripts/screenshot.mjs), newest first. The files carry a running number so they sort in order, then a name for what they show; the headings carry the dates. The README shows the latest desktop and phone captures; the rest stay here as a record of how the site grew.
 
+## 2026-11-02 · M7, the price over time
+
+![The price over time](007-price-over-time.png)
+
+A Sunday noon at the floor, 2026-11-01 at 12:00, with nothing picked: the system price at 0.01 ¥/kWh and the readout's new charts in a column over the supply. The price curve draws every area over the dashed system price, three blue and three amber lines where the east split twice and the west settled at three prices, and under it the auction behind the system price, 82.7 GW offered against 43.3 GW asked with the gap shaded, which is why the price fell to the floor. The supply chart follows, all Japan without Hokkaido, with the curtailed solar hatched over it.
+
+<img src="007-price-over-time-phone.png" alt="Kyushu's price history on a phone" width="260">
+
+Kyushu's price history on a phone (390×844), the readout's third view: every priced day since April 2025 across and the 48 half hours down in the 60 Hz ramp, the midday floors a dark band through the spring and the autumn and the evening peaks bright, the crosshair on the displayed half hour, a tick a month along the foot with the year named.
+
 ## 2026-09-29 · Recorded flows and whole days
 
 ![Recorded flows](006-recorded.png)
