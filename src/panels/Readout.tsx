@@ -12,6 +12,7 @@ import { areaList } from '../regions/names'
 import type { PlantProps } from '../regions/plants'
 import { mw, signed, yen } from '../shared/format'
 import { useNarrow } from '../shared/useNarrow'
+import { useShort } from '../shared/useShort'
 import styles from './Readout.module.css'
 import AuctionChart from './AuctionChart'
 import { DayPrices, DaySupply } from './DayView'
@@ -54,8 +55,10 @@ interface Props {
 /**
  * The displayed slot in numbers: the system price and the spread across the areas, or with a half of the grid chosen
  * from its control, that half's spread, its areas against the system price, the frequency converters as its lines
- * and what ran in it summed, a picked area against its neighbors and what ran in it, or a picked plant. On a phone it is an accordion: the headline row alone until tapped, remembered for what it
- * was opened for, so another pick opens folded again.
+ * and what ran in it summed, a picked area against its neighbors and what ran in it, or a picked plant. The headline
+ * row stays pinned at the top while the rest scrolls under it, and the switches with it where the screen is tall
+ * enough. On a phone it is an accordion: the headline row alone until tapped, remembered for what it was opened for,
+ * so another pick opens folded again.
  */
 export default function Readout({
   slot,
@@ -82,6 +85,7 @@ export default function Readout({
   const half = useApp((x) => x.half)
   const setHalf = useApp((x) => x.setHalf)
   const narrow = useNarrow()
+  const short = useShort()
   const [openFor, setOpenFor] = useState<string | null>(null)
   if (!slot) return null
   const picked = area && area !== 'okinawa' ? (area as PricedArea) : null
@@ -120,11 +124,11 @@ export default function Readout({
       </div>
     </div>
   )
+  const switches = !plant && area !== 'okinawa' && views
   const body = plant ? (
     <p className="muted">{s.readout.plantNote}</p>
   ) : view === 'day' ? (
     <>
-      {views}
       <DayPrices spot={spotDay} area={picked} half={half} weighted={dayPrice} />
       {!picked && <JapanHeading half={half} missing={japan.missing} />}
       <DaySupply totals={dayTotals} area={picked} />
@@ -141,7 +145,6 @@ export default function Readout({
     </>
   ) : view === 'history' ? (
     <>
-      {views}
       {half && !picked && <p className="muted">{s.readout.halfHistory}</p>}
       <PriceHistory
         days={history}
@@ -156,7 +159,6 @@ export default function Readout({
     </>
   ) : picked ? (
     <>
-      {views}
       <AreaRows area={picked} slot={slot} />
       <Lines area={picked} interchange={interchange} />
       {spotDay && <PriceChart day={spotDay} area={picked} slot={slot.slot} onSlot={onSlot} hours={!day?.length} />}
@@ -165,7 +167,6 @@ export default function Readout({
     </>
   ) : (
     <>
-      {area !== 'okinawa' && views}
       {half && area !== 'okinawa' ? (
         <>
           <HalfRows half={half} slot={slot} />
@@ -191,24 +192,32 @@ export default function Readout({
   )
   return (
     <aside className={styles.panel} aria-label={s.readout.label}>
-      <div className={styles.head}>
-        {(plant || picked) && (
-          <button className={styles.back} aria-label={s.readout.back} onClick={onBack}>
-            <Chevron turn={90} />
-          </button>
-        )}
-        {narrow ? (
-          <button className={styles.fold} aria-expanded={open} onClick={() => setOpenFor(open ? null : key)}>
-            {head}
-            <span className={styles.chevron}>
-              <Chevron turn={open ? 180 : 0} />
-            </span>
-          </button>
-        ) : (
-          <div className={styles.fold}>{head}</div>
-        )}
+      <div className={styles.pinned}>
+        <div className={styles.head}>
+          {(plant || picked) && (
+            <button className={styles.back} aria-label={s.readout.back} onClick={onBack}>
+              <Chevron turn={90} />
+            </button>
+          )}
+          {narrow ? (
+            <button className={styles.fold} aria-expanded={open} onClick={() => setOpenFor(open ? null : key)}>
+              {head}
+              <span className={styles.chevron}>
+                <Chevron turn={open ? 180 : 0} />
+              </span>
+            </button>
+          ) : (
+            <div className={styles.fold}>{head}</div>
+          )}
+        </div>
+        {open && !short && switches}
       </div>
-      {open && <div className={styles.body}>{body}</div>}
+      {open && (
+        <div className={styles.body}>
+          {short && switches}
+          {body}
+        </div>
+      )}
     </aside>
   )
 }
