@@ -10,7 +10,9 @@ import { recordSlot } from '../market/record'
 import { TEPCO } from '../market/tepco'
 import Readout from './Readout'
 
-const slot = slotOf(parseSpot(csv), '2026-09-26', 47)!
+const spot = parseSpot(csv)
+const slot = slotOf(spot, '2026-09-26', 47)!
+const spotDay = spot.get('2026-09-26')!
 const days = TEPCO.parse(tepcoCsv)
 const record = recordSlot(days, '2026-09-24', 25)
 const day = days.get('2026-09-24')!
@@ -53,6 +55,38 @@ test('a picked area against the system price and its neighbors', async () => {
   expect(screen.getByText('No record for this half hour yet.')).toBeInTheDocument()
   await userEvent.click(screen.getByRole('button', { name: 'Back' }))
   expect(onBack).toHaveBeenCalled()
+})
+
+test('the day’s price curve above the supply chart, for an area and for all Japan, and the hours once', () => {
+  const { rerender } = render(
+    <Readout
+      slot={slot}
+      record={record}
+      day={day}
+      interchange={null}
+      spotDay={spotDay}
+      area="tokyo"
+      onBack={vi.fn()}
+      onSlot={vi.fn()}
+    />,
+  )
+  const sliders = () => screen.getAllByRole('slider').map((c) => c.getAttribute('aria-label'))
+  expect(sliders()).toEqual(['Price over the day', 'Supply over the day'])
+  expect(screen.getAllByText('18')).toHaveLength(1)
+  rerender(
+    <Readout
+      slot={slot}
+      record={undefined}
+      day={undefined}
+      interchange={null}
+      spotDay={spotDay}
+      area={null}
+      onBack={vi.fn()}
+      onSlot={vi.fn()}
+    />,
+  )
+  expect(sliders()).toEqual(['Price over the day'])
+  expect(screen.getAllByText('18')).toHaveLength(1)
 })
 
 test('Okinawa has no price to show', () => {

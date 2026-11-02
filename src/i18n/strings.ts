@@ -125,6 +125,8 @@ export interface Strings {
     curtailed: string
     demand: string
     gw: string
+    price: string
+    yen: (price: number) => string
   }
   key: {
     key: string
@@ -287,6 +289,8 @@ const en: Strings = {
     curtailed: 'Curtailed',
     demand: 'Demand',
     gw: 'GW',
+    price: 'Price over the day',
+    yen: (price) => `¥${price}`,
   },
   key: {
     key: 'Key',
@@ -457,6 +461,8 @@ const ja: Strings = {
     curtailed: '出力制御',
     demand: '需要',
     gw: 'GW',
+    price: '一日の価格',
+    yen: (price) => `${price}円`,
   },
   key: {
     key: '凡例',
