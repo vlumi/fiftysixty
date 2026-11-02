@@ -3,11 +3,16 @@ import { fetchText } from './fetch'
 
 export type PricedArea = Exclude<Area, 'okinawa'>
 
-/** One half hour of the day-ahead auction: the slot is 1 to 48 from 00:00 JST. */
+/**
+ * One half hour of the day-ahead auction: the slot is 1 to 48 from 00:00 JST; the prices, and system-wide what was
+ * offered, asked and contracted in kWh.
+ */
 export interface SpotSlot {
   slot: number
   systemPrice: number
   areaPrice: Record<PricedArea, number>
+  sellKWh: number
+  buyKWh: number
   volumeKWh: number
 }
 
@@ -46,6 +51,8 @@ export function parseSpot(csv: string): SpotDays {
   const date = column('受渡日')
   const slot = column('時刻コード')
   const volume = column('約定総量')
+  const sell = column('売り入札量')
+  const buy = column('買い入札量')
   const system = column('システムプライス')
   const areas = PRICED_AREAS.map((a) => [a.id as PricedArea, column(`エリアプライス${a.ja}`)] as const)
 
@@ -60,6 +67,8 @@ export function parseSpot(csv: string): SpotDays {
       slot: Number(cells[slot]),
       systemPrice: Number(cells[system]),
       areaPrice: Object.fromEntries(areas.map(([id, i]) => [id, Number(cells[i])])) as Record<PricedArea, number>,
+      sellKWh: Number(cells[sell]),
+      buyKWh: Number(cells[buy]),
       volumeKWh: Number(cells[volume]),
     })
   }

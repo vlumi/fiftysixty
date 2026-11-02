@@ -1,0 +1,65 @@
+/* The three lines told apart by weight and dash alone, so the chart takes no color from the sources or the halves. */
+.offered,
+.asked,
+.cleared {
+  fill: none;
+  stroke-linejoin: round;
+}
+
+.offered {
+  stroke: var(--muted);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 2;
+}
+
+.asked {
+  stroke: var(--muted);
+  stroke-width: 1.5;
+}
+
+.cleared {
+  stroke: var(--text);
+  stroke-width: 2;
+}
+
+/* Between what was offered and what was asked: the surplus, or the shortfall, as a soft fill. */
+.gap {
+  fill: var(--fill-soft);
+  stroke: none;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.9rem;
+  margin-top: 0.35rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.lineKey {
+  display: inline-block;
+  width: 0.9rem;
+  border-top-width: 2px;
+  border-top-style: solid;
+  border-top-color: var(--muted);
+}
+
+.lineKey.offered {
+  border-top-style: dashed;
+}
+
+.lineKey.cleared {
+  border-top-color: var(--text);
+}
+
+.figure {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}

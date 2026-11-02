@@ -134,6 +134,10 @@ export interface Strings {
     price: string
     history: string
     yen: (price: number) => string
+    auction: string
+    offered: string
+    asked: string
+    cleared: string
   }
   key: {
     key: string
@@ -304,6 +308,10 @@ const en: Strings = {
     gw: 'GW',
     price: 'Price over the day',
     history: 'Price history',
+    auction: 'Auction over the day',
+    offered: 'Offered',
+    asked: 'Asked',
+    cleared: 'Cleared',
     yen: (price) => `¥${price}`,
   },
   key: {
@@ -483,6 +491,10 @@ const ja: Strings = {
     gw: 'GW',
     price: '一日の価格',
     history: '価格の推移',
+    auction: '一日の入札',
+    offered: '売り入札',
+    asked: '買い入札',
+    cleared: '約定',
     yen: (price) => `${price}円`,
   },
   key: {

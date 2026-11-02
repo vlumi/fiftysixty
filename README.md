@@ -10,9 +10,9 @@ Unofficial demo project, built from public data; not affiliated with any exchang
 
 Live at [fiftysixty.misaki.fi](https://fiftysixty.misaki.fi). [SCOPE.md](SCOPE.md) is the plan; [ARCHITECTURE.md](ARCHITECTURE.md) explains how it works.
 
-![A clear Sunday noon with the recorded flows: Kyushu picked at the price floor, its supply chart and key with each source's share, violet arrows and a market-split wall at Kanmon](docs/screenshots/006-recorded.png)
+![A Sunday noon at the floor with nothing picked: the price curve of every area over the system price, the auction's offered, asked and cleared volumes under it, and all Japan's supply chart](docs/screenshots/007-price-over-time.png)
 
-<img src="docs/screenshots/006-recorded-phone.png" alt="All Japan's day on a phone: the day's supply as one bar and a table of each source's share, the peak and the renewable share" width="260">
+<img src="docs/screenshots/007-price-over-time-phone.png" alt="Kyushu's price history on a phone: every priced day across and the half hours down as a heatmap in the 60 Hz ramp" width="260">
 
 Every capture, one per milestone, is shown in [docs/screenshots](docs/screenshots/README.md). The interface comes in English and Japanese, dark and light.
 
