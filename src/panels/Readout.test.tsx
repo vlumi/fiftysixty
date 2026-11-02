@@ -10,6 +10,7 @@ import { recordSlot } from '../market/record'
 import { TEPCO } from '../market/tepco'
 import { resetApp, useApp } from '../store'
 import Readout from './Readout'
+import { SHORT_QUERY } from '../shared/useShort'
 
 const spot = parseSpot(csv)
 const slot = slotOf(spot, '2026-09-26', 47)!
@@ -256,6 +257,45 @@ test("a half's lines are the frequency converters alone, in or out of the half a
     />,
   )
   expect(rows()).toEqual(['Frequency converters', 'out 256 of 1,800'])
+})
+
+test('the switches stay with the headline, pinned above the body that scrolls', () => {
+  render(
+    <Readout
+      slot={slot}
+      record={undefined}
+      day={undefined}
+      interchange={null}
+      area={null}
+      onBack={vi.fn()}
+      onSlot={vi.fn()}
+    />,
+  )
+  const pinned = screen.getByRole('group', { name: 'View' }).parentElement!.parentElement!
+  expect(pinned).toContainElement(screen.getByRole('heading', { name: 'System price' }))
+  expect(pinned).not.toContainElement(screen.getByText(/Pick an area for its price/))
+})
+
+test('on a short screen the switches scroll with the body, so the content keeps the room', () => {
+  vi.stubGlobal('matchMedia', (query: string) => ({
+    matches: query === SHORT_QUERY,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  }))
+  render(
+    <Readout
+      slot={slot}
+      record={undefined}
+      day={undefined}
+      interchange={null}
+      area={null}
+      onBack={vi.fn()}
+      onSlot={vi.fn()}
+    />,
+  )
+  const group = screen.getByRole('group', { name: 'View' })
+  expect(group.parentElement).not.toContainElement(screen.getByRole('heading', { name: 'System price' }))
+  expect(group.parentElement!.parentElement).toContainElement(screen.getByText(/Pick an area for its price/))
 })
 
 test('a picked plant: its capacity and fuel, and that its output is not public', () => {
