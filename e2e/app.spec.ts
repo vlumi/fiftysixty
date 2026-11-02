@@ -125,6 +125,18 @@ test('the keys: an arrow steps the half hour, Escape lets a picked area go, ? op
   await expect(page.getByRole('dialog')).toHaveCount(0)
 })
 
+test('with nothing picked, the auction behind the system price stands under the price curve', async ({ page }) => {
+  await open(page)
+  const readout = page.getByRole('complementary', { name: 'Readout' })
+  const chart = readout.getByRole('slider', { name: 'Auction over the day' })
+  await expect(chart).toHaveAttribute('aria-valuenow', '25')
+  await expect(readout.locator('figcaption', { hasText: 'Cleared' })).toContainText(
+    /Offered\s*\d+\.\d GW\s*Asked\s*\d+\.\d GW\s*Cleared\s*\d+\.\d GW/,
+  )
+  await page.locator('.maplibregl-canvas').click({ position: await tokyo(page) })
+  await expect(chart).toHaveCount(0)
+})
+
 test('the history view: a press on the heatmap sets the day and the half hour', async ({ page }) => {
   await open(page)
   await page.getByRole('button', { name: 'History' }).click()

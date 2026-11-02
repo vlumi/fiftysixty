@@ -57,7 +57,7 @@ test('a picked area against the system price and its neighbors', async () => {
   expect(onBack).toHaveBeenCalled()
 })
 
-test('the day’s price curve above the supply chart, for an area and for all Japan, and the hours once', () => {
+test('the day’s price curve above the supply chart, for an area, and over the auction for all Japan, the hours once', () => {
   const { rerender } = render(
     <Readout
       slot={slot}
@@ -85,7 +85,7 @@ test('the day’s price curve above the supply chart, for an area and for all Ja
       onSlot={vi.fn()}
     />,
   )
-  expect(sliders()).toEqual(['Price over the day'])
+  expect(sliders()).toEqual(['Price over the day', 'Auction over the day'])
   expect(screen.getAllByText('18')).toHaveLength(1)
 })
 

@@ -13,6 +13,7 @@ import type { PlantProps } from '../regions/plants'
 import { mw, signed, yen } from '../shared/format'
 import { useNarrow } from '../shared/useNarrow'
 import styles from './Readout.module.css'
+import AuctionChart from './AuctionChart'
 import { DayPrices, DaySupply } from './DayView'
 import MonthStrip, { type MonthDay, type MonthPrice } from './MonthStrip'
 import PriceChart from './PriceChart'
@@ -144,7 +145,12 @@ export default function Readout({
     <>
       {area !== 'okinawa' && views}
       <SystemNote slot={slot} okinawa={area === 'okinawa'} />
-      {area !== 'okinawa' && spotDay && <PriceChart day={spotDay} area={null} slot={slot.slot} onSlot={onSlot} />}
+      {area !== 'okinawa' && spotDay && (
+        <>
+          <PriceChart day={spotDay} area={null} slot={slot.slot} onSlot={onSlot} hours={false} />
+          <AuctionChart day={spotDay} slot={slot.slot} onSlot={onSlot} hours={!japan.slots.length} />
+        </>
+      )}
       {area !== 'okinawa' && japan.slots.length > 0 && (
         <>
           <JapanHeading missing={japan.missing} />
