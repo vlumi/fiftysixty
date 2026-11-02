@@ -37,9 +37,9 @@ interface Props {
 }
 
 /**
- * The displayed month a day a column, side by side to compare: a bar as tall as the day's supply and banded by the
- * sources as the chart stacks them, and under it the day's price from its lowest half hour to its highest with the mean
- * as a tick, the displayed day marked. The columns are the recorded whole days and the priced days together, so the
+ * The displayed month a day a column, side by side to compare: the day's price from its lowest half hour to its
+ * highest with the mean as a tick, and under it, as the supply chart stands under the price curve, a bar as tall as
+ * the day's supply and banded by the sources as the chart stacks them, the displayed day marked. The columns are the recorded whole days and the priced days together, so the
  * price row runs on into the days the records have not reached. It is a slider for the pointer: pressing and dragging
  * across it moves the map through the days; the keys keep the page's scheme, Shift and an arrow for a day.
  */
@@ -108,18 +108,6 @@ export default function MonthStrip({ days, prices = [], hz = null, date, onPick 
               aria-current={d === date ? 'date' : undefined}
               title={describe(d)}
             >
-              {days.length > 0 && (
-                <span className={styles.supply}>
-                  {day && (
-                    <span className={styles.stack} style={{ height: `${(supplied(day.totals) / top) * 100}%` }}>
-                      <span style={{ flexGrow: day.totals.storageOutMWh, background: 'var(--src-storage)' }} />
-                      {[...SERIES].reverse().map((x) => (
-                        <span key={x} style={{ flexGrow: day.totals.bySeries[x], background: `var(--src-${x})` }} />
-                      ))}
-                    </span>
-                  )}
-                </span>
-              )}
               {prices.length > 0 && (
                 <span className={styles.prices}>
                   {price && (
@@ -128,6 +116,18 @@ export default function MonthStrip({ days, prices = [], hz = null, date, onPick 
                       style={{ bottom: range(price.stats).bottom, height: range(price.stats).height }}
                     >
                       <span className={styles.mean} style={{ bottom: range(price.stats).mean }} />
+                    </span>
+                  )}
+                </span>
+              )}
+              {days.length > 0 && (
+                <span className={styles.supply}>
+                  {day && (
+                    <span className={styles.stack} style={{ height: `${(supplied(day.totals) / top) * 100}%` }}>
+                      <span style={{ flexGrow: day.totals.storageOutMWh, background: 'var(--src-storage)' }} />
+                      {[...SERIES].reverse().map((x) => (
+                        <span key={x} style={{ flexGrow: day.totals.bySeries[x], background: `var(--src-${x})` }} />
+                      ))}
                     </span>
                   )}
                 </span>

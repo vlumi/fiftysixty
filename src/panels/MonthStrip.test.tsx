@@ -37,7 +37,7 @@ test('a bar a day, as tall as its supply against the month’s most, the display
   expect(a.className).toMatch(/partial/)
   expect(a.title).toMatch(/, without Hokkaido, not recorded yet$/)
   expect(b.className).not.toMatch(/partial/)
-  const stack = (column: HTMLElement) => (column.firstChild as HTMLElement).firstChild as HTMLElement
+  const stack = (column: HTMLElement) => (column.lastChild as HTMLElement).firstChild as HTMLElement
   expect(stack(a).style.height).toBe('50%')
   expect(stack(b).style.height).toBe('100%')
   // The keys are the page's: an arrow steps the half hour, Shift and an arrow the day.
@@ -77,8 +77,8 @@ test('the price row: a bar a priced day from its low to its high over a scale fr
   expect(strip).toHaveAttribute('aria-valuetext', `2026-09-26 (Sat): mean ${prices[1].stats.mean.toFixed(2)} ¥/kWh`)
   const [recorded, , priced] = [...strip.children] as HTMLElement[]
   expect(recorded.title).toMatch(/GWh$/)
-  expect(recorded.lastElementChild!).toBeEmptyDOMElement()
-  const bar = priced.lastElementChild!.firstElementChild as HTMLElement
+  expect(recorded.firstElementChild!).toBeEmptyDOMElement()
+  const bar = priced.firstElementChild!.firstElementChild as HTMLElement
   expect(bar.className).toMatch(/hz50/)
   const ceiling = priceAxis(Math.max(...prices.map((p) => p.stats.high.price))).top
   expect(parseFloat(bar.style.bottom)).toBeCloseTo((prices[1].stats.low.price / ceiling) * 100)

@@ -4,14 +4,19 @@ import tepcoCsv from '../test/fixtures/tepco-jukyu.csv?raw'
 import { dayTotals } from '../market/daily'
 import { parseSpot } from '../market/jepx'
 import { TEPCO } from '../market/tepco'
-import DayView from './DayView'
+import { DayPrices, DaySupply } from './DayView'
 
 /** A split day: Tokyo touched 50.01 in the evening while Kansai spent the night at 8.40. */
 const spot = parseSpot(csv).get('2026-09-22')!
 const totals = dayTotals(TEPCO.parse(tepcoCsv).get('2026-09-24')!)
 
 test('the price figures stand without a record: the mean, the low and the high with when', () => {
-  render(<DayView totals={null} price={null} spot={spot} area="tokyo" />)
+  render(
+    <>
+      <DayPrices spot={spot} area="tokyo" weighted={null} />
+      <DaySupply totals={null} area="tokyo" />
+    </>,
+  )
   expect(screen.getByText('No record for this half hour yet.')).toBeInTheDocument()
   const prices = screen.getByRole('region', { name: 'Prices' })
   const rows = within(prices)
@@ -28,7 +33,12 @@ test('the price figures stand without a record: the mean, the low and the high w
 
 test('with the record, the supply and the weighted price too, and the half hours at the floor when there were any', () => {
   const floored = spot.map((s, i) => (i < 3 ? { ...s, systemPrice: 0.01 } : s))
-  render(<DayView totals={totals} price={12.34} spot={floored} area={null} />)
+  render(
+    <>
+      <DayPrices spot={floored} area={null} weighted={12.34} />
+      <DaySupply totals={totals} area={null} />
+    </>,
+  )
   expect(screen.getByRole('region', { name: 'How the day was supplied' })).toBeInTheDocument()
   const prices = screen.getByRole('region', { name: 'Prices' })
   expect(within(prices).getByText('Price, weighted by demand').nextElementSibling).toHaveTextContent('12.34 ¥/kWh')

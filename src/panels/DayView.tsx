@@ -12,37 +12,17 @@ const gwh = (mwh: number) => (mwh / GWH).toLocaleString('en-US', { minimumFracti
 const startOf = (slot: number) => slotRange(slot).split('–')[0]
 const percent = (share: number) => `${Math.round(share * 100)}%`
 
-interface Props {
-  /** The day's totals, or null when the records for it are not all in. */
-  totals: DayTotals | null
-  /** The price weighted by demand, ¥/kWh. */
-  price: number | null
-  spot: readonly SpotSlot[] | undefined
-  /** The area, or none for all Japan. */
-  area: PricedArea | null
-}
+/** The area, or none for all Japan. */
+type Picked = PricedArea | null
 
 /**
- * The displayed day: in energy, how it was supplied, as one bar and a table of each source's GWh and share, read from
- * the top as the chart stacks, then the day's figures; and in price, its figures, which stand for any priced day, since
- * the auction runs a day ahead of the record.
+ * The displayed day in energy: how it was supplied, as one bar and a table of each source's GWh and share, read from
+ * the top as the chart stacks, then the day's figures; or, while the records for it are not all in, a note. The prices
+ * stand above it, as the price curve stands above the supply chart.
  */
-export default function DayView({ totals, price, spot, area }: Props) {
+export function DaySupply({ totals, area }: { totals: DayTotals | null; area: Picked }) {
   const s = useStrings()
-  return (
-    <>
-      {totals ? (
-        <Supply totals={totals} area={area} />
-      ) : (
-        <p className="muted">{area ? s.readout.noRecord : s.day.notAll}</p>
-      )}
-      <Prices spot={spot} area={area} weighted={price} />
-    </>
-  )
-}
-
-function Supply({ totals, area }: { totals: DayTotals; area: PricedArea | null }) {
-  const s = useStrings()
+  if (!totals) return <p className="muted">{area ? s.readout.noRecord : s.day.notAll}</p>
   const supply = [
     { key: 'imports', name: s.chart.imports, color: 'var(--src-exchange)', mwh: area ? totals.importMWh : 0 },
     { key: 'storageOut', name: s.chart.storageOut, color: 'var(--src-storage)', mwh: totals.storageOutMWh },
@@ -136,14 +116,19 @@ function Supply({ totals, area }: { totals: DayTotals; area: PricedArea | null }
   )
 }
 
-/** The day's price in figures: the mean, the demand-weighted price where the record allows it, the low and the high with when, and the half hours at the floor. */
-function Prices({
+/**
+ * The displayed day in price: the mean, the price weighted by demand where the record allows it, the low and the high
+ * with when, and the half hours at the floor; they stand for any priced day, since the auction runs a day ahead of
+ * the record.
+ */
+export function DayPrices({
   spot,
   area,
   weighted,
 }: {
   spot: readonly SpotSlot[] | undefined
-  area: PricedArea | null
+  area: Picked
+  /** The price weighted by demand, ¥/kWh, or null without the record. */
   weighted: number | null
 }) {
   const s = useStrings()
