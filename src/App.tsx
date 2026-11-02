@@ -17,11 +17,11 @@ import { jstDate, openingDay } from './time/days'
 import { LANGS, LANGUAGE_NAMES, type Lang } from './i18n/strings'
 import { useStrings } from './i18n/useStrings'
 import { PALETTES } from './shared/palette'
-import { resolveTheme, useSystemDark } from './shared/theme'
+import { useTheme } from './shared/useTheme'
 import TimeBar from './time/TimeBar'
 import { useNow } from './time/useNow'
 import { dispatchShortcut, releaseFocusAfterPointerClick } from './shortcuts'
-import { useElementHeight } from './shared/useElementHeight'
+import { useElementSize } from './shared/useElementSize'
 import { usePlayer } from './time/usePlayer'
 
 const MapView = lazy(() => import('./map/MapView'))
@@ -62,9 +62,8 @@ export default function App() {
   const step = useApp((s) => s.step)
   const now = useNow()
   const bar = useRef<HTMLDivElement>(null)
-  const barHeight = useElementHeight(bar)
-  const systemDark = useSystemDark()
-  const themeChoice = useApp((s) => s.themeChoice)
+  const { height: barHeight } = useElementSize(bar)
+  const theme = useTheme()
   const setThemeChoice = useApp((s) => s.setThemeChoice)
   const lang = useApp((s) => s.lang)
   const setLang = useApp((s) => s.setLang)
@@ -73,7 +72,6 @@ export default function App() {
   useEffect(() => {
     document.documentElement.lang = lang
   }, [lang])
-  const theme = resolveTheme(themeChoice, systemDark)
   useEffect(() => {
     document.documentElement.dataset.theme = theme
   }, [theme])
