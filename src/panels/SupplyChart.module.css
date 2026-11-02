@@ -1,21 +1,3 @@
-.figure {
-  margin: 0.75rem 0 0;
-}
-
-.chart {
-  display: block;
-  width: 100%;
-  height: auto;
-  touch-action: none;
-  cursor: crosshair;
-  border-radius: 0.25rem;
-}
-
-.chart:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
 /* No outline between the bands: the colors alone tell the sources apart, and the paths share their edges exactly. */
 .band {
   stroke: none;
@@ -36,31 +18,14 @@
   stroke-linejoin: round;
 }
 
-.marker {
-  stroke: var(--accent);
-  stroke-width: 1.5;
-}
-
-.grid {
-  stroke: var(--border);
-  stroke-width: 1;
-}
-
 /* Over the bands, plain and solid, so the part below it reads as what left the area. */
 .zero {
   stroke: var(--text);
   stroke-width: 1.5;
 }
 
-.gridLabel,
-.zeroLabel,
-.hour {
-  fill: var(--muted);
-  font-size: 9px;
-  font-variant-numeric: tabular-nums;
-}
-
 .zeroLabel {
+  composes: gridLabel from './DayChart.module.css';
   fill: var(--text);
 }
 
