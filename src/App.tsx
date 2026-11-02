@@ -3,6 +3,7 @@ import { ADAPTERS } from './market/adapters'
 import { flowsAt, loadFlows, type FlowDays } from './market/flows'
 import { interchangeAt, RECORDED_AREAS } from './market/interchange'
 import { dayTotals, japanDay, japanTotals, priceStats, weightedPrice } from './market/daily'
+import { priceHistory } from './market/history'
 import { fiscalYear, loadSpotYears, SLOTS, slotOf, type PricedArea, type SpotDays } from './market/jepx'
 import { stories } from './market/stories'
 import { loadRecord, monthOf, recordSlot, type RecordDays, type RecordSlot } from './market/record'
@@ -17,11 +18,11 @@ import { jstDate, openingDay } from './time/days'
 import { LANGS, LANGUAGE_NAMES, type Lang } from './i18n/strings'
 import { useStrings } from './i18n/useStrings'
 import { PALETTES } from './shared/palette'
-import { resolveTheme, useSystemDark } from './shared/theme'
+import { useTheme } from './shared/useTheme'
 import TimeBar from './time/TimeBar'
 import { useNow } from './time/useNow'
 import { dispatchShortcut, releaseFocusAfterPointerClick } from './shortcuts'
-import { useElementHeight } from './shared/useElementHeight'
+import { useElementSize } from './shared/useElementSize'
 import { usePlayer } from './time/usePlayer'
 
 const MapView = lazy(() => import('./map/MapView'))
@@ -62,9 +63,8 @@ export default function App() {
   const step = useApp((s) => s.step)
   const now = useNow()
   const bar = useRef<HTMLDivElement>(null)
-  const barHeight = useElementHeight(bar)
-  const systemDark = useSystemDark()
-  const themeChoice = useApp((s) => s.themeChoice)
+  const { height: barHeight } = useElementSize(bar)
+  const theme = useTheme()
   const setThemeChoice = useApp((s) => s.setThemeChoice)
   const lang = useApp((s) => s.lang)
   const setLang = useApp((s) => s.setLang)
@@ -73,7 +73,6 @@ export default function App() {
   useEffect(() => {
     document.documentElement.lang = lang
   }, [lang])
-  const theme = resolveTheme(themeChoice, systemDark)
   useEffect(() => {
     document.documentElement.dataset.theme = theme
   }, [theme])
@@ -193,6 +192,11 @@ export default function App() {
         return stats ? [{ date: d, stats }] : []
       })
   }, [spot, month, area])
+  // Every priced day held, the picked area's price or the system's, for the readout's history view.
+  const history = useMemo(
+    () => priceHistory(spot, area && area !== 'okinawa' ? (area as PricedArea) : undefined),
+    [spot, area],
+  )
   const japan = useMemo(() => japanDay(areaDays, RECORDED_AREAS), [areaDays])
   const dayFigures = useMemo(() => {
     const picked = area && area !== 'okinawa' ? (area as PricedArea) : null
@@ -267,6 +271,7 @@ export default function App() {
           spotDay={spotDay}
           monthDays={monthDays}
           monthPrices={monthPrices}
+          history={history}
           japan={japan}
           date={date}
           onDate={setDate}

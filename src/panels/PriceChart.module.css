@@ -9,10 +9,9 @@
   stroke-width: 2.25;
 }
 
-/* Every area at once: thinner and a little clear, so where the halves overlap both still show. */
+/* Every area at once: thinner, and solid, so the areas on one price draw as one line in their half's color. */
 .areas {
   stroke-width: 1.5;
-  stroke-opacity: 0.8;
 }
 
 .hz50 {
@@ -46,11 +45,13 @@
   gap: 0.4rem;
 }
 
+/* The keys take their color from the hue classes, so the border's color is left to them. */
 .areaKey,
 .systemKey {
   display: inline-block;
   width: 0.9rem;
-  border-top: 2px solid;
+  border-top-width: 2px;
+  border-top-style: solid;
 }
 
 .systemKey {

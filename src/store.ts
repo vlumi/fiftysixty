@@ -14,6 +14,9 @@ import {
   type MapLayer,
 } from './map/layerChoice'
 
+/** The readout's figures for the displayed half hour, for its whole day, or the price history behind it. */
+export type View = 'slot' | 'day' | 'history'
+
 /** What the reader has chosen: the delivery day (null for the opening day), the half hour, the area or a plant, and whether the day plays. */
 interface State {
   date: string | null
@@ -24,8 +27,7 @@ interface State {
   playing: boolean
   /** Whether the map draws the arrows and the columns. */
   layers: LayerChoice
-  /** The readout's figures for the displayed half hour or for its whole day. */
-  view: 'slot' | 'day'
+  view: View
   /** The fuels whose plants are hidden from the map; every fuel hidden is the plants off. */
   hiddenFuels: Series[]
   themeChoice: ThemeChoice
@@ -38,7 +40,7 @@ interface Actions {
   selectArea: (area: Area | null) => void
   pickPlant: (plant: string | null) => void
   toggleLayer: (layer: MapLayer) => void
-  setView: (view: 'slot' | 'day') => void
+  setView: (view: View) => void
   toggleFuel: (fuel: Series) => void
   setHiddenFuels: (fuels: Series[]) => void
   setThemeChoice: (choice: ThemeChoice) => void

@@ -13,6 +13,7 @@ const STATES: [string, (page: Page) => Promise<unknown>][] = [
       await page.getByRole('button', { name: 'By fuel' }).click()
     },
   ],
+  ['the history view', (page) => page.getByRole('button', { name: 'History' }).click()],
   ['the about', (page) => page.getByRole('button', { name: 'About and credits' }).click()],
   [
     'an area picked in the light theme',
