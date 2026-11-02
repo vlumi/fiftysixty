@@ -17,17 +17,20 @@ interface Props {
   record: RecordSlot | null
   /** The column's size against full size, following the map's zoom. */
   scale?: number
+  /** Faded, as an area of the other half while a half is chosen. */
+  dim?: boolean
   onPick: () => void
 }
 
 /** What ran in an area for the slot, as a column in the middle of it on the map: the chart's bands, a hatched cap for curtailment, demand as its height. */
-export default function MixGlyph({ name, record, scale = 1, onPick }: Props) {
+export default function MixGlyph({ name, record, scale = 1, dim = false, onPick }: Props) {
   const s = useStrings()
   const width = WIDTH * scale
+  const className = dim ? `${styles.glyph} ${styles.dim}` : styles.glyph
   if (!record) {
     const height = EMPTY_HEIGHT * scale
     return (
-      <button className={styles.glyph} aria-label={`${s.key.mix(name)}, ${s.key.noData}`} onClick={onPick}>
+      <button className={className} aria-label={`${s.key.mix(name)}, ${s.key.noData}`} onClick={onPick}>
         <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
           <rect className={styles.empty} x={0.5} y={0.5} width={width - 1} height={height - 1} />
         </svg>
@@ -44,7 +47,7 @@ export default function MixGlyph({ name, record, scale = 1, onPick }: Props) {
   const height = top + px(exports)
   const y = (mw: number) => top - px(mw)
   return (
-    <button className={styles.glyph} aria-label={s.key.mix(name)} onClick={onPick}>
+    <button className={className} aria-label={s.key.mix(name)} onClick={onPick}>
       <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
         {SERIES.map((s) => (
           <rect

@@ -41,6 +41,7 @@ export default function MapView({
   regions,
   prices,
   selected,
+  half = null,
   interchange,
   plants,
   selectedPlant,
@@ -118,6 +119,7 @@ export default function MapView({
       layers: buildLayers(regions, PALETTES[loaded], {
         prices,
         selected,
+        half,
         interchange,
         zoom,
         plants,
@@ -126,7 +128,7 @@ export default function MapView({
         beforeId: BELOW_LABELS[loaded],
       }),
     })
-  }, [loaded, regions, prices, selected, interchange, zoom, plants, selectedPlant, hiddenFuels])
+  }, [loaded, regions, prices, selected, half, interchange, zoom, plants, selectedPlant, hiddenFuels])
 
   return (
     <>
@@ -138,6 +140,7 @@ export default function MapView({
               name={lang === 'ja' ? AREA_BY_ID[area].ja : AREA_BY_ID[area].name}
               record={record}
               scale={mapScale(zoom)}
+              dim={half !== null && AREA_BY_ID[area].hz !== half}
               onPick={() => pick.current.onPick(area)}
             />
           </AreaMarker>

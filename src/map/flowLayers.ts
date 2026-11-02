@@ -1,7 +1,7 @@
 import type { Layer } from '@deck.gl/core'
 import { IconLayer, SolidPolygonLayer } from '@deck.gl/layers'
 import type { Fork, Interchange } from '../market/interchange'
-import { AREA_BY_ID, type Area } from '../regions/areas'
+import { AREA_BY_ID, type Area, type Hz } from '../regions/areas'
 import type { Palette, Rgba } from '../shared/palette'
 import { lerpRgb } from '../shared/scale'
 import type { Interleaved } from './layers'
@@ -14,6 +14,8 @@ import { FULL_SIZE_ZOOM, mapScale } from './scale'
 export interface FlowDatum {
   id: string
   path: [[number, number], [number, number]]
+  /** The areas the stroke runs between, or a fork's three. */
+  areas: Area[]
   /** The flow, MW, always positive along `path`; a tail carries none of its own. */
   mw: number
   /** How full the line is, 0 to 1, for its color; a fork, over two lines, takes the middle. */
@@ -36,6 +38,7 @@ export function flowData(x: Interchange): FlowDatum[] {
   const links = x.links.map((l): FlowDatum => ({
     id: l.id,
     path: [point(l.from), point(l.to)],
+    areas: [l.from, l.to],
     mw: l.mw,
     load: l.load,
     head: true,
@@ -52,9 +55,11 @@ export function forkData(f: Fork): FlowDatum[] {
     focus[0] + ((a[0] + b[0]) / 2 - focus[0]) * JOIN,
     focus[1] + ((a[1] + b[1]) / 2 - focus[1]) * JOIN,
   ]
+  const areas = [f.focus, ...f.others]
   const tail = (end: [number, number], i: number): FlowDatum => ({
     id: `${f.id}/${i}`,
     path: f.into ? [end, junction] : [junction, end],
+    areas,
     mw: 0,
     load: FORK_LOAD,
     head: !f.into,
@@ -64,6 +69,7 @@ export function forkData(f: Fork): FlowDatum[] {
   const shaft: FlowDatum = {
     id: f.id,
     path: f.into ? [junction, focus] : [focus, junction],
+    areas,
     mw: f.mw,
     load: FORK_LOAD,
     head: f.into,
@@ -74,6 +80,9 @@ export function forkData(f: Fork): FlowDatum[] {
 
 const MW_PER_PX = 1000
 const MIN_PX = 1
+const ALPHA = 230
+/** An arrow between two areas of the other half, with a half chosen. */
+const DIM_ALPHA = 70
 /** Half the width and the height, in pixels with a margin, of the column a glyph draws over an anchor; the arrows keep clear of it at both ends. */
 const COLUMN_HALF_PX = [12, 48]
 /** The most of a line the clearances and the head may take, so the shaft keeps the rest of a short line. */
@@ -171,17 +180,20 @@ export function heading([[x1, y1], [x2, y2]]: FlowDatum['path']): number {
 /**
  * The flows as arrows: a solid shaft tapering from a hair where the power leaves to the flow's width where the head
  * begins, colored by the load, and a head in the same color, sized with the shaft, pointing on the way the power goes.
+ * With a half chosen the arrows that touch none of its areas are dimmed.
  */
 export function buildFlowLayers(
   interchange: Interchange | null,
   palette: Palette,
   zoom: number,
   beforeId = 'water_name',
+  half: Hz | null = null,
 ): Layer[] {
   const data = interchange ? flowData(interchange) : []
   if (!interchange || !data.length) return []
   const ramp = palette.flow[interchange.source]
-  const color = (d: FlowDatum): Rgba => [...lerpRgb(ramp.idle, ramp.full, d.load), 230]
+  const dim = (d: FlowDatum) => half !== null && !d.areas.some((a) => AREA_BY_ID[a].hz === half)
+  const color = (d: FlowDatum): Rgba => [...lerpRgb(ramp.idle, ramp.full, d.load), dim(d) ? DIM_ALPHA : ALPHA]
   const head = (d: FlowDatum): [number, number] => shaftEnds(d, zoom)[1]
   return [
     new SolidPolygonLayer<FlowDatum, Interleaved>({
@@ -190,7 +202,7 @@ export function buildFlowLayers(
       data,
       getPolygon: (d) => taperPolygon(d, zoom),
       getFillColor: color,
-      updateTriggers: { getPolygon: zoom, getFillColor: [palette, interchange.source] },
+      updateTriggers: { getPolygon: zoom, getFillColor: [palette, interchange.source, half] },
     }),
     new IconLayer<FlowDatum, Interleaved>({
       id: 'flow-heads',
@@ -205,7 +217,7 @@ export function buildFlowLayers(
       getSize: (d) => headSize(d, zoom),
       sizeUnits: 'pixels',
       billboard: false,
-      updateTriggers: { getPosition: zoom, getSize: zoom, getColor: [palette, interchange.source] },
+      updateTriggers: { getPosition: zoom, getSize: zoom, getColor: [palette, interchange.source, half] },
     }),
   ]
 }

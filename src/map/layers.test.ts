@@ -1,4 +1,4 @@
-import type { GeoJsonLayer } from '@deck.gl/layers'
+import type { GeoJsonLayer, PathLayer } from '@deck.gl/layers'
 import { flowsAt, parseFlows } from '../market/flows'
 import { planned } from '../market/interchange'
 import type { AreaProps, Regions } from '../regions/geometry'
@@ -6,6 +6,7 @@ import flowsCsv from '../test/fixtures/occto-renkei.csv?raw'
 import { DARK } from '../shared/palette'
 import { priceColor } from '../shared/scale'
 import { buildLayers, type AreaPrices, type Interleaved } from './layers'
+import type { Segment } from './outline'
 
 const regions: Regions = {
   areas: {
@@ -14,6 +15,7 @@ const regions: Regions = {
       { type: 'Feature', properties: { area: 'tokyo', hz: 50 }, geometry: { type: 'Polygon', coordinates: [] } },
       { type: 'Feature', properties: { area: 'kansai', hz: 60 }, geometry: { type: 'Polygon', coordinates: [] } },
       { type: 'Feature', properties: { area: 'okinawa', hz: 60 }, geometry: { type: 'Polygon', coordinates: [] } },
+      { type: 'Feature', properties: { area: 'kyushu', hz: 60 }, geometry: { type: 'Polygon', coordinates: [] } },
     ],
   },
   split: { type: 'FeatureCollection', features: [] },
@@ -29,6 +31,19 @@ const regions: Regions = {
             [
               [137, 35],
               [137, 36],
+            ],
+          ],
+        },
+      },
+      {
+        type: 'Feature',
+        properties: { line: 'kansai-kyushu', a: 'kansai', b: 'kyushu', sea: false },
+        geometry: {
+          type: 'MultiLineString',
+          coordinates: [
+            [
+              [132, 34],
+              [131, 33],
             ],
           ],
         },
@@ -87,6 +102,37 @@ test('the selected area is outlined strongly', () => {
   const context = { index: 0, data: regions.areas.features, target: [] }
   expect(width(regions.areas.features[0], context)).toBe(1)
   expect(width(regions.areas.features[1], context)).toBe(2.5)
+})
+
+test("with a half chosen, the other half's areas are muted like Okinawa and its walls left out, and the half is outlined in its hue", () => {
+  const prices = { tokyo: 30, kansai: 5, kyushu: 8 } as AreaPrices
+  const layers = buildLayers(regions, DARK, { prices, half: 50 })
+  expect(layers.map((l) => l.id)).toEqual(['areas', 'split', 'half', 'walls'])
+  const [areas, , outline, walls] = layers as [
+    GeoJsonLayer<AreaProps, Interleaved>,
+    unknown,
+    PathLayer<Segment, Interleaved>,
+    GeoJsonLayer,
+  ]
+  const fill = areas.props.getFillColor
+  if (typeof fill !== 'function') throw new Error('the fill is an accessor')
+  const context = { index: 0, data: regions.areas.features, target: [] }
+  expect(fill(regions.areas.features[0], context)).toEqual([...priceColor(30, DARK.price[50]), 170])
+  expect(fill(regions.areas.features[1], context)).toEqual([...DARK.muted, 40])
+  expect(outline.props.getColor).toEqual([...DARK.hz[50], 255])
+  expect(areas.props.updateTriggers.getFillColor).toEqual([DARK, prices, 50])
+  expect(outline.props.beforeId).toBe('water_name')
+  const lines = (w: GeoJsonLayer) =>
+    (w.props.data as unknown as { features: { properties: { line: string } }[] }).features.map((f) => f.properties.line)
+  expect(lines(walls)).toEqual(['tokyo-kansai'])
+  const [, , sixty, sixtyWalls] = buildLayers(regions, DARK, { prices, half: 60 }) as [
+    unknown,
+    unknown,
+    PathLayer,
+    GeoJsonLayer,
+  ]
+  expect(sixty.props.getColor).toEqual([...DARK.hz[60], 255])
+  expect(lines(sixtyWalls)).toEqual(['tokyo-kansai', 'kansai-kyushu'])
 })
 
 test('with flows, the arrows follow the areas and the split line', () => {
