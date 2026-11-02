@@ -71,7 +71,7 @@ Toolchain, CI, a map of Japan under the name, the data fetcher for JEPX and TEPC
 
 - The day's price curve in the half-hour view, above the supply chart and a slider like it: the picked area's price in its half's color over the system price, or with nothing picked every area's, so the day forks where the market split (done 2026-11-02).
 - The day's price figures, the mean and the range with their half hours, for any priced day, and under the month's supply strip a price strip, a day a bar from its low to its high with the mean as a tick (done 2026-11-02).
-- The price history as a heatmap, a day across and the 48 half hours down in the map's own ramp, a two-dimensional slider over the priced days held.
+- The price history as a heatmap, a day across and the 48 half hours down in the map's own ramp, a two-dimensional slider over the priced days held (done 2026-11-02).
 - The auction behind the system price with nothing picked: what was offered, asked and cleared each half hour, from the bid volumes in JEPX's file.
 
 ## Non-goals

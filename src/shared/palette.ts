@@ -11,8 +11,8 @@ export interface Palette {
   muted: Rgb
   accent: Rgb
   hz: Record<50 | 60, Rgb>
-  /** A ramp per half of the grid, blue for 50 Hz and amber for 60 Hz as the name's colors, each from near the surface to bright, low price to high; see shared/scale.ts. */
-  price: Record<50 | 60, readonly Rgb[]>
+  /** A ramp per half of the grid, blue for 50 Hz and amber for 60 Hz as the name's colors, each from near the surface to bright, low price to high, and a neutral one for the system price, which is of neither half; see shared/scale.ts. */
+  price: Record<50 | 60 | 'system', readonly Rgb[]>
   /** A line's color from idle to full, one ramp per kind: the plan in the cool cyan, the record in violet. */
   flow: Record<'planned' | 'recorded', { idle: Rgb; full: Rgb }>
   /** The chart's series, the `--src-*` tokens as numbers, for the plants. */
@@ -37,6 +37,12 @@ export const DARK: Palette = {
       [150, 62, 18],
       [232, 118, 30],
       [255, 190, 70],
+    ],
+    system: [
+      [22, 26, 40],
+      [70, 76, 92],
+      [138, 144, 160],
+      [214, 217, 224],
     ],
   },
   flow: {
@@ -73,6 +79,12 @@ export const LIGHT: Palette = {
       [242, 168, 100],
       [200, 84, 22],
       [110, 36, 6],
+    ],
+    system: [
+      [228, 230, 236],
+      [164, 170, 182],
+      [91, 98, 112],
+      [28, 31, 38],
     ],
   },
   flow: {

@@ -3,6 +3,7 @@ import { useStrings } from '../i18n/useStrings'
 import { useApp } from '../store'
 import type { PricedArea, SpotSlot } from '../market/jepx'
 import type { DayTotals, JapanDay } from '../market/daily'
+import type { HistoryDay } from '../market/history'
 import type { Interchange } from '../market/interchange'
 import type { RecordSlot } from '../market/record'
 import { AREA_BY_ID, PRICED_AREAS, type Area } from '../regions/areas'
@@ -15,6 +16,7 @@ import styles from './Readout.module.css'
 import DayView from './DayView'
 import MonthStrip, { type MonthDay, type MonthPrice } from './MonthStrip'
 import PriceChart from './PriceChart'
+import PriceHistory from './PriceHistory'
 import SupplyChart from './SupplyChart'
 
 interface Props {
@@ -36,6 +38,8 @@ interface Props {
   /** The displayed month's whole days with their totals, and its priced days with their figures, for the strip under the day. */
   monthDays?: readonly MonthDay[]
   monthPrices?: readonly MonthPrice[]
+  /** Every priced day held, the picked area's price or the system's, for the history view. */
+  history?: readonly HistoryDay[]
   date?: string | null
   onDate?: (date: string) => void
   area: Area | null
@@ -63,6 +67,7 @@ export default function Readout({
   spotDay,
   monthDays = [],
   monthPrices = [],
+  history = [],
   japan = { slots: [], missing: [] },
   date = null,
   onDate,
@@ -87,9 +92,9 @@ export default function Readout({
   )
   const views = (
     <div className={styles.views} role="group" aria-label={s.day.view}>
-      {(['slot', 'day'] as const).map((v) => (
+      {(['slot', 'day', 'history'] as const).map((v) => (
         <button key={v} aria-pressed={view === v} onClick={() => setView(v)}>
-          {v === 'slot' ? s.day.halfHour : s.day.day}
+          {v === 'slot' ? s.day.halfHour : v === 'day' ? s.day.day : s.day.history}
         </button>
       ))}
     </div>
@@ -110,6 +115,20 @@ export default function Readout({
           onPick={onDate}
         />
       )}
+    </>
+  ) : view === 'history' ? (
+    <>
+      {views}
+      <PriceHistory
+        days={history}
+        area={picked}
+        date={date}
+        slot={slot.slot}
+        onPick={(d, at) => {
+          if (d !== date) onDate?.(d)
+          onSlot(at)
+        }}
+      />
     </>
   ) : picked ? (
     <>
