@@ -1,6 +1,15 @@
 import csv from '../test/fixtures/tepco-jukyu.csv?raw'
 import spotCsv from '../test/fixtures/jepx-spot.csv?raw'
-import { co2Intensity, dayTotals, floorSlots, japanDay, japanTotals, renewableShare, weightedPrice } from './daily'
+import {
+  co2Intensity,
+  dayTotals,
+  floorSlots,
+  japanDay,
+  japanTotals,
+  priceStats,
+  renewableShare,
+  weightedPrice,
+} from './daily'
 import { parseSpot } from './jepx'
 import type { RecordSlot } from './record'
 import { SERIES } from './stack'
@@ -85,4 +94,18 @@ test('CO₂ is estimated from the fuel burnt, each fuel by its factor, and per k
       ),
     )!.co2t,
   ).toBeCloseTo(t.co2t * 2)
+})
+
+test("a day's price in figures: the mean, and the low and the high with their half hours, for an area or the system", () => {
+  const spot = parseSpot(spotCsv).get('2026-09-22')!
+  const tokyo = priceStats(spot, 'tokyo')!
+  const prices = spot.map((s) => s.areaPrice.tokyo)
+  expect(tokyo.mean).toBeCloseTo(prices.reduce((a, b) => a + b, 0) / prices.length)
+  expect(tokyo.high.price).toBe(Math.max(...prices))
+  expect(spot.find((s) => s.slot === tokyo.high.slot)!.areaPrice.tokyo).toBe(tokyo.high.price)
+  expect(tokyo.low.price).toBe(Math.min(...prices))
+  const system = priceStats(spot)!
+  expect(system.high.price).toBe(Math.max(...spot.map((s) => s.systemPrice)))
+  expect(priceStats(undefined)).toBeNull()
+  expect(priceStats([])).toBeNull()
 })

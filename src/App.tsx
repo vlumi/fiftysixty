@@ -2,7 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type
 import { ADAPTERS } from './market/adapters'
 import { flowsAt, loadFlows, type FlowDays } from './market/flows'
 import { interchangeAt, RECORDED_AREAS } from './market/interchange'
-import { dayTotals, japanDay, japanTotals, weightedPrice } from './market/daily'
+import { dayTotals, japanDay, japanTotals, priceStats, weightedPrice } from './market/daily'
 import { fiscalYear, loadSpotYears, SLOTS, slotOf, type PricedArea, type SpotDays } from './market/jepx'
 import { stories } from './market/stories'
 import { loadRecord, monthOf, recordSlot, type RecordDays, type RecordSlot } from './market/record'
@@ -181,6 +181,18 @@ export default function App() {
       return japan.slots.length === SLOTS ? [{ date: d, totals: dayTotals(japan.slots), missing: japan.missing }] : []
     })
   }, [records, month, area])
+  // The displayed month's priced days, the picked area's price or the system's, for the strip's price row.
+  const monthPrices = useMemo(() => {
+    if (!spot || !month) return []
+    const picked = area && area !== 'okinawa' ? (area as PricedArea) : undefined
+    return [...spot.keys()]
+      .filter((d) => monthOf(d) === month)
+      .sort()
+      .flatMap((d) => {
+        const stats = priceStats(spot.get(d), picked)
+        return stats ? [{ date: d, stats }] : []
+      })
+  }, [spot, month, area])
   const japan = useMemo(() => japanDay(areaDays, RECORDED_AREAS), [areaDays])
   const dayFigures = useMemo(() => {
     const picked = area && area !== 'okinawa' ? (area as PricedArea) : null
@@ -254,6 +266,7 @@ export default function App() {
           dayPrice={dayFigures.price}
           spotDay={spotDay}
           monthDays={monthDays}
+          monthPrices={monthPrices}
           japan={japan}
           date={date}
           onDate={setDate}

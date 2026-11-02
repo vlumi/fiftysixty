@@ -216,6 +216,7 @@ test("the day view: the switch shows the area's day in energy, and all Japan wit
       interchange={null}
       area="tokyo"
       dayTotals={totals}
+      spotDay={spotDay}
       dayPrice={12.34}
       onBack={vi.fn()}
       onSlot={vi.fn()}
@@ -224,7 +225,7 @@ test("the day view: the switch shows the area's day in energy, and all Japan wit
   await userEvent.click(screen.getByRole('button', { name: 'Day' }))
   const supply = screen.getByRole('region', { name: 'How the day was supplied' })
   expect(within(supply).getByRole('row', { name: /^Nuclear/ })).toHaveTextContent(/\d+\.\d\d+%/)
-  expect(supply).toHaveTextContent('Price, weighted by demand12.34')
+  expect(screen.getByRole('region', { name: 'Prices' })).toHaveTextContent('Price, weighted by demand12.34')
   expect(screen.getByRole('button', { name: 'Day' })).toHaveAttribute('aria-pressed', 'true')
   rerender(
     <Readout

@@ -1,5 +1,5 @@
 import { useStrings } from '../i18n/useStrings'
-import { co2Intensity, floorSlots, renewableShare, type DayTotals } from '../market/daily'
+import { co2Intensity, floorSlots, priceStats, renewableShare, type DayTotals } from '../market/daily'
 import { SLOTS, type PricedArea, type SpotSlot } from '../market/jepx'
 import { SERIES } from '../market/stack'
 import { mw, yen } from '../shared/format'
@@ -23,12 +23,26 @@ interface Props {
 }
 
 /**
- * The displayed day in energy: how it was supplied, as one bar and a table of each source's GWh and share, read from
- * the top as the chart stacks, then the day's figures.
+ * The displayed day: in energy, how it was supplied, as one bar and a table of each source's GWh and share, read from
+ * the top as the chart stacks, then the day's figures; and in price, its figures, which stand for any priced day, since
+ * the auction runs a day ahead of the record.
  */
 export default function DayView({ totals, price, spot, area }: Props) {
   const s = useStrings()
-  if (!totals) return <p className="muted">{area ? s.readout.noRecord : s.day.notAll}</p>
+  return (
+    <>
+      {totals ? (
+        <Supply totals={totals} area={area} />
+      ) : (
+        <p className="muted">{area ? s.readout.noRecord : s.day.notAll}</p>
+      )}
+      <Prices spot={spot} area={area} weighted={price} />
+    </>
+  )
+}
+
+function Supply({ totals, area }: { totals: DayTotals; area: PricedArea | null }) {
+  const s = useStrings()
   const supply = [
     { key: 'imports', name: s.chart.imports, color: 'var(--src-exchange)', mwh: area ? totals.importMWh : 0 },
     { key: 'storageOut', name: s.chart.storageOut, color: 'var(--src-storage)', mwh: totals.storageOutMWh },
@@ -40,7 +54,6 @@ export default function DayView({ totals, price, spot, area }: Props) {
     })),
   ].filter((r) => r.mwh > 0)
   const total = supply.reduce((sum, r) => sum + r.mwh, 0)
-  const floors = floorSlots(spot, area ?? undefined)
   return (
     <section className={styles.day} aria-label={s.day.supply}>
       {totals.slots < SLOTS && <p className="muted">{s.day.soFar(slotRange(totals.slots).split('–')[1])}</p>}
@@ -118,14 +131,54 @@ export default function DayView({ totals, price, spot, area }: Props) {
             </dd>
           </>
         )}
-        {price !== null && (
+      </dl>
+    </section>
+  )
+}
+
+/** The day's price in figures: the mean, the demand-weighted price where the record allows it, the low and the high with when, and the half hours at the floor. */
+function Prices({
+  spot,
+  area,
+  weighted,
+}: {
+  spot: readonly SpotSlot[] | undefined
+  area: PricedArea | null
+  weighted: number | null
+}) {
+  const s = useStrings()
+  const stats = priceStats(spot, area ?? undefined)
+  if (!stats) return null
+  const floors = floorSlots(spot, area ?? undefined)
+  return (
+    <section aria-label={s.day.prices}>
+      <dl className={styles.figures}>
+        <dt>{s.day.meanPrice}</dt>
+        <dd>
+          {yen(stats.mean)} <span className="muted">{s.readout.yenPerKwh}</span>
+        </dd>
+        {weighted !== null && (
           <>
             <dt>{s.day.price}</dt>
             <dd>
-              {yen(price)} <span className="muted">{s.readout.yenPerKwh}</span>
+              {yen(weighted)} <span className="muted">{s.readout.yenPerKwh}</span>
             </dd>
           </>
         )}
+        <dt>{s.day.lowPrice}</dt>
+        <dd>
+          {yen(stats.low.price)}{' '}
+          <span className="muted">
+            {s.readout.yenPerKwh} · {startOf(stats.low.slot)}
+          </span>
+        </dd>
+        <dt>{s.day.highPrice}</dt>
+        <dd>
+          {yen(stats.high.price)}{' '}
+          <span className="muted">
+            {s.readout.yenPerKwh} · {startOf(stats.high.slot)}
+          </span>
+        </dd>
         {floors > 0 && (
           <>
             <dt>{s.day.floor}</dt>

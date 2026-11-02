@@ -6,27 +6,29 @@
   display: flex;
   touch-action: none;
   cursor: ew-resize;
-  align-items: flex-end;
   gap: 2px;
-  height: 4rem;
 }
 
-/* A day's button spans the strip's height, so the whole column is the target, not only the bar. */
+/* A day's column spans the strip's height, so the whole column is the target, not only the bars. */
 .day {
   flex: 1;
   display: flex;
-  align-items: flex-end;
-  height: 100%;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.4rem;
   min-width: 0;
-  padding: 0;
-  border: 0;
   border-radius: 2px;
-  background: none;
 }
 
 .day[aria-current='date'] {
   outline: 1.5px solid var(--text);
   outline-offset: 1px;
+}
+
+.supply {
+  display: flex;
+  align-items: flex-end;
+  height: 4rem;
 }
 
 .stack {
@@ -39,6 +41,40 @@
 
 .stack span {
   flex-basis: 0;
+}
+
+/* The day's price from its lowest half hour to its highest, over a scale from zero, the mean a tick across it. */
+.prices {
+  position: relative;
+  height: 3rem;
+}
+
+.range {
+  position: absolute;
+  right: 0;
+  left: 0;
+  min-height: 2px;
+  border-radius: 1px;
+}
+
+.system {
+  background: var(--border-strong);
+}
+
+.hz50 {
+  background: var(--price50);
+}
+
+.hz60 {
+  background: var(--price60);
+}
+
+.mean {
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: var(--text);
 }
 
 .ends {
