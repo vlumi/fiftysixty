@@ -13,7 +13,7 @@ import { mw, signed, yen } from '../shared/format'
 import { useNarrow } from '../shared/useNarrow'
 import styles from './Readout.module.css'
 import DayView from './DayView'
-import MonthStrip, { type MonthDay } from './MonthStrip'
+import MonthStrip, { type MonthDay, type MonthPrice } from './MonthStrip'
 import PriceChart from './PriceChart'
 import SupplyChart from './SupplyChart'
 
@@ -33,8 +33,9 @@ interface Props {
   spotDay?: readonly SpotSlot[]
   /** All Japan's half hours of the displayed day, where every area has one, for the national readout. */
   japan?: JapanDay
-  /** The displayed month's whole days with their totals, for the strip under the day. */
+  /** The displayed month's whole days with their totals, and its priced days with their figures, for the strip under the day. */
   monthDays?: readonly MonthDay[]
+  monthPrices?: readonly MonthPrice[]
   date?: string | null
   onDate?: (date: string) => void
   area: Area | null
@@ -61,6 +62,7 @@ export default function Readout({
   dayPrice = null,
   spotDay,
   monthDays = [],
+  monthPrices = [],
   japan = { slots: [], missing: [] },
   date = null,
   onDate,
@@ -99,7 +101,15 @@ export default function Readout({
       {views}
       {!picked && <JapanHeading missing={japan.missing} />}
       <DayView totals={dayTotals} price={dayPrice} spot={spotDay} area={picked} />
-      {onDate && <MonthStrip days={monthDays} date={date} onPick={onDate} />}
+      {onDate && (
+        <MonthStrip
+          days={monthDays}
+          prices={monthPrices}
+          hz={picked ? AREA_BY_ID[picked].hz : null}
+          date={date}
+          onPick={onDate}
+        />
+      )}
     </>
   ) : picked ? (
     <>
