@@ -14,6 +14,7 @@ import { useNarrow } from '../shared/useNarrow'
 import styles from './Readout.module.css'
 import DayView from './DayView'
 import MonthStrip, { type MonthDay } from './MonthStrip'
+import PriceChart from './PriceChart'
 import SupplyChart from './SupplyChart'
 
 interface Props {
@@ -28,6 +29,7 @@ interface Props {
   /** The displayed day for the picked area, or for all Japan with none picked; its weighted price and its prices. */
   dayTotals?: DayTotals | null
   dayPrice?: number | null
+  /** The displayed day's auction, for the price curve and the day's price figures. */
   spotDay?: readonly SpotSlot[]
   /** All Japan's half hours of the displayed day, where every area has one, for the national readout. */
   japan?: JapanDay
@@ -104,6 +106,7 @@ export default function Readout({
       {views}
       <AreaRows area={picked} slot={slot} />
       <Lines area={picked} interchange={interchange} />
+      {spotDay && <PriceChart day={spotDay} area={picked} slot={slot.slot} onSlot={onSlot} hours={!day?.length} />}
       {day?.length ? <SupplyChart day={day} slot={slot.slot} onSlot={onSlot} /> : null}
       {!record && <p className="muted">{s.readout.noRecord}</p>}
     </>
@@ -111,6 +114,7 @@ export default function Readout({
     <>
       {area !== 'okinawa' && views}
       <SystemNote slot={slot} okinawa={area === 'okinawa'} />
+      {area !== 'okinawa' && spotDay && <PriceChart day={spotDay} area={null} slot={slot.slot} onSlot={onSlot} />}
       {area !== 'okinawa' && japan.slots.length > 0 && (
         <>
           <JapanHeading missing={japan.missing} />

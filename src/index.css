@@ -11,6 +11,9 @@
   --fill-soft: rgb(255 255 255 / 0.12);
   --hz50: #00c6e6;
   --hz60: #eedd66;
+  /* A stop of each half's price ramp, the one that reads best against the panel, for lines drawn in a half's price color. */
+  --price50: #96c8ff;
+  --price60: #ffbe46;
 
   /* The supply stack's series, bottom to top, an order that stays telling apart under color-blindness. */
   --src-coal: #e66767;
@@ -46,6 +49,8 @@
   --fill-soft: rgb(0 0 0 / 0.1);
   --hz50: #007a90;
   --hz60: #8f5f00;
+  --price50: #2854c4;
+  --price60: #c85416;
   --src-coal: #e34948;
   --src-nuclear: #4a3aa7;
   --src-renewables: #008300;

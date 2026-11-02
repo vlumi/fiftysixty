@@ -4,7 +4,7 @@ The Japanese power market on a map, from public data. A sibling of [nebulosa](ht
 
 **The name:** 50 Hz east, 60 Hz west, and the three converter stations between them that cap the flow across the middle of the country; also Nykänen's *fifty-sixty*, "more or less", which is what a day-ahead price is. Styled 50/60.
 
-**Status:** unofficial demo project, not affiliated with JEPX, OCCTO or any utility. Bootstrapped 2026-09-25 with the toolchain and a map of Japan; the same day, the day-ahead price on the map, what ran in every area, the flows between them, play and the story days, and the plants, the phone layout, the light theme and the Japanese interface: every milestone below through M5 landed on the first day, and M6, whole days and the recorded flows, by 2026-09-29.
+**Status:** unofficial demo project, not affiliated with JEPX, OCCTO or any utility. Bootstrapped 2026-09-25 with the toolchain and a map of Japan; the same day, the day-ahead price on the map, what ran in every area, the flows between them, play and the story days, and the plants, the phone layout, the light theme and the Japanese interface: every milestone below through M5 landed on the first day, M6, whole days and the recorded flows, by 2026-09-29, and M7, the price over time, was begun 2026-11-02.
 
 ## Data
 
@@ -66,6 +66,13 @@ Toolchain, CI, a map of Japan under the name, the data fetcher for JEPX and TEPC
 - The market split as a wall on the border, from the area prices.
 - A day view: the day's energy by source, the peak, the renewable share, the price weighted by demand and an estimated CO₂, per area and for all Japan, with the areas not yet recorded named; the month's days side by side to scrub.
 - The keyboard, an accessibility round with axe in the browser tests, and the layers switched in a panel.
+
+### M7 — the price over time
+
+- The day's price curve in the half-hour view, above the supply chart and a slider like it: the picked area's price in its half's color over the system price, or with nothing picked every area's, so the day forks where the market split (done 2026-11-02).
+- The day's price figures, the mean and the range with their half hours, and under the month's supply strip a price strip, a day a bar from its low to its high.
+- The price history as a heatmap, a day across and the 48 half hours down in the map's own ramp, a two-dimensional slider over the priced days held.
+- The auction behind the system price with nothing picked: what was offered, asked and cleared each half hour, from the bid volumes in JEPX's file.
 
 ## Non-goals
 

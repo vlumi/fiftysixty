@@ -1,20 +1,14 @@
-import { useMemo, type PointerEvent } from 'react'
+import { useMemo } from 'react'
 import { co2Intensity, dayTotals, renewableShare } from '../market/daily'
 import type { RecordSlot } from '../market/record'
 import { useStrings } from '../i18n/useStrings'
-import { SLOTS } from '../market/jepx'
 import { aboveMW, SERIES, stackDay, type StackedSlot } from '../market/stack'
-import { clampSlot, slotRange } from '../time/slots'
+import DayChart from './DayChart'
+import frame from './DayChart.module.css'
+import { LEFT, slotX, TOP, WIDTH } from './slotAxis'
 import styles from './SupplyChart.module.css'
 
-const WIDTH = 320
-const HEIGHT = 150
-const TOP = 6
-const BOTTOM = 16
-/** The gutter on the left where the gigawatt labels sit, off the bands. */
-const LEFT = 34
-const PLOT = HEIGHT - TOP - BOTTOM
-const SPAN = WIDTH - LEFT
+const PLOT = 128
 const GW = 1000
 
 /** The rows that supplied the half hour, whose shares are given: the sources, storage giving back and imports. */
@@ -64,54 +58,29 @@ interface Props {
   onSlot: (slot: number) => void
 }
 
-/**
- * The day's supply stack under the demand line, the displayed half hour marked; pointing or dragging on it moves
- * the half hour, and the page's arrow keys do the same with it focused, so the readout beside it is the tooltip.
- */
+/** The day's supply stack under the demand line, in the day charts' frame, with its key and the half hour's figures under it. */
 export default function SupplyChart({ day, slot, onSlot }: Props) {
   const s = useStrings()
   const stack = useMemo(() => stackDay(day), [day])
-  const x = (s: number) => LEFT + ((s - 0.5) / SLOTS) * SPAN
   const y = (mw: number) => TOP + ((stack.maxMW - mw) / (stack.maxMW - stack.minMW)) * PLOT
   const band = (top: (s: StackedSlot) => number, bottom: (s: StackedSlot) => number) => {
-    const up = stack.slots.map((s) => `${x(s.slot).toFixed(1)},${y(top(s)).toFixed(1)}`)
-    const down = [...stack.slots].reverse().map((s) => `${x(s.slot).toFixed(1)},${y(bottom(s)).toFixed(1)}`)
+    const up = stack.slots.map((s) => `${slotX(s.slot).toFixed(1)},${y(top(s)).toFixed(1)}`)
+    const down = [...stack.slots].reverse().map((s) => `${slotX(s.slot).toFixed(1)},${y(bottom(s)).toFixed(1)}`)
     return `M${up.join('L')}L${down.join('L')}Z`
   }
   const line = (v: (s: StackedSlot) => number) =>
-    `M${stack.slots.map((s) => `${x(s.slot).toFixed(1)},${y(v(s)).toFixed(1)}`).join('L')}`
+    `M${stack.slots.map((s) => `${slotX(s.slot).toFixed(1)},${y(v(s)).toFixed(1)}`).join('L')}`
   // About five gridlines whatever the range, from an area's few gigawatts to all Japan's ninety.
   const gridStep = ([5, 10, 20, 50].find((gw) => (stack.maxMW - stack.minMW) / (gw * GW) <= 5) ?? 100) * GW
   const gridlines = []
   for (let mw = Math.ceil(stack.minMW / gridStep) * gridStep; mw <= stack.maxMW; mw += gridStep) gridlines.push(mw)
   const curtailed = stack.slots.some((s) => s.curtailedMW > 0)
 
-  const slotAt = (e: PointerEvent<SVGSVGElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const px = ((e.clientX - rect.left) / rect.width) * WIDTH
-    return clampSlot(((px - LEFT) / SPAN) * SLOTS + 0.5)
-  }
-
   return (
-    <figure className={styles.figure}>
-      <svg
-        className={styles.chart}
-        viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-        role="slider"
-        aria-label={s.chart.label}
-        aria-valuemin={1}
-        aria-valuemax={SLOTS}
-        aria-valuenow={slot}
-        aria-valuetext={slotRange(slot)}
-        tabIndex={0}
-        onPointerDown={(e) => {
-          e.currentTarget.setPointerCapture(e.pointerId)
-          onSlot(slotAt(e))
-        }}
-        onPointerMove={(e) => e.buttons && onSlot(slotAt(e))}
-      >
+    <figure className={frame.figure}>
+      <DayChart label={s.chart.label} plot={PLOT} slot={slot} onSlot={onSlot}>
         {gridlines.map((mw) => (
-          <line key={mw} className={styles.grid} x1={LEFT} x2={WIDTH} y1={y(mw)} y2={y(mw)} />
+          <line key={mw} className={frame.grid} x1={LEFT} x2={WIDTH} y1={y(mw)} y2={y(mw)} />
         ))}
         {SERIES.map((x) => (
           <path
@@ -147,7 +116,7 @@ export default function SupplyChart({ day, slot, onSlot }: Props) {
         {gridlines.map((mw) => (
           <text
             key={mw}
-            className={mw === 0 ? styles.zeroLabel : styles.gridLabel}
+            className={mw === 0 ? styles.zeroLabel : frame.gridLabel}
             x={LEFT - 4}
             y={y(mw) + 3}
             textAnchor="end"
@@ -155,19 +124,7 @@ export default function SupplyChart({ day, slot, onSlot }: Props) {
             {mw / GW} {s.chart.gw}
           </text>
         ))}
-        <line className={styles.marker} x1={x(slot)} x2={x(slot)} y1={TOP} y2={TOP + PLOT} />
-        {[0, 6, 12, 18, 24].map((h) => (
-          <text
-            key={h}
-            className={styles.hour}
-            x={LEFT + (h / 24) * SPAN}
-            y={HEIGHT - 4}
-            textAnchor={h === 0 ? 'start' : h === 24 ? 'end' : 'middle'}
-          >
-            {h}
-          </text>
-        ))}
-      </svg>
+      </DayChart>
       <MixKey
         at={stack.slots.find((t) => t.slot === slot)}
         record={day.find((r) => r.slot === slot)}

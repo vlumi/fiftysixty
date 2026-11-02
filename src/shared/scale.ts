@@ -16,3 +16,15 @@ export function priceColor(price: number, ramp: readonly Rgb[]): Rgb {
 }
 
 export const cssRgb = (c: Rgb) => `rgb(${c[0]} ${c[1]} ${c[2]})`
+
+/** Gridlines about five to the day chart's plot, from a cheap day's few yen to a capped winter's hundreds. */
+const AXIS_STEPS = [5, 10, 20, 50, 100]
+/** The day chart's axis never shrinks below this top, so a cheap day reads as flat and low rather than noisy. */
+const LEAST_TOP = 20
+
+/** The day chart's axis for a day whose highest drawn price is `max`: zero-based, the top at the gridline above it. */
+export function priceAxis(max: number): { top: number; step: number } {
+  const high = Math.max(LEAST_TOP, max)
+  const step = AXIS_STEPS.find((s) => high / s <= 5) ?? 200
+  return { top: Math.ceil(high / step) * step, step }
+}
