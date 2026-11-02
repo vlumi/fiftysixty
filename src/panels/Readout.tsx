@@ -122,14 +122,15 @@ export default function Readout({
   ) : view === 'day' ? (
     <>
       {views}
-      {!half && <DayPrices spot={spotDay} area={picked} weighted={dayPrice} />}
+      <DayPrices spot={spotDay} area={picked} half={half} weighted={dayPrice} />
       {!picked && <JapanHeading half={half} missing={japan.missing} />}
       <DaySupply totals={dayTotals} area={picked} />
       {onDate && (
         <MonthStrip
           days={monthDays}
           prices={monthPrices}
-          hz={picked ? AREA_BY_ID[picked].hz : null}
+          hz={picked ? AREA_BY_ID[picked].hz : half}
+          weighted={!picked && !!half}
           date={date}
           onPick={onDate}
         />
@@ -138,6 +139,7 @@ export default function Readout({
   ) : view === 'history' ? (
     <>
       {views}
+      {half && !picked && <p className="muted">{s.readout.halfHistory}</p>}
       <PriceHistory
         days={history}
         area={picked}
@@ -161,7 +163,11 @@ export default function Readout({
   ) : (
     <>
       {area !== 'okinawa' && views}
-      <SystemNote slot={slot} half={half} okinawa={area === 'okinawa'} />
+      {half && area !== 'okinawa' ? (
+        <HalfRows half={half} slot={slot} />
+      ) : (
+        <SystemNote slot={slot} okinawa={area === 'okinawa'} />
+      )}
       {area !== 'okinawa' && spotDay && (
         <>
           <PriceChart day={spotDay} area={null} slot={slot.slot} onSlot={onSlot} hours={false} />
@@ -241,18 +247,33 @@ function spreadOf(slot: SpotSlot, half: Hz | null): [number, number] {
   return [Math.min(...prices), Math.max(...prices)]
 }
 
-function SystemNote({ slot, half, okinawa }: { slot: SpotSlot; half: Hz | null; okinawa: boolean }) {
+function SystemNote({ slot, okinawa }: { slot: SpotSlot; okinawa: boolean }) {
   const s = useStrings()
-  const [low, high] = spreadOf(slot, half)
+  const [low, high] = spreadOf(slot, null)
   return (
     <p className="muted">
-      {half
-        ? s.readout.halfSystem(yen(slot.systemPrice))
-        : low === high
-          ? s.readout.everyAreaSystem
-          : s.readout.spread(yen(low), yen(high))}{' '}
+      {low === high ? s.readout.everyAreaSystem : s.readout.spread(yen(low), yen(high))}{' '}
       {okinawa ? s.readout.okinawa : s.readout.pickArea}
     </p>
+  )
+}
+
+/** A half's half hour in figures: the system price, then each of its areas against it. */
+function HalfRows({ half, slot }: { half: Hz; slot: SpotSlot }) {
+  const s = useStrings()
+  return (
+    <dl className={styles.rows}>
+      <dt>{s.readout.system}</dt>
+      <dd>{yen(slot.systemPrice)}</dd>
+      {PRICED_AREAS.filter((a) => a.hz === half).map((a) => (
+        <Neighbor
+          key={a.id}
+          area={a.id as PricedArea}
+          price={slot.areaPrice[a.id as PricedArea]}
+          against={slot.systemPrice}
+        />
+      ))}
+    </dl>
   )
 }
 

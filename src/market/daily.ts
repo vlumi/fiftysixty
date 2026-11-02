@@ -171,6 +171,26 @@ export function priceStats(spot: readonly SpotSlot[] | undefined, area?: PricedA
   return { mean: sum / spot.length, low, high }
 }
 
+/** The lowest and the highest price across a set of areas over the day, each with its area and when. */
+export interface SpreadStats {
+  low: { price: number; slot: number; area: PricedArea }
+  high: { price: number; slot: number; area: PricedArea }
+}
+
+/** The day's spread across the areas given, for a half of the grid, which has no price of its own; null without half hours. */
+export function spreadStats(spot: readonly SpotSlot[] | undefined, areas: readonly PricedArea[]): SpreadStats | null {
+  if (!spot?.length || !areas.length) return null
+  let low = { price: Infinity, slot: 0, area: areas[0] }
+  let high = { price: -Infinity, slot: 0, area: areas[0] }
+  for (const s of spot)
+    for (const area of areas) {
+      const price = s.areaPrice[area]
+      if (price < low.price) low = { price, slot: s.slot, area }
+      if (price > high.price) high = { price, slot: s.slot, area }
+    }
+  return { low, high }
+}
+
 /** How many half hours of the day an area, or the system price when none is given, cleared at the floor. */
 export function floorSlots(spot: readonly SpotSlot[] | undefined, area?: PricedArea): number {
   return (spot ?? []).filter((s) => (area ? s.areaPrice[area] : s.systemPrice) <= FLOOR_YEN).length

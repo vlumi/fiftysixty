@@ -81,10 +81,13 @@ export interface Strings {
     prices: string
     meanPrice: string
     meanOf: (price: string) => string
+    weightedOf: (price: string) => string
+    spreadOf: (low: string, high: string) => string
     lowPrice: string
     highPrice: string
     price: string
     floor: string
+    floorArea: string
     soFar: (time: string) => string
     japan: string
     notAll: string
@@ -102,11 +105,11 @@ export interface Strings {
     yenPerKwh: string
     spread: (low: string, high: string) => string
     everyAreaSystem: string
-    halfSystem: (price: string) => string
     pickArea: string
     okinawa: string
     hz: (hz: number) => string
     half: string
+    halfHistory: string
     system: string
     lines: string
     recorded: string
@@ -249,10 +252,13 @@ const en: Strings = {
     prices: 'Prices',
     meanPrice: 'Mean price',
     meanOf: (price) => `mean ${price} ¥/kWh`,
+    weightedOf: (price) => `weighted ${price} ¥/kWh`,
+    spreadOf: (low, high) => `from ${low} to ${high} ¥/kWh`,
     lowPrice: 'Lowest price',
     highPrice: 'Highest price',
     price: 'Price, weighted by demand',
     floor: 'Half hours at the floor',
+    floorArea: 'Area half hours at the floor',
     soFar: (time) => `Through ${time} so far.`,
     japan: 'All Japan',
     notAll: 'No area has recorded the day yet.',
@@ -270,11 +276,11 @@ const en: Strings = {
     yenPerKwh: '¥/kWh',
     spread: (low, high) => `Areas from ${low} to ${high}.`,
     everyAreaSystem: 'Every area at the system price.',
-    halfSystem: (price) => `System price ${price}.`,
     pickArea: 'Pick an area for its price.',
     okinawa: 'Okinawa is not on the exchange.',
     hz: (hz) => `${hz} Hz`,
     half: 'Half of the grid',
+    halfHistory: 'A half has no price of its own; this is the system price.',
     system: 'System',
     lines: 'Lines',
     recorded: 'recorded',
@@ -434,10 +440,13 @@ const ja: Strings = {
     prices: '価格',
     meanPrice: '平均価格',
     meanOf: (price) => `平均 ${price} 円/kWh`,
+    weightedOf: (price) => `需要加重 ${price} 円/kWh`,
+    spreadOf: (low, high) => `${low}〜${high} 円/kWh`,
     lowPrice: '最低価格',
     highPrice: '最高価格',
     price: '需要加重平均価格',
     floor: '下限価格のコマ',
+    floorArea: '下限価格のエリア・コマ',
     soFar: (time) => `${time}まで。`,
     japan: '全国',
     notAll: 'まだどのエリアもこの日の実績がありません。',
@@ -455,11 +464,11 @@ const ja: Strings = {
     yenPerKwh: '円/kWh',
     spread: (low, high) => `エリアプライスは ${low}〜${high}。`,
     everyAreaSystem: '全エリアがシステムプライス。',
-    halfSystem: (price) => `システムプライス ${price}。`,
     pickArea: 'エリアを選ぶと価格が出ます。',
     okinawa: '沖縄は取引所の対象外です。',
     hz: (hz) => `${hz} Hz`,
     half: '周波数帯',
+    halfHistory: '周波数帯に固有の価格はありません。システムプライスを示します。',
     system: 'システム',
     lines: '連系線',
     recorded: '実績',
