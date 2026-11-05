@@ -1,6 +1,7 @@
 import { useStrings } from '../../i18n/useStrings'
 import type { HistoryDay } from '../../market/history'
 import type { SplitHistory as Splits } from '../../market/splits'
+import DurationCurve from '../DurationCurve'
 import PriceHistory from '../PriceHistory'
 import SplitHistory from '../SplitHistory'
 import type { PricedScope } from './scope'
@@ -18,10 +19,13 @@ interface Props {
 
 /**
  * The long view: the price history as the heatmap, the picked area's price, or the system's for a half, which has
- * none of its own, and for all Japan; under it the market splits over the same days on the scope's lines.
+ * none of its own, and for all Japan; under it the market splits over the same days on the scope's lines, and the
+ * price duration curve over every half hour of them.
  */
 export default function HistoryView({ scope, history, splits, date, slot, onDate, onSlot }: Props) {
   const s = useStrings()
+  const at = date ? history.findIndex((d) => d.date === date) : -1
+  const price = at >= 0 ? history[at].prices[slot - 1] : NaN
   return (
     <>
       {scope.kind === 'half' && <p className="muted">{s.readout.halfHistory}</p>}
@@ -36,6 +40,7 @@ export default function HistoryView({ scope, history, splits, date, slot, onDate
         }}
       />
       <SplitHistory splits={splits} date={date} />
+      <DurationCurve days={history} scope={scope} price={price} />
     </>
   )
 }

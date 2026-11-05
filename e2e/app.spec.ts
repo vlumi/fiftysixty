@@ -170,6 +170,7 @@ test('the history view: a press on the heatmap sets the day and the half hour', 
   await expect(heat).toHaveAttribute('aria-valuenow', '3')
   await expect(heat).toHaveAttribute('aria-valuetext', /^2026-09-25 \(Fri\) 12:00–12:30: /)
   await expect(page.getByRole('img', { name: 'Market splits' })).toBeVisible()
+  await expect(page.getByRole('img', { name: 'Price duration' })).toBeVisible()
   const box = (await heat.boundingBox())!
   await heat.click({ position: { x: box.width * 0.125, y: box.height * 0.51 } })
   await expect(page.getByLabel('Delivery day')).toHaveValue('2026-09-22')

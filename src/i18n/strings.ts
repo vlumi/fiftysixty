@@ -138,6 +138,12 @@ export interface Strings {
     history: string
     splits: string
     splitsKey: string
+    duration: string
+    durationKey: (halfHours: string, from: string, to: string) => string
+    mean: string
+    median: string
+    topTenth: string
+    atFloor: string
     yen: (price: number) => string
     auction: string
     offered: string
@@ -318,6 +324,12 @@ const en: Strings = {
     history: 'Price history',
     splits: 'Market splits',
     splitsKey: 'Half hours the line split, share of the day',
+    duration: 'Price duration',
+    durationKey: (halfHours, from, to) => `${halfHours} half hours, ${from} to ${to}, the dearest first`,
+    mean: 'Mean',
+    median: 'Median',
+    topTenth: 'A tenth of the time above',
+    atFloor: 'At the floor',
     auction: 'Auction over the day',
     offered: 'Offered',
     asked: 'Asked',
@@ -506,6 +518,12 @@ const ja: Strings = {
     history: '価格の推移',
     splits: '市場分断の推移',
     splitsKey: '分断したコマの割合',
+    duration: '価格持続曲線',
+    durationKey: (halfHours, from, to) => `${from}〜${to}の${halfHours}コマ、高い順`,
+    mean: '平均',
+    median: '中央値',
+    topTenth: '上位1割の下限',
+    atFloor: '下限価格のコマ',
     auction: '一日の入札',
     offered: '売り入札',
     asked: '買い入札',
