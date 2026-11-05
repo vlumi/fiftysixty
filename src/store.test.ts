@@ -6,6 +6,19 @@ test('the day starts at noon on the newest day with nothing selected', () => {
   expect(useApp.getState()).toMatchObject({ date: null, slot: 25, area: null })
 })
 
+test('the address follows the choices', () => {
+  useApp.getState().setDate('2026-09-23')
+  useApp.getState().setSlot(24)
+  useApp.getState().selectArea('kansai')
+  useApp.getState().setView('day')
+  expect(location.search).toBe('?day=2026-09-23&slot=24&area=kansai&view=day')
+  useApp.getState().selectArea(null)
+  useApp.getState().setHalf(50)
+  expect(location.search).toBe('?day=2026-09-23&slot=24&half=50&view=day')
+  resetApp()
+  expect(location.search).toBe('')
+})
+
 test('the slot is kept in the day', () => {
   useApp.getState().setSlot(60)
   expect(useApp.getState().slot).toBe(48)

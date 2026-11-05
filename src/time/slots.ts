@@ -4,8 +4,14 @@ const MINUTES = 30
 
 /** The half hour a slot covers, as JEPX counts them: slot 1 is 00:00 to 00:30 JST. */
 export function slotRange(slot: number): string {
-  return `${hhmm((slot - 1) * MINUTES)}–${hhmm(slot * MINUTES)}`
+  return `${slotStart(slot)}–${slotEnd(slot)}`
 }
+
+/** When the half hour begins, hh:mm JST. */
+export const slotStart = (slot: number) => hhmm((slot - 1) * MINUTES)
+
+/** When the half hour ends, hh:mm JST. */
+export const slotEnd = (slot: number) => hhmm(slot * MINUTES)
 
 export function clampSlot(slot: number): number {
   return Math.min(SLOTS, Math.max(1, Math.round(slot)))

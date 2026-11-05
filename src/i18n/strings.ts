@@ -13,6 +13,8 @@ export interface Strings {
   map: string
   theme: string
   close: string
+  /** A part of the page threw while rendering. */
+  failed: string
   credits: {
     label: string
     title: string
@@ -27,6 +29,8 @@ export interface Strings {
     lines: string
     co2: string
     co2By: string
+    data: string
+    fetchedAt: (at: string) => string
     source: string
   }
   language: string
@@ -74,10 +78,8 @@ export interface Strings {
     low: string
     renewables: string
     curtailed: string
-    imported: string
     exported: string
     storedIn: string
-    storedOut: string
     prices: string
     meanPrice: string
     meanOf: (price: string) => string
@@ -123,6 +125,8 @@ export interface Strings {
     whatRan: string
     noRecord: string
     notAllSlot: string
+    /** A data file could not be loaded; the app asks again. */
+    loadFailed: string
     aPlant: string
     plantNote: string
   }
@@ -138,6 +142,14 @@ export interface Strings {
     gw: string
     price: string
     history: string
+    splits: string
+    splitsKey: string
+    duration: string
+    durationKey: (halfHours: string, from: string, to: string) => string
+    mean: string
+    median: string
+    topTenth: string
+    atFloor: string
     yen: (price: number) => string
     auction: string
     offered: string
@@ -168,6 +180,7 @@ const en: Strings = {
   map: 'Map',
   theme: 'Light theme',
   close: 'Close',
+  failed: 'Something went wrong; reload the page.',
   credits: {
     label: 'About and credits',
     title: 'About',
@@ -184,6 +197,8 @@ const en: Strings = {
     co2: 'CO₂',
     co2By:
       'Estimated from the fuel burnt, after CRIEPI (2016): coal 864, LNG 430, oil and other thermal 695 g/kWh; biomass as none.',
+    data: 'Data',
+    fetchedAt: (at) => `Fetched hourly on the host, last at ${at} JST`,
     source: 'Source on GitHub',
   },
   language: 'Language',
@@ -245,10 +260,8 @@ const en: Strings = {
     low: 'Low',
     renewables: 'Renewable share',
     curtailed: 'Curtailed',
-    imported: 'Imported',
     exported: 'Exported',
     storedIn: 'Into storage',
-    storedOut: 'From storage',
     prices: 'Prices',
     meanPrice: 'Mean price',
     meanOf: (price) => `mean ${price} ¥/kWh`,
@@ -294,6 +307,7 @@ const en: Strings = {
     whatRan: 'What ran',
     noRecord: 'No record for this half hour yet.',
     notAllSlot: 'Not every area has recorded this half hour yet.',
+    loadFailed: 'Some of the data could not be loaded; trying again.',
     aPlant: 'A plant',
     plantNote: 'Capacity as mapped in OpenStreetMap; what it runs is not public.',
   },
@@ -318,6 +332,14 @@ const en: Strings = {
     gw: 'GW',
     price: 'Price over the day',
     history: 'Price history',
+    splits: 'Market splits',
+    splitsKey: 'Half hours the line split, share of the day',
+    duration: 'Price duration',
+    durationKey: (halfHours, from, to) => `${halfHours} half hours, ${from} to ${to}, the dearest first`,
+    mean: 'Mean',
+    median: 'Median',
+    topTenth: 'A tenth of the time above',
+    atFloor: 'At the floor',
     auction: 'Auction over the day',
     offered: 'Offered',
     asked: 'Asked',
@@ -357,6 +379,7 @@ const ja: Strings = {
   map: '地図',
   theme: 'ライトテーマ',
   close: '閉じる',
+  failed: 'エラーが起きました。ページを再読み込みしてください。',
   credits: {
     label: '情報とクレジット',
     title: 'このサイトについて',
@@ -372,6 +395,8 @@ const ja: Strings = {
     lines: '連系線',
     co2: 'CO₂',
     co2By: '燃料の燃焼分を電中研（2016）の係数で推計：石炭 864、LNG 430、石油・その他火力 695 g/kWh、バイオマスは 0。',
+    data: 'データ',
+    fetchedAt: (at) => `毎時取得、最終 ${at} JST`,
     source: 'GitHub のソース',
   },
   language: '言語',
@@ -433,10 +458,8 @@ const ja: Strings = {
     low: '最小',
     renewables: '再エネ比率',
     curtailed: '出力制御',
-    imported: '受電',
     exported: '送電',
     storedIn: '揚水・蓄電池（充電）',
-    storedOut: '揚水・蓄電池（放電）',
     prices: '価格',
     meanPrice: '平均価格',
     meanOf: (price) => `平均 ${price} 円/kWh`,
@@ -482,6 +505,7 @@ const ja: Strings = {
     whatRan: '需給実績',
     noRecord: 'このコマの実績はまだありません。',
     notAllSlot: 'まだ全エリアのこのコマの実績がそろっていません。',
+    loadFailed: '一部のデータを読み込めませんでした。再試行します。',
     aPlant: '発電所',
     plantNote: '出力は OpenStreetMap の記載による設備容量。実際の発電量は公開されていません。',
   },
@@ -506,6 +530,14 @@ const ja: Strings = {
     gw: 'GW',
     price: '一日の価格',
     history: '価格の推移',
+    splits: '市場分断の推移',
+    splitsKey: '分断したコマの割合',
+    duration: '価格持続曲線',
+    durationKey: (halfHours, from, to) => `${from}〜${to}の${halfHours}コマ、高い順`,
+    mean: '平均',
+    median: '中央値',
+    topTenth: '上位1割の下限',
+    atFloor: '下限価格のコマ',
     auction: '一日の入札',
     offered: '売り入札',
     asked: '買い入札',

@@ -1,34 +1,82 @@
-import { useStrings } from '../i18n/useStrings'
-import { co2Intensity, floorSlots, priceStats, renewableShare, spreadStats, type DayTotals } from '../market/daily'
-import { SLOTS, type PricedArea, type SpotSlot } from '../market/jepx'
-import { SERIES } from '../market/stack'
-import { AREA_BY_ID, PRICED_AREAS, type Hz } from '../regions/areas'
-import { mw, yen } from '../shared/format'
-import { useApp } from '../store'
-import { slotRange } from '../time/slots'
+import { useStrings } from '../../i18n/useStrings'
+import {
+  co2Intensity,
+  floorSlots,
+  priceStats,
+  renewableShare,
+  spreadStats,
+  type DayTotals,
+  type JapanDay,
+} from '../../market/daily'
+import { SLOTS, type SpotSlot } from '../../market/jepx'
+import type { MonthDay, MonthPrice } from '../../market/monthly'
+import { SERIES_TOP_DOWN } from '../../market/stack'
+import { areasOf, type Hz, type PricedArea } from '../../regions/areas'
+import { areaName } from '../../regions/names'
+import { gwh, kt, mw, percent, yen } from '../../shared/format'
+import { useApp } from '../../store'
+import { slotEnd, slotStart } from '../../time/slots'
+import MonthStrip from '../MonthStrip'
 import styles from './DayView.module.css'
+import ScopeHeading from './ScopeHeading'
+import { scopeHz, type PricedScope } from './scope'
 
-const GWH = 1000
-const gwh = (mwh: number) => (mwh / GWH).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
-/** When a half hour begins, as the time bar gives it. */
-const startOf = (slot: number) => slotRange(slot).split('–')[0]
-const percent = (share: number) => `${Math.round(share * 100)}%`
+interface Props {
+  scope: PricedScope
+  spotDay: readonly SpotSlot[] | undefined
+  /** The day's totals and its price weighted by demand, null without the record. */
+  totals: DayTotals | null
+  price: number | null
+  /** The scope's half hours of the day summed, for the areas left out of a half's or all Japan's. */
+  scoped: JapanDay
+  monthDays: readonly MonthDay[]
+  monthPrices: readonly MonthPrice[]
+  date: string | null
+  onDate: (date: string) => void
+}
 
-/** The area, or none for all Japan. */
-type Picked = PricedArea | null
+/** The whole day: its prices, its supply under the scope's name, and the month's days under it to scrub through. */
+export default function DayView({
+  scope,
+  spotDay,
+  totals,
+  price,
+  scoped,
+  monthDays,
+  monthPrices,
+  date,
+  onDate,
+}: Props) {
+  return (
+    <>
+      <DayPrices spot={spotDay} scope={scope} weighted={price} />
+      {scope.kind !== 'area' && <ScopeHeading scope={scope} missing={scoped.missing} />}
+      <DaySupply totals={totals} scope={scope} />
+      <MonthStrip
+        days={monthDays}
+        prices={monthPrices}
+        hz={scopeHz(scope)}
+        weighted={scope.kind === 'half'}
+        date={date}
+        onPick={onDate}
+      />
+    </>
+  )
+}
 
 /**
  * The displayed day in energy: how it was supplied, as one bar and a table of each source's GWh and share, read from
  * the top as the chart stacks, then the day's figures; or, while the records for it are not all in, a note. The prices
  * stand above it, as the price curve stands above the supply chart.
  */
-export function DaySupply({ totals, area }: { totals: DayTotals | null; area: Picked }) {
+export function DaySupply({ totals, scope }: { totals: DayTotals | null; scope: PricedScope }) {
   const s = useStrings()
+  const area = scope.kind === 'area'
   if (!totals) return <p className="muted">{area ? s.readout.noRecord : s.day.notAll}</p>
   const supply = [
     { key: 'imports', name: s.chart.imports, color: 'var(--src-exchange)', mwh: area ? totals.importMWh : 0 },
     { key: 'storageOut', name: s.chart.storageOut, color: 'var(--src-storage)', mwh: totals.storageOutMWh },
-    ...[...SERIES].reverse().map((x) => ({
+    ...SERIES_TOP_DOWN.map((x) => ({
       key: x,
       name: s.chart.series[x],
       color: `var(--src-${x})`,
@@ -38,7 +86,7 @@ export function DaySupply({ totals, area }: { totals: DayTotals | null; area: Pi
   const total = supply.reduce((sum, r) => sum + r.mwh, 0)
   return (
     <section className={styles.day} aria-label={s.day.supply}>
-      {totals.slots < SLOTS && <p className="muted">{s.day.soFar(slotRange(totals.slots).split('–')[1])}</p>}
+      {totals.slots < SLOTS && <p className="muted">{s.day.soFar(slotEnd(totals.slots))}</p>}
       <div className={styles.bar} role="img" aria-label={s.day.supply}>
         {supply.map((r) => (
           <span key={r.key} style={{ flexGrow: r.mwh, background: r.color }} title={r.name} />
@@ -72,18 +120,17 @@ export function DaySupply({ totals, area }: { totals: DayTotals | null; area: Pi
         </dd>
         <dt>{s.day.peak}</dt>
         <dd>
-          {mw(totals.peak.mw)} <span className="muted">MW · {startOf(totals.peak.slot)}</span>
+          {mw(totals.peak.mw)} <span className="muted">MW · {slotStart(totals.peak.slot)}</span>
         </dd>
         <dt>{s.day.low}</dt>
         <dd>
-          {mw(totals.low.mw)} <span className="muted">MW · {startOf(totals.low.slot)}</span>
+          {mw(totals.low.mw)} <span className="muted">MW · {slotStart(totals.low.slot)}</span>
         </dd>
         <dt>{s.day.renewables}</dt>
         <dd>{percent(renewableShare(totals))}</dd>
         <dt>{s.day.co2}</dt>
         <dd>
-          {(totals.co2t / 1000).toLocaleString('en-US', { maximumFractionDigits: 1, minimumFractionDigits: 1 })}{' '}
-          <span className="muted">{s.day.kt}</span>
+          {kt(totals.co2t)} <span className="muted">{s.day.kt}</span>
         </dd>
         <dt>{s.day.co2Intensity}</dt>
         <dd>
@@ -126,22 +173,20 @@ export function DaySupply({ totals, area }: { totals: DayTotals | null; area: Pi
  */
 export function DayPrices({
   spot,
-  area,
-  half = null,
+  scope,
   weighted,
 }: {
   spot: readonly SpotSlot[] | undefined
-  area: Picked
-  /** With nothing picked, the half of the grid the day is scoped to. */
-  half?: Hz | null
+  scope: PricedScope
   /** The price weighted by demand, ¥/kWh, or null without the record. */
   weighted: number | null
 }) {
   const s = useStrings()
-  if (half && !area) return <HalfPrices spot={spot} half={half} weighted={weighted} />
-  const stats = priceStats(spot, area ?? undefined)
+  if (scope.kind === 'half') return <HalfPrices spot={spot} half={scope.half} weighted={weighted} />
+  const area = scope.kind === 'area' ? scope.area : undefined
+  const stats = priceStats(spot, area)
   if (!stats) return null
-  const floors = floorSlots(spot, area ?? undefined)
+  const floors = floorSlots(spot, area)
   return (
     <section aria-label={s.day.prices}>
       <dl className={styles.figures}>
@@ -161,14 +206,14 @@ export function DayPrices({
         <dd>
           {yen(stats.low.price)}{' '}
           <span className="muted">
-            {s.readout.yenPerKwh} · {startOf(stats.low.slot)}
+            {s.readout.yenPerKwh} · {slotStart(stats.low.slot)}
           </span>
         </dd>
         <dt>{s.day.highPrice}</dt>
         <dd>
           {yen(stats.high.price)}{' '}
           <span className="muted">
-            {s.readout.yenPerKwh} · {startOf(stats.high.slot)}
+            {s.readout.yenPerKwh} · {slotStart(stats.high.slot)}
           </span>
         </dd>
         {floors > 0 && (
@@ -193,12 +238,11 @@ function HalfPrices({
 }) {
   const s = useStrings()
   const lang = useApp((x) => x.lang)
-  const areas = PRICED_AREAS.filter((a) => a.hz === half).map((a) => a.id as PricedArea)
+  const areas = areasOf(half)
   const spread = spreadStats(spot, areas)
   if (!spread) return null
   const floors = areas.reduce((sum, a) => sum + floorSlots(spot, a), 0)
-  const name = (a: PricedArea) => (lang === 'ja' ? AREA_BY_ID[a].ja : AREA_BY_ID[a].name)
-  const where = ({ slot, area }: { slot: number; area: PricedArea }) => `${startOf(slot)} ${name(area)}`
+  const where = ({ slot, area }: { slot: number; area: PricedArea }) => `${slotStart(slot)} ${areaName(area, lang)}`
   return (
     <section aria-label={s.day.prices}>
       <dl className={styles.figures}>

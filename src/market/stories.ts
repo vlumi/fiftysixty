@@ -1,5 +1,5 @@
-import { PRICED_AREAS } from '../regions/areas'
-import type { PricedArea, SpotDays, SpotSlot } from './jepx'
+import { PRICED_AREA_IDS } from '../regions/areas'
+import type { SpotDays, SpotSlot } from './jepx'
 
 export type StoryId = 'summer' | 'winter' | 'split' | 'floor' | 'cheapest'
 
@@ -14,15 +14,14 @@ export interface Story {
   other?: number
 }
 
-const AREAS = PRICED_AREAS.map((a) => a.id as PricedArea)
 const FLOOR = 0.01
 
 const spread = (s: SpotSlot) => {
-  const prices = AREAS.map((a) => s.areaPrice[a])
+  const prices = PRICED_AREA_IDS.map((a) => s.areaPrice[a])
   return Math.max(...prices) - Math.min(...prices)
 }
 const floorCount = (slots: SpotSlot[]) =>
-  slots.reduce((n, s) => n + AREAS.filter((a) => s.areaPrice[a] <= FLOOR).length, 0)
+  slots.reduce((n, s) => n + PRICED_AREA_IDS.filter((a) => s.areaPrice[a] <= FLOOR).length, 0)
 const mean = (slots: SpotSlot[]) => slots.reduce((sum, s) => sum + s.systemPrice, 0) / slots.length
 const month = (date: string) => Number(date.slice(5, 7))
 const summer = (date: string) => month(date) >= 6 && month(date) <= 9
@@ -51,7 +50,7 @@ export function stories(days: SpotDays | null): Story[] {
   for (const [date, slots] of days)
     for (const slot of slots) if (!widest || spread(slot) > spread(widest.slot)) widest = { date, slot }
   if (widest) {
-    const prices = AREAS.map((a) => widest.slot.areaPrice[a])
+    const prices = PRICED_AREA_IDS.map((a) => widest.slot.areaPrice[a])
     found.push({
       id: 'split',
       date: widest.date,

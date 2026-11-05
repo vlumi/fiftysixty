@@ -1,9 +1,11 @@
-import { clampSlot, slotRange } from './slots'
+import { clampSlot, slotEnd, slotRange, slotStart } from './slots'
 
 test('a slot is its half hour from midnight', () => {
   expect(slotRange(1)).toBe('00:00–00:30')
   expect(slotRange(25)).toBe('12:00–12:30')
   expect(slotRange(48)).toBe('23:30–00:00')
+  expect(slotStart(25)).toBe('12:00')
+  expect(slotEnd(48)).toBe('00:00')
 })
 
 test('slots stay in 1 to 48', () => {

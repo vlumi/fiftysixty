@@ -1,0 +1,17 @@
+.months {
+  position: relative;
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* A tick where a month begins, its name beside it where there is room. */
+.months span {
+  position: absolute;
+  top: 0;
+  height: 0.9rem;
+  padding-left: 0.2rem;
+  border-left: 1px solid var(--border-strong);
+  line-height: 0.9rem;
+  white-space: nowrap;
+}

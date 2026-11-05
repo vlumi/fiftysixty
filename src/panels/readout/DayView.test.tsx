@@ -1,9 +1,9 @@
 import { render, screen, within } from '@testing-library/react'
-import csv from '../test/fixtures/jepx-spot.csv?raw'
-import tepcoCsv from '../test/fixtures/tepco-jukyu.csv?raw'
-import { dayTotals } from '../market/daily'
-import { parseSpot } from '../market/jepx'
-import { TEPCO } from '../market/tepco'
+import csv from '../../test/fixtures/jepx-spot.csv?raw'
+import tepcoCsv from '../../test/fixtures/tepco-jukyu.csv?raw'
+import { dayTotals } from '../../market/daily'
+import { parseSpot } from '../../market/jepx'
+import { TEPCO } from '../../market/tepco'
 import { DayPrices, DaySupply } from './DayView'
 
 /** A split day: Tokyo touched 50.01 in the evening while Kansai spent the night at 8.40. */
@@ -13,8 +13,8 @@ const totals = dayTotals(TEPCO.parse(tepcoCsv).get('2026-09-24')!)
 test('the price figures stand without a record: the mean, the low and the high with when', () => {
   render(
     <>
-      <DayPrices spot={spot} area="tokyo" weighted={null} />
-      <DaySupply totals={null} area="tokyo" />
+      <DayPrices spot={spot} scope={{ kind: 'area', area: 'tokyo' }} weighted={null} />
+      <DaySupply totals={null} scope={{ kind: 'area', area: 'tokyo' }} />
     </>,
   )
   expect(screen.getByText('No record for this half hour yet.')).toBeInTheDocument()
@@ -35,8 +35,8 @@ test('with the record, the supply and the weighted price too, and the half hours
   const floored = spot.map((s, i) => (i < 3 ? { ...s, systemPrice: 0.01 } : s))
   render(
     <>
-      <DayPrices spot={floored} area={null} weighted={12.34} />
-      <DaySupply totals={totals} area={null} />
+      <DayPrices spot={floored} scope={{ kind: 'system' }} weighted={12.34} />
+      <DaySupply totals={totals} scope={{ kind: 'system' }} />
     </>,
   )
   expect(screen.getByRole('region', { name: 'How the day was supplied' })).toBeInTheDocument()
@@ -47,7 +47,7 @@ test('with the record, the supply and the weighted price too, and the half hours
 })
 
 test("a half's prices are what JEPX's give: the spread across its areas with where and when, and the area half hours at the floor", () => {
-  render(<DayPrices spot={spot} area={null} half={60} weighted={9.5} />)
+  render(<DayPrices spot={spot} scope={{ kind: 'half', half: 60 }} weighted={9.5} />)
   const rows = [...screen.getByRole('region', { name: 'Prices' }).querySelectorAll('dt')].map(
     (dt) => `${dt.textContent}: ${dt.nextElementSibling!.textContent}`,
   )

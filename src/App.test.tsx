@@ -36,6 +36,21 @@ test('the page is the name, the line under it, the map, the clock and the price 
   expect(screen.getByRole('status')).toHaveTextContent('12:00–12:30 JST')
 })
 
+test('a file the host would not give is said under the headline, until it is', async () => {
+  vi.spyOn(console, 'error').mockImplementation(() => {})
+  const fetch = vi.mocked(globalThis.fetch)
+  const answer = fetch.getMockImplementation()!
+  fetch.mockImplementation((input, init) =>
+    String(input).includes('occto') ? Promise.resolve(new Response('', { status: 500 })) : answer(input, init),
+  )
+  render(<App />)
+  expect(await screen.findByRole('alert')).toHaveTextContent('Some of the data could not be loaded; trying again.')
+  fetch.mockImplementation(answer)
+  act(() => vi.setSystemTime(new Date('2026-09-26T10:01:00+09:00')))
+  act(() => vi.advanceTimersByTime(60_000))
+  vi.restoreAllMocks()
+})
+
 test('the clock opens on yesterday in Japan, the newest complete day, with the system price read out', async () => {
   render(<App />)
   expect(await screen.findByDisplayValue('2026-09-25')).toBeInTheDocument()

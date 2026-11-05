@@ -1,8 +1,9 @@
 import { useEffect, useRef, type PointerEvent } from 'react'
 import { useStrings } from '../i18n/useStrings'
 import type { HistoryDay } from '../market/history'
-import { SLOTS, type PricedArea } from '../market/jepx'
-import { AREA_BY_ID } from '../regions/areas'
+import { SLOTS } from '../market/jepx'
+import { AREA_BY_ID, type PricedArea } from '../regions/areas'
+import { areaName } from '../regions/names'
 import { yen } from '../shared/format'
 import { PALETTES } from '../shared/palette'
 import { cssRgb, PRICE_DOMAIN } from '../shared/scale'
@@ -11,12 +12,11 @@ import { useTheme } from '../shared/useTheme'
 import { useApp } from '../store'
 import { formatDay } from '../time/days'
 import { slotRange } from '../time/slots'
-import { cellAt, heatmapPixels, labeled, monthStarts } from './heatmap'
+import { cellAt, heatmapPixels } from './heatmap'
+import MonthTicks from './MonthTicks'
 import styles from './PriceHistory.module.css'
 import { scrub } from '../shared/scrub'
 
-/** Room for a month's label along the foot, in CSS pixels. */
-const LABEL_PX = 30
 const HOURS = [0, 6, 12, 18, 24]
 
 interface Props {
@@ -52,7 +52,13 @@ export default function PriceHistory({ days, area, date, slot, onPick }: Props) 
     target.canvas.width = columns
     target.canvas.height = SLOTS
     const image = target.createImageData(columns, SLOTS)
-    image.data.set(heatmapPixels(days, ramp, columns))
+    image.data.set(
+      heatmapPixels(
+        days.map((d) => d.prices),
+        ramp,
+        columns,
+      ),
+    )
     target.putImageData(image, 0, 0)
   }, [days, ramp, width, n])
 
@@ -64,17 +70,7 @@ export default function PriceHistory({ days, area, date, slot, onPick }: Props) 
     const cell = cellAt((e.clientX - rect.left) / rect.width, (e.clientY - rect.top) / rect.height, n)
     onPick(days[cell.index].date, cell.slot)
   }
-  const starts = monthStarts(days.map((d) => d.date))
-  const january = (i: number) => days[i].date.slice(5, 7) === '01'
-  const named = new Set(labeled(starts, width ? (LABEL_PX * n) / width : 0, starts.filter(january)))
-  const monthLabel = (d: string) => {
-    const [year, month] = d.split('-').map(Number)
-    if (month === 1) return lang === 'ja' ? `${year}年` : `${year}`
-    return new Intl.DateTimeFormat(lang === 'ja' ? 'ja-JP' : 'en-US', { month: 'short', timeZone: 'UTC' }).format(
-      Date.UTC(year, month - 1, 1),
-    )
-  }
-  const name = area ? (lang === 'ja' ? AREA_BY_ID[area].ja : AREA_BY_ID[area].name) : s.readout.systemPrice
+  const name = area ? areaName(area, lang) : s.readout.systemPrice
   const [lo, hi] = PRICE_DOMAIN
 
   return (
@@ -109,13 +105,7 @@ export default function PriceHistory({ days, area, date, slot, onPick }: Props) 
             </>
           )}
         </div>
-        <div className={styles.months} aria-hidden="true">
-          {starts.map((i) => (
-            <span key={i} style={{ left: `${(i / n) * 100}%` }}>
-              {named.has(i) ? monthLabel(days[i].date) : ''}
-            </span>
-          ))}
-        </div>
+        <MonthTicks className={styles.months} dates={days.map((d) => d.date)} width={width} />
       </div>
       <figcaption className={styles.legend}>
         <span>{name}</span>

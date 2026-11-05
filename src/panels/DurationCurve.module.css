@@ -1,0 +1,36 @@
+.chart {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.curve {
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.hz50 {
+  composes: hz50 from './PriceChart.module.css';
+}
+
+.hz60 {
+  composes: hz60 from './PriceChart.module.css';
+}
+
+.system {
+  stroke: var(--text);
+  stroke-width: 1.5;
+}
+
+.note {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.figures {
+  composes: figures from './readout/DayView.module.css';
+  margin-top: 0.35rem;
+  font-size: 0.8rem;
+}

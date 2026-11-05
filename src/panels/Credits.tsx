@@ -1,11 +1,16 @@
 import { Fragment, useEffect, useRef } from 'react'
 import { useStrings } from '../i18n/useStrings'
+import type { Fetched } from '../market/fetched'
 import { SHORTCUTS } from '../shortcuts'
+import { jstDateTime } from '../time/days'
 import CloseButton from './CloseButton'
 import styles from './Credits.module.css'
 
-/** What the page is and where the map, the shapes and the figures come from, behind the header's ⓘ; the map's own attribution is off. */
-export default function Credits({ onClose }: { onClose: () => void }) {
+/**
+ * What the page is and where the map, the shapes and the figures come from, behind the header's ⓘ, the map's own
+ * attribution being off; and how fresh the data is, from the fetcher's note of its last run.
+ */
+export default function Credits({ fetched = null, onClose }: { fetched?: Fetched | null; onClose: () => void }) {
   const s = useStrings()
   const dialog = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -81,6 +86,12 @@ export default function Credits({ onClose }: { onClose: () => void }) {
           </dd>
           <dt>{s.credits.co2}</dt>
           <dd>{s.credits.co2By}</dd>
+          {fetched && (
+            <>
+              <dt>{s.credits.data}</dt>
+              <dd>{s.credits.fetchedAt(jstDateTime(new Date(fetched.at)))}</dd>
+            </>
+          )}
         </dl>
         <h3>{s.help.title}</h3>
         <dl className={styles.rows}>

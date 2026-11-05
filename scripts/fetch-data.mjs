@@ -179,3 +179,11 @@ for (const source of SOURCES) {
     await rm(raw, { force: true })
   }
 }
+
+// The run's time and each file's, so the page can say how fresh the data is and that the hourly fetch is alive.
+const files = {}
+for (const source of SOURCES) {
+  const target = join(output, source.name)
+  if (existsSync(target)) files[source.name] = new Date((await stat(target)).mtimeMs).toISOString()
+}
+await writeFile(join(output, 'fetched.json'), JSON.stringify({ at: new Date().toISOString(), files }, null, 2) + '\n')

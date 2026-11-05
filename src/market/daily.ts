@@ -1,5 +1,5 @@
-import type { Area } from '../regions/areas'
-import type { PricedArea, SpotSlot } from './jepx'
+import type { Area, PricedArea } from '../regions/areas'
+import type { SpotSlot } from './jepx'
 import { SOURCES, type RecordSlot } from './record'
 import { SERIES, seriesMW, storageMW, type Series } from './stack'
 

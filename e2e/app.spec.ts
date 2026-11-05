@@ -169,6 +169,8 @@ test('the history view: a press on the heatmap sets the day and the half hour', 
   const heat = page.getByRole('complementary', { name: 'Readout' }).getByRole('slider', { name: 'Price history' })
   await expect(heat).toHaveAttribute('aria-valuenow', '3')
   await expect(heat).toHaveAttribute('aria-valuetext', /^2026-09-25 \(Fri\) 12:00–12:30: /)
+  await expect(page.getByRole('img', { name: 'Market splits' })).toBeVisible()
+  await expect(page.getByRole('img', { name: 'Price duration' })).toBeVisible()
   const box = (await heat.boundingBox())!
   await heat.click({ position: { x: box.width * 0.125, y: box.height * 0.51 } })
   await expect(page.getByLabel('Delivery day')).toHaveValue('2026-09-22')
@@ -176,6 +178,24 @@ test('the history view: a press on the heatmap sets the day and the half hour', 
   await heat.click({ position: { x: box.width * 0.875, y: box.height * 0.02 } })
   await expect(page.getByLabel('Delivery day')).toHaveValue('2026-09-26')
   await expect(page.getByRole('status')).toHaveText('Today 00:00–00:30 JST')
+})
+
+test('a link carries the day, the half hour, the pick and the view, and the address follows the choices', async ({
+  page,
+}) => {
+  await open(page, '/?day=2026-09-22&slot=23&area=kyushu&view=day')
+  const readout = page.getByRole('complementary', { name: 'Readout' })
+  await expect(readout.getByRole('heading', { level: 2 })).toHaveText(/^Kyushu/)
+  await expect(page.getByRole('status')).toHaveText('4 days ago 11:00–11:30 JST')
+  await expect(page.getByRole('button', { name: 'Day', exact: true })).toHaveAttribute('aria-pressed', 'true')
+  await page.getByRole('button', { name: 'Half hour' }).click()
+  await page.getByRole('button', { name: 'Next day' }).click()
+  await expect(page).toHaveURL(/\?day=2026-09-23&slot=23&area=kyushu$/)
+  await page.keyboard.press('Escape')
+  await page.getByRole('button', { name: '60 Hz' }).click()
+  await expect(page).toHaveURL(/\?day=2026-09-23&slot=23&half=60$/)
+  await open(page, '/?day=2030-01-01')
+  await expect(page.getByLabel('Delivery day')).toHaveValue('2026-09-25')
 })
 
 test('the light theme is a click away and is kept across a reload', async ({ page }) => {

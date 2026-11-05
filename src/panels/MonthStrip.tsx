@@ -1,9 +1,10 @@
 import type { PointerEvent } from 'react'
 import { useStrings } from '../i18n/useStrings'
-import type { Area } from '../regions/areas'
 import { areaList } from '../regions/names'
 import type { DayTotals } from '../market/daily'
-import { SERIES } from '../market/stack'
+import type { Hz } from '../regions/areas'
+import type { MonthDay, MonthPrice } from '../market/monthly'
+import { SERIES_TOP_DOWN } from '../market/stack'
 import { yen } from '../shared/format'
 import { priceAxis } from '../shared/scale'
 import { useApp } from '../store'
@@ -13,28 +14,13 @@ import { scrub } from '../shared/scrub'
 
 const GWH = 1000
 
-/** A whole day of the month with its totals, and for all Japan the areas left out of them. */
-export interface MonthDay {
-  date: string
-  totals: DayTotals
-  missing: readonly Area[]
-}
-
-/** A priced day of the month: its lowest and highest half hour, and the mean, or for a half of the grid the price weighted by demand where the records allow it. */
-export interface MonthPrice {
-  date: string
-  low: number
-  high: number
-  mean: number | null
-}
-
 interface Props {
   /** The month's whole recorded days in order. */
   days: readonly MonthDay[]
   /** The month's priced days in order, for the price row under the supply. */
   prices?: readonly MonthPrice[]
   /** The half whose price color the price row takes, or none for the system price. */
-  hz?: number | null
+  hz?: Hz | null
   /** Whether the price row's ticks are prices weighted by demand, a half's, rather than means. */
   weighted?: boolean
   date: string | null
@@ -134,7 +120,7 @@ export default function MonthStrip({ days, prices = [], hz = null, weighted = fa
                   {day && (
                     <span className={styles.stack} style={{ height: `${(supplied(day.totals) / top) * 100}%` }}>
                       <span style={{ flexGrow: day.totals.storageOutMWh, background: 'var(--src-storage)' }} />
-                      {[...SERIES].reverse().map((x) => (
+                      {SERIES_TOP_DOWN.map((x) => (
                         <span key={x} style={{ flexGrow: day.totals.bySeries[x], background: `var(--src-${x})` }} />
                       ))}
                     </span>

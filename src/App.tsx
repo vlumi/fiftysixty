@@ -2,15 +2,18 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type
 import { ADAPTERS } from './market/adapters'
 import { flowsAt, loadFlows, type FlowDays } from './market/flows'
 import { interchangeAt, RECORDED_AREAS } from './market/interchange'
-import { dayTotals, japanDay, japanTotals, priceStats, spreadStats, weightedPrice } from './market/daily'
+import { dayTotals, japanDay, japanTotals, weightedPrice } from './market/daily'
 import { priceHistory } from './market/history'
-import { fiscalYear, loadSpotYears, SLOTS, slotOf, type PricedArea, type SpotDays } from './market/jepx'
+import { fiscalYear, loadSpotYears, slotOf, type SpotDays } from './market/jepx'
+import { pricedMonth, recordedMonth, spreadMonth, summedMonth } from './market/monthly'
+import { scopeLines, splitHistory } from './market/splits'
 import { stories } from './market/stories'
+import { loadFetched, type Fetched } from './market/fetched'
 import { loadRecord, monthOf, recordSlot, type RecordDays, type RecordSlot } from './market/record'
-import { AREA_BY_ID, type Area } from './regions/areas'
+import { areasOf, pricedArea, type Area } from './regions/areas'
 import Corner from './panels/Corner'
 import Credits from './panels/Credits'
-import Readout from './panels/Readout'
+import Readout from './panels/readout/Readout'
 import { loadRegions, type Regions } from './regions/geometry'
 import { loadPlants, type Plants } from './regions/plants'
 import { useApp } from './store'
@@ -18,6 +21,7 @@ import { jstDate, openingDay } from './time/days'
 import { LANGS, LANGUAGE_NAMES, type Lang } from './i18n/strings'
 import { useStrings } from './i18n/useStrings'
 import { PALETTES } from './shared/palette'
+import ErrorBoundary from './shared/ErrorBoundary'
 import { useTheme } from './shared/useTheme'
 import TimeBar from './time/TimeBar'
 import { useNow } from './time/useNow'
@@ -36,6 +40,8 @@ export default function App() {
   const [spot, setSpot] = useState<SpotDays | null>(null)
   const [records, setRecords] = useState<ReadonlyMap<string, RecordDays | null>>(new Map())
   const [flowMonths, setFlowMonths] = useState<ReadonlyMap<string, FlowDays | null>>(new Map())
+  const [fetched, setFetched] = useState<Fetched | null>(null)
+  const [failed, setFailed] = useState<ReadonlySet<string>>(new Set())
   useEffect(() => {
     loadRegions().then(setRegions, console.error)
     loadPlants().then(setPlants, console.error)
@@ -46,6 +52,7 @@ export default function App() {
   const setDate = useApp((s) => s.setDate)
   const setSlot = useApp((s) => s.setSlot)
   const area = useApp((s) => s.area)
+  const picked = pricedArea(area)
   const half = useApp((s) => s.half)
   const selectArea = useApp((s) => s.selectArea)
   const plantId = useApp((s) => s.plant)
@@ -78,6 +85,10 @@ export default function App() {
     document.documentElement.dataset.theme = theme
   }, [theme])
   const date = chosenDate ?? openingDay(spot, now)
+  // A day a link named that the prices do not hold falls back to the opening day.
+  useEffect(() => {
+    if (spot && chosenDate && !spot.has(chosenDate)) setDate(null)
+  }, [spot, chosenDate, setDate])
   const days = useMemo(() => (spot ? [...spot.keys()].sort() : []), [spot])
   const storyDays = useMemo(() => stories(spot), [spot])
   const tick = useCallback(() => step(days, date), [step, days, date])
@@ -108,16 +119,21 @@ export default function App() {
       const at = askedAt.current.get(key)
       if (at !== undefined && now.getTime() - at < REFRESH_MS) return
       askedAt.current.set(key, now.getTime())
-      load().catch((error: unknown) => {
-        console.error(error)
-        askedAt.current.delete(key)
-      })
+      load().then(
+        () => setFailed((f) => (f.has(key) ? new Set([...f].filter((k) => k !== key)) : f)),
+        (error: unknown) => {
+          console.error(error)
+          askedAt.current.delete(key)
+          setFailed((f) => new Set(f).add(key))
+        },
+      )
     }
     for (const adapter of Object.values(ADAPTERS)) {
       const key = `${adapter.area}/${month}`
       ask(key, () => loadRecord(adapter, month).then((days) => setRecords((r) => new Map(r).set(key, days))))
     }
     ask(`flows/${month}`, () => loadFlows(month).then((days) => setFlowMonths((f) => new Map(f).set(month, days))))
+    ask('fetched', () => loadFetched().then(setFetched))
   }, [month, now])
   // The prices likewise, so an open tab learns of the next delivery day and, in April, of the next file.
   useEffect(() => {
@@ -125,10 +141,17 @@ export default function App() {
     const at = askedAt.current.get(key)
     if (at !== undefined && now.getTime() - at < REFRESH_MS) return
     askedAt.current.set(key, now.getTime())
-    loadSpotYears(fiscalYear(jstDate(now))).then(setSpot, (error: unknown) => {
-      console.error(error)
-      askedAt.current.delete(key)
-    })
+    loadSpotYears(fiscalYear(jstDate(now))).then(
+      (years) => {
+        setSpot(years)
+        setFailed((f) => (f.has(key) ? new Set([...f].filter((k) => k !== key)) : f))
+      },
+      (error: unknown) => {
+        console.error(error)
+        askedAt.current.delete(key)
+        setFailed((f) => new Set(f).add(key))
+      },
+    )
   }, [now])
   const flows = useMemo(
     () => flowsAt(month ? flowMonths.get(month) : null, date, slot),
@@ -140,9 +163,9 @@ export default function App() {
   const mixes = useMemo(
     () =>
       Object.fromEntries(
-        Object.keys(ADAPTERS).map((a) => [
+        RECORDED_AREAS.map((a) => [
           a,
-          recordSlot(a && month ? records.get(`${a}/${month}`) : undefined, date, slot) ?? null,
+          recordSlot(month ? records.get(`${a}/${month}`) : undefined, date, slot) ?? null,
         ]),
       ) as Partial<Record<Area, RecordSlot | null>>,
     [records, month, date, slot],
@@ -153,87 +176,41 @@ export default function App() {
   const areaDays = useMemo(
     () =>
       new Map(
-        Object.keys(ADAPTERS).flatMap((a) => {
+        RECORDED_AREAS.flatMap((a) => {
           const d = date && month ? records.get(`${a}/${month}`)?.get(date) : undefined
-          return d?.length ? [[a as PricedArea, d] as const] : []
+          return d?.length ? [[a, d] as const] : []
         }),
       ),
     [records, month, date],
   )
   // The areas all Japan sums, or with a half chosen and nothing picked, the half's.
-  const scope = useMemo(() => (half ? RECORDED_AREAS.filter((a) => AREA_BY_ID[a].hz === half) : RECORDED_AREAS), [half])
+  const scope = areasOf(half)
   const scopedDays = useMemo(() => new Map([...areaDays].filter(([a]) => scope.includes(a))), [areaDays, scope])
-  // The displayed month's whole days, the picked area's, the half's or all Japan's, for the strip under the day.
-  const monthDays = useMemo(() => {
-    if (!month) return []
-    const picked = area && area !== 'okinawa' ? (area as PricedArea) : null
-    const dates = [...(records.get(`${picked ?? scope[0]}/${month}`)?.keys() ?? [])].sort()
-    return dates.flatMap((d) => {
-      if (picked) {
-        const day = records.get(`${picked}/${month}`)?.get(d)
-        return day?.length === SLOTS ? [{ date: d, totals: dayTotals(day), missing: [] }] : []
-      }
-      const byArea = new Map(
-        scope.flatMap((a) => {
-          const day = records.get(`${a}/${month}`)?.get(d)
-          return day ? [[a, day] as const] : []
-        }),
-      )
-      const japan = japanDay(byArea, scope)
-      // Whole days only, so a bar is a day; one with an area missing is marked as such.
-      return japan.slots.length === SLOTS ? [{ date: d, totals: dayTotals(japan.slots), missing: japan.missing }] : []
-    })
-  }, [records, month, area, scope])
-  // The displayed month's priced days for the strip's price row: the picked area's price or the system's, each
-  // day's low, high and mean; or a half's spread across its areas, the tick its weighted price where the day's
-  // records are whole.
+  const monthRecords = useMemo(
+    () => new Map(RECORDED_AREAS.map((a) => [a, month ? (records.get(`${a}/${month}`) ?? null) : null])),
+    [records, month],
+  )
+  const monthDays = useMemo(
+    () => (picked ? recordedMonth(monthRecords.get(picked)) : summedMonth(monthRecords, scope)),
+    [picked, monthRecords, scope],
+  )
   const monthPrices = useMemo(() => {
     if (!spot || !month) return []
-    const picked = area && area !== 'okinawa' ? (area as PricedArea) : undefined
-    const areas = scope.filter((a) => a !== 'okinawa') as PricedArea[]
-    return [...spot.keys()]
-      .filter((d) => monthOf(d) === month)
-      .sort()
-      .flatMap((d) => {
-        const spotDay = spot.get(d)
-        if (picked || !half) {
-          const stats = priceStats(spotDay, picked)
-          return stats ? [{ date: d, low: stats.low.price, high: stats.high.price, mean: stats.mean }] : []
-        }
-        const spread = spreadStats(spotDay, areas)
-        if (!spread) return []
-        const byArea = new Map(
-          areas.flatMap((a) => {
-            const day = records.get(`${a}/${month}`)?.get(d)
-            return day ? [[a, day] as const] : []
-          }),
-        )
-        const whole = japanDay(byArea, areas).slots.length === SLOTS
-        return [
-          {
-            date: d,
-            low: spread.low.price,
-            high: spread.high.price,
-            mean: whole ? weightedPrice(spotDay, byArea) : null,
-          },
-        ]
-      })
-  }, [spot, month, area, half, scope, records])
+    if (picked || !half) return pricedMonth(spot, month, picked ?? undefined)
+    return spreadMonth(spot, month, scope, monthRecords)
+  }, [spot, month, picked, half, scope, monthRecords])
   // Every priced day held, the picked area's price or the system's, for the readout's history view.
-  const history = useMemo(
-    () => priceHistory(spot, area && area !== 'okinawa' ? (area as PricedArea) : undefined),
-    [spot, area],
-  )
+  const history = useMemo(() => priceHistory(spot, picked ?? undefined), [spot, picked])
   const japan = useMemo(() => japanDay(scopedDays, scope), [scopedDays, scope])
+  const splits = useMemo(() => splitHistory(spot, scopeLines(area, half)), [spot, area, half])
   const dayFigures = useMemo(() => {
-    const picked = area && area !== 'okinawa' ? (area as PricedArea) : null
     if (picked) {
       const d = areaDays.get(picked)
       return { totals: d ? dayTotals(d) : null, price: d ? weightedPrice(spotDay, new Map([[picked, d]])) : null }
     }
     const totals = japanTotals(japan)
     return { totals, price: totals ? weightedPrice(spotDay, scopedDays) : null }
-  }, [area, areaDays, scopedDays, spotDay, japan])
+  }, [picked, areaDays, scopedDays, spotDay, japan])
 
   return (
     <>
@@ -270,65 +247,69 @@ export default function App() {
           ⓘ
         </button>
       </header>
-      {credits && <Credits onClose={() => setCredits(false)} />}
+      {credits && <Credits fetched={fetched} onClose={() => setCredits(false)} />}
       <main style={{ '--bar-inset': `${barHeight + 16}px` } as CSSProperties}>
-        <Suspense fallback={null}>
-          <MapView
-            theme={theme}
-            lang={lang}
-            regions={regions}
-            prices={displayed?.areaPrice}
-            selected={area}
-            half={area ? null : half}
-            interchange={layers.flows ? interchange : null}
-            plants={plants}
-            selectedPlant={plantId}
-            hiddenFuels={hiddenFuels}
-            mixes={layers.mixes ? mixes : NO_MIXES}
-            onPick={selectArea}
-            onPickPlant={pickPlant}
+        <ErrorBoundary fallback={<p className="failed">{words.failed}</p>}>
+          <Suspense fallback={null}>
+            <MapView
+              theme={theme}
+              lang={lang}
+              regions={regions}
+              prices={displayed?.areaPrice}
+              selected={area}
+              half={area ? null : half}
+              interchange={layers.flows ? interchange : null}
+              plants={plants}
+              selectedPlant={plantId}
+              hiddenFuels={hiddenFuels}
+              mixes={layers.mixes ? mixes : NO_MIXES}
+              onPick={selectArea}
+              onPickPlant={pickPlant}
+            />
+          </Suspense>
+          <Readout
+            slot={displayed}
+            record={record}
+            recordDay={recordedDay}
+            interchange={interchange}
+            dayTotals={dayFigures.totals}
+            dayPrice={dayFigures.price}
+            spotDay={spotDay}
+            monthDays={monthDays}
+            monthPrices={monthPrices}
+            history={history}
+            splits={splits}
+            scoped={japan}
+            date={date}
+            onDate={setDate}
+            warning={failed.size ? words.readout.loadFailed : null}
+            area={area}
+            plant={plant}
+            onBack={() => (plant ? pickPlant(null) : selectArea(null))}
+            onSlot={setSlot}
           />
-        </Suspense>
-        <Readout
-          slot={displayed}
-          record={record}
-          day={recordedDay}
-          interchange={interchange}
-          dayTotals={dayFigures.totals}
-          dayPrice={dayFigures.price}
-          spotDay={spotDay}
-          monthDays={monthDays}
-          monthPrices={monthPrices}
-          history={history}
-          japan={japan}
-          date={date}
-          onDate={setDate}
-          area={area}
-          plant={plant}
-          onBack={() => (plant ? pickPlant(null) : selectArea(null))}
-          onSlot={setSlot}
-        />
-        <TimeBar
-          ref={bar}
-          date={date}
-          days={days}
-          slot={slot}
-          now={now}
-          playing={playing}
-          stories={storyDays}
-          onDate={setDate}
-          onSlot={setSlot}
-          onPlay={togglePlay}
-        />
-        <Corner
-          palette={PALETTES[theme]}
-          layers={layers}
-          onToggleLayer={toggleLayer}
-          plants={plants}
-          hiddenFuels={hiddenFuels}
-          onToggleFuel={toggleFuel}
-          onHideFuels={setHiddenFuels}
-        />
+          <TimeBar
+            ref={bar}
+            date={date}
+            days={days}
+            slot={slot}
+            now={now}
+            playing={playing}
+            stories={storyDays}
+            onDate={setDate}
+            onSlot={setSlot}
+            onPlay={togglePlay}
+          />
+          <Corner
+            palette={PALETTES[theme]}
+            layers={layers}
+            onToggleLayer={toggleLayer}
+            plants={plants}
+            hiddenFuels={hiddenFuels}
+            onToggleFuel={toggleFuel}
+            onHideFuels={setHiddenFuels}
+          />
+        </ErrorBoundary>
       </main>
     </>
   )

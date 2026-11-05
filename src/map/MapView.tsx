@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { RecordSlot } from '../market/record'
 import { AREA_BY_ID, type Area } from '../regions/areas'
+import { areaName } from '../regions/names'
 import type { PlantProps } from '../regions/plants'
 import type { AreaProps, Regions } from '../regions/geometry'
 import { PALETTES } from '../shared/palette'
@@ -25,7 +26,6 @@ interface Props extends LayerOptions {
   /** The basemap's labels and the areas' names come in this language. */
   lang: Lang
   regions: Regions | null
-  /** What ran in each recorded area for the displayed slot, drawn as a glyph beside it. */
   /** What ran in each wired area for the displayed slot, null where there is no record for it yet, which draws an empty column. */
   mixes?: Partial<Record<Area, RecordSlot | null>>
   /** A click on an area, or on the sea for none. */
@@ -137,7 +137,7 @@ export default function MapView({
         (Object.entries(mixes) as [Area, RecordSlot | null][]).map(([area, record]) => (
           <AreaMarker key={area} map={map} area={area}>
             <MixGlyph
-              name={lang === 'ja' ? AREA_BY_ID[area].ja : AREA_BY_ID[area].name}
+              name={areaName(area, lang)}
               record={record}
               scale={mapScale(zoom)}
               dim={half !== null && AREA_BY_ID[area].hz !== half}

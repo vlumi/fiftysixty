@@ -1,31 +1,37 @@
-import type { HistoryDay } from '../market/history'
 import { SLOTS } from '../market/jepx'
 import type { Rgb } from '../shared/palette'
-import { priceColor } from '../shared/scale'
+import { PRICE_DOMAIN, scaleColor } from '../shared/scale'
 
 /**
- * The heatmap's pixels, RGBA by row then column: `width` columns across the days and a row a half hour, 00:00 at
- * the top. A column averages the days that fall in it, one or two at a year across a panel, so no day is skipped;
- * with fewer days than columns a day spans several. A cell without a price is left clear.
+ * The heatmap's pixels, RGBA by row then column: `width` columns across the days, each a column of values from the
+ * top down, the prices by half hour from 00:00 or the lines' shares. A column averages the days that fall in it, one
+ * or two at a year across a panel, so no day is skipped; with fewer days than columns a day spans several. A cell
+ * without a value is left clear.
  */
-export function heatmapPixels(days: readonly HistoryDay[], ramp: readonly Rgb[], width: number): Uint8ClampedArray {
-  const pixels = new Uint8ClampedArray(width * SLOTS * 4)
+export function heatmapPixels(
+  days: readonly (readonly number[])[],
+  ramp: readonly Rgb[],
+  width: number,
+  domain: readonly [number, number] = PRICE_DOMAIN,
+): Uint8ClampedArray {
+  const rows = days[0]?.length ?? 0
+  const pixels = new Uint8ClampedArray(width * rows * 4)
   const n = days.length
   for (let x = 0; x < width; x++) {
     const from = Math.floor((x * n) / width)
     const to = Math.max(from + 1, Math.floor(((x + 1) * n) / width))
-    for (let row = 0; row < SLOTS; row++) {
+    for (let row = 0; row < rows; row++) {
       let sum = 0
       let count = 0
       for (let i = from; i < to; i++) {
-        const price = days[i].prices[row]
-        if (Number.isFinite(price)) {
-          sum += price
+        const value = days[i][row]
+        if (Number.isFinite(value)) {
+          sum += value
           count++
         }
       }
       if (!count) continue
-      const [r, g, b] = priceColor(sum / count, ramp)
+      const [r, g, b] = scaleColor(sum / count, ramp, domain)
       pixels.set([r, g, b, 255], (row * width + x) * 4)
     }
   }

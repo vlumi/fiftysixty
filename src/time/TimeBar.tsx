@@ -25,9 +25,9 @@ interface Props {
 /**
  * The day and its 48 half hours: a controlled row of native inputs, so it scrubs and takes the keyboard for free, with
  * a step to the priced day before and after, the day in words in the reader's language over the native picker, a jump
- * to the half hour under way or to a day the data singled out, play
- * through the day at four half hours a second, and a word for where the half hour stands; on today,
- * whether it is now or still ahead, since the price is known before the record.
+ * to the half hour under way or to a day the data singled out, play through the day at four half hours a second, and
+ * a word for where the half hour stands; on today, whether it is now or still ahead, since the price is known before
+ * the record.
  */
 export default function TimeBar({ date, days, slot, now, playing, stories, onDate, onSlot, onPlay, ref }: Props) {
   const s = useStrings()

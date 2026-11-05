@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [react()],
   worker: { format: 'es' },
   build: {
-    // The MapLibre vendor chunk, hashed and cached across deploys, is 1031 kB at 6.9 and sets the limit; the warning is for app code.
+    // The MapLibre vendor chunk, hashed and cached across deploys, is about a megabyte and sets the limit; the warning is for app code.
     chunkSizeWarningLimit: 1100,
     rolldownOptions: {
       output: {
