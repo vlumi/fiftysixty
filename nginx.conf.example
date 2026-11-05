@@ -17,6 +17,11 @@ server {
     root /var/www/fiftysixty/current;
     index index.html;
 
+    # The map's scripts and the CSVs are megabytes that compress to a quarter.
+    gzip on;
+    gzip_min_length 1024;
+    gzip_types text/css text/csv text/javascript application/javascript application/json application/geo+json;
+
     # Single-page app: every path falls back to index.html.
     location / {
         try_files $uri /index.html;
@@ -29,9 +34,15 @@ server {
         add_header Cache-Control "public, immutable";
     }
 
-    # The market data lives outside the releases so deploys never touch it.
+    # The market data lives outside the releases so deploys never touch it; nginx has no type for CSV of its own.
     location /data/ {
         alias /var/www/fiftysixty/data/;
+        types { text/csv csv; application/json json; }
+        add_header Cache-Control "no-cache";
+    }
+
+    location /geo/ {
+        types { application/geo+json geojson; }
         add_header Cache-Control "no-cache";
     }
 
