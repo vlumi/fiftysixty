@@ -1,12 +1,12 @@
-import type { Area } from './areas'
+import type { Area, PricedArea } from './areas'
 
 export type Link = 'ac' | 'hvdc' | 'converter'
 
-/** A line between two areas; the capacities and flows arrive with OCCTO's data in M3. */
+/** A line between two areas; its capacity and planned flow come per half hour with OCCTO's file, what crossed with the records. */
 export interface Interconnector {
   id: string
   name: string
-  ends: readonly [Area, Area]
+  ends: readonly [PricedArea, PricedArea]
   link: Link
 }
 
@@ -25,7 +25,7 @@ export const INTERCONNECTORS: readonly Interconnector[] = [
 ]
 
 /** The areas one line away, in table order. */
-export function neighbors(area: Area): Area[] {
+export function neighbors(area: PricedArea): PricedArea[] {
   return INTERCONNECTORS.flatMap(({ ends: [a, b] }) => (a === area ? [b] : b === area ? [a] : []))
 }
 
@@ -60,9 +60,9 @@ export const OCCTO_LINES: readonly OcctoLine[] = [
 ]
 
 /** OCCTO's lines once each, the two Kansai–Chugoku sections folded, in table order. */
-export const OCCTO_LINE_IDS: readonly OcctoLine[] = OCCTO_LINES.filter(
+export const OCCTO_LINES_ONCE: readonly OcctoLine[] = OCCTO_LINES.filter(
   (l, i) => OCCTO_LINES.findIndex((m) => m.id === l.id) === i,
 )
 
 /** The lines with an end in the area; a fence belongs to the area it bounds. */
-export const linesOf = (area: Area) => OCCTO_LINE_IDS.filter((l) => l.from === area || l.to === area)
+export const linesOf = (area: Area) => OCCTO_LINES_ONCE.filter((l) => l.from === area || l.to === area)

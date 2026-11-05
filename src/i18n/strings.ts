@@ -74,10 +74,8 @@ export interface Strings {
     low: string
     renewables: string
     curtailed: string
-    imported: string
     exported: string
     storedIn: string
-    storedOut: string
     prices: string
     meanPrice: string
     meanOf: (price: string) => string
@@ -245,10 +243,8 @@ const en: Strings = {
     low: 'Low',
     renewables: 'Renewable share',
     curtailed: 'Curtailed',
-    imported: 'Imported',
     exported: 'Exported',
     storedIn: 'Into storage',
-    storedOut: 'From storage',
     prices: 'Prices',
     meanPrice: 'Mean price',
     meanOf: (price) => `mean ${price} ¥/kWh`,
@@ -433,10 +429,8 @@ const ja: Strings = {
     low: '最小',
     renewables: '再エネ比率',
     curtailed: '出力制御',
-    imported: '受電',
     exported: '送電',
     storedIn: '揚水・蓄電池（充電）',
-    storedOut: '揚水・蓄電池（放電）',
     prices: '価格',
     meanPrice: '平均価格',
     meanOf: (price) => `平均 ${price} 円/kWh`,

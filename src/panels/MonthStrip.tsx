@@ -3,7 +3,7 @@ import { useStrings } from '../i18n/useStrings'
 import { areaList } from '../regions/names'
 import type { DayTotals } from '../market/daily'
 import type { MonthDay, MonthPrice } from '../market/monthly'
-import { SERIES } from '../market/stack'
+import { SERIES_TOP_DOWN } from '../market/stack'
 import { yen } from '../shared/format'
 import { priceAxis } from '../shared/scale'
 import { useApp } from '../store'
@@ -119,7 +119,7 @@ export default function MonthStrip({ days, prices = [], hz = null, weighted = fa
                   {day && (
                     <span className={styles.stack} style={{ height: `${(supplied(day.totals) / top) * 100}%` }}>
                       <span style={{ flexGrow: day.totals.storageOutMWh, background: 'var(--src-storage)' }} />
-                      {[...SERIES].reverse().map((x) => (
+                      {SERIES_TOP_DOWN.map((x) => (
                         <span key={x} style={{ flexGrow: day.totals.bySeries[x], background: `var(--src-${x})` }} />
                       ))}
                     </span>

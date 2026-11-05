@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useStrings } from '../i18n/useStrings'
 import type { LayerChoice, MapLayer } from '../map/layerChoice'
 import { MAP_LAYERS } from '../map/layerChoice'
-import { SERIES, type Series } from '../market/stack'
+import { SERIES, SERIES_TOP_DOWN, type Series } from '../market/stack'
 import type { Plants } from '../regions/plants'
 import styles from './Layers.module.css'
 
@@ -52,7 +52,7 @@ export default function LayersPanel({ layers, onToggleLayer, plants, hiddenFuels
       </div>
       {byFuel && (
         <div className={styles.filter}>
-          {[...SERIES].reverse().map((x) => {
+          {SERIES_TOP_DOWN.map((x) => {
             const count = counts.get(x) ?? 0
             return (
               <button

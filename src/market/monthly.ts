@@ -1,6 +1,6 @@
-import type { Area } from '../regions/areas'
+import type { Area, PricedArea } from '../regions/areas'
 import { dayTotals, japanDay, priceStats, spreadStats, weightedPrice, type DayTotals } from './daily'
-import { SLOTS, type PricedArea, type SpotDays } from './jepx'
+import { SLOTS, type SpotDays } from './jepx'
 import { monthOf, type RecordDays, type RecordSlot } from './record'
 
 /** A whole day of the month with its totals, and for a scope of areas the ones left out of them. */

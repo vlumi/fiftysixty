@@ -2,7 +2,8 @@ import { useMemo } from 'react'
 import { co2Intensity, dayTotals, renewableShare } from '../market/daily'
 import type { RecordSlot } from '../market/record'
 import { useStrings } from '../i18n/useStrings'
-import { aboveMW, SERIES, stackDay, type StackedSlot } from '../market/stack'
+import { aboveMW, SERIES, SERIES_TOP_DOWN, stackDay, type StackedSlot } from '../market/stack'
+import { mw, percent } from '../shared/format'
 import DayChart from './DayChart'
 import frame from './DayChart.module.css'
 import { LEFT, slotX, TOP, WIDTH } from './slotAxis'
@@ -174,7 +175,7 @@ function MixKey({
         ]
       : []),
     ...(lines ? [EXCHANGE[1], EXCHANGE[0]] : [EXCHANGE[0]]).map(row),
-    ...[...SERIES].reverse().map((x) => ({
+    ...SERIES_TOP_DOWN.map((x) => ({
       key: x,
       name: s.chart.series[x],
       color: `var(--src-${x})`,
@@ -185,7 +186,7 @@ function MixKey({
   // A supplying row's share of all that supplied the half hour: the generation, storage giving back and imports.
   const supplied = rows.filter((r) => SUPPLYING.has(r.key)).reduce((sum, r) => sum + (r.mw ?? 0), 0)
   const share = (r: (typeof rows)[number]) =>
-    SUPPLYING.has(r.key) && r.mw !== undefined && supplied > 0 ? `${Math.round((r.mw / supplied) * 100)}%` : ''
+    SUPPLYING.has(r.key) && r.mw !== undefined && supplied > 0 ? percent(r.mw / supplied) : ''
   return (
     <section aria-label={s.readout.whatRan}>
       <table className={styles.key}>
@@ -208,7 +209,7 @@ function MixKey({
                 />
                 {r.name}
               </th>
-              <td>{r.mw === undefined ? '–' : Math.round(r.mw).toLocaleString('en-US')}</td>
+              <td>{r.mw === undefined ? '–' : mw(r.mw)}</td>
               <td className={styles.share}>{share(r)}</td>
             </tr>
           ))}
@@ -217,7 +218,7 @@ function MixKey({
       {half && (
         <dl className={styles.figures}>
           <dt>{s.day.renewables}</dt>
-          <dd>{Math.round(renewableShare(half) * 100)}%</dd>
+          <dd>{percent(renewableShare(half))}</dd>
           <dt>{s.day.co2Intensity}</dt>
           <dd>
             {Math.round(co2Intensity(half))} <span className="muted">g · {s.day.estimated}</span>

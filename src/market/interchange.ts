@@ -1,4 +1,4 @@
-import type { Area } from '../regions/areas'
+import { PRICED_AREA_IDS, type Area, type PricedArea } from '../regions/areas'
 import { capacityOf, load, type FlowSlot } from './flows'
 import type { RecordSlot } from './record'
 
@@ -67,17 +67,7 @@ const LINES: { id: string; from: Area; to: Area }[] = [
 const NONE_MW = 1
 
 /** The areas whose records the recorded kind needs: every one with an interconnector. */
-export const RECORDED_AREAS: readonly Area[] = [
-  'hokkaido',
-  'tohoku',
-  'tokyo',
-  'chubu',
-  'hokuriku',
-  'kansai',
-  'chugoku',
-  'shikoku',
-  'kyushu',
-]
+export const RECORDED_AREAS: readonly PricedArea[] = PRICED_AREA_IDS
 
 function link(id: string, from: Area, to: Area, forwardMW: number, flows: ReadonlyMap<string, FlowSlot>): Link {
   const [a, b, mw] = forwardMW >= 0 ? [from, to, forwardMW] : [to, from, -forwardMW]

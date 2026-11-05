@@ -8,7 +8,6 @@ test('every line joins two priced areas and every priced area has a line', () =>
     expect(ends).not.toContain('okinawa')
   }
   for (const area of PRICED_AREAS) expect(neighbors(area.id).length).toBeGreaterThan(0)
-  expect(neighbors('okinawa')).toEqual([])
 })
 
 test('neighbors are read from either end', () => {

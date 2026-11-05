@@ -5,6 +5,9 @@ export const SERIES = ['coal', 'nuclear', 'renewables', 'otherThermal', 'solar',
 
 export type Series = (typeof SERIES)[number]
 
+/** The series as a key reads them, from the top of the stack down. */
+export const SERIES_TOP_DOWN: readonly Series[] = [...SERIES].reverse()
+
 export function seriesMW(slot: RecordSlot): Record<Series, number> {
   const s = slot.bySource
   return {

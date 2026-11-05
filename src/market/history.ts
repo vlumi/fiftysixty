@@ -1,4 +1,5 @@
-import { SLOTS, type PricedArea, type SpotDays } from './jepx'
+import type { PricedArea } from '../regions/areas'
+import { SLOTS, type SpotDays } from './jepx'
 
 /** A priced day's price per half hour, slot 1 first, for an area or for the system price; NaN where a half hour is missing. */
 export interface HistoryDay {

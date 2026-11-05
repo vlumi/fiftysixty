@@ -1,6 +1,7 @@
 import { useStrings } from '../i18n/useStrings'
-import type { PricedArea, SpotSlot } from '../market/jepx'
-import { AREA_BY_ID, PRICED_AREAS } from '../regions/areas'
+import type { SpotSlot } from '../market/jepx'
+import { AREA_BY_ID, areasOf, type PricedArea } from '../regions/areas'
+import { areaName } from '../regions/names'
 import { priceAxis } from '../shared/scale'
 import { useApp } from '../store'
 import DayChart from './DayChart'
@@ -9,7 +10,6 @@ import styles from './PriceChart.module.css'
 import { LEFT, slotX, TOP, WIDTH } from './slotAxis'
 
 const PLOT = 96
-const AREAS = PRICED_AREAS.map((a) => a.id as PricedArea)
 
 interface Props {
   day: readonly SpotSlot[]
@@ -30,14 +30,14 @@ export default function PriceChart({ day, area, slot, onSlot, hours }: Props) {
   const s = useStrings()
   const lang = useApp((x) => x.lang)
   const half = useApp((x) => x.half)
-  const areas = area ? [area] : AREAS.filter((a) => !half || AREA_BY_ID[a].hz === half)
+  const areas = area ? [area] : areasOf(half)
   const { top, step } = priceAxis(Math.max(...day.flatMap((d) => [d.systemPrice, ...areas.map((a) => d.areaPrice[a])])))
   const y = (price: number) => TOP + (1 - price / top) * PLOT
   const line = (at: (d: SpotSlot) => number) =>
     `M${day.map((d) => `${slotX(d.slot).toFixed(1)},${y(at(d)).toFixed(1)}`).join('L')}`
   const gridlines = []
   for (let price = 0; price <= top; price += step) gridlines.push(price)
-  const name = (a: PricedArea) => (lang === 'ja' ? AREA_BY_ID[a].ja : AREA_BY_ID[a].name)
+  const name = (a: PricedArea) => areaName(a, lang)
   const hue = (a: PricedArea) => styles[`hz${AREA_BY_ID[a].hz}`]
 
   return (

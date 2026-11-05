@@ -1,7 +1,5 @@
-import { PRICED_AREAS, type Area } from '../regions/areas'
+import { PRICED_AREAS, type PricedArea } from '../regions/areas'
 import { fetchText } from './fetch'
-
-export type PricedArea = Exclude<Area, 'okinawa'>
 
 /**
  * One half hour of the day-ahead auction: the slot is 1 to 48 from 00:00 JST; the prices, and system-wide what was
@@ -54,7 +52,7 @@ export function parseSpot(csv: string): SpotDays {
   const sell = column('売り入札量')
   const buy = column('買い入札量')
   const system = column('システムプライス')
-  const areas = PRICED_AREAS.map((a) => [a.id as PricedArea, column(`エリアプライス${a.ja}`)] as const)
+  const areas = PRICED_AREAS.map((a) => [a.id, column(`エリアプライス${a.ja}`)] as const)
 
   const days: SpotDays = new Map()
   for (const row of rows) {

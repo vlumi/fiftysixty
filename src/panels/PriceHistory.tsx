@@ -1,8 +1,9 @@
 import { useEffect, useRef, type PointerEvent } from 'react'
 import { useStrings } from '../i18n/useStrings'
 import type { HistoryDay } from '../market/history'
-import { SLOTS, type PricedArea } from '../market/jepx'
-import { AREA_BY_ID } from '../regions/areas'
+import { SLOTS } from '../market/jepx'
+import { AREA_BY_ID, type PricedArea } from '../regions/areas'
+import { areaName } from '../regions/names'
 import { yen } from '../shared/format'
 import { PALETTES } from '../shared/palette'
 import { cssRgb, PRICE_DOMAIN } from '../shared/scale'
@@ -74,7 +75,7 @@ export default function PriceHistory({ days, area, date, slot, onPick }: Props) 
       Date.UTC(year, month - 1, 1),
     )
   }
-  const name = area ? (lang === 'ja' ? AREA_BY_ID[area].ja : AREA_BY_ID[area].name) : s.readout.systemPrice
+  const name = area ? areaName(area, lang) : s.readout.systemPrice
   const [lo, hi] = PRICE_DOMAIN
 
   return (

@@ -2,6 +2,9 @@
 export type Area =
   'hokkaido' | 'tohoku' | 'tokyo' | 'chubu' | 'hokuriku' | 'kansai' | 'chugoku' | 'shikoku' | 'kyushu' | 'okinawa'
 
+/** An area with a JEPX price, which is every one but Okinawa. */
+export type PricedArea = Exclude<Area, 'okinawa'>
+
 export type Hz = 50 | 60
 
 export interface AreaInfo {
@@ -14,6 +17,10 @@ export interface AreaInfo {
   prefectures: readonly number[]
   /** A point in the middle of the area's land, where its glyph is centered. */
   anchor: readonly [number, number]
+}
+
+export interface PricedAreaInfo extends AreaInfo {
+  id: PricedArea
 }
 
 /**
@@ -49,12 +56,25 @@ export const AREAS: readonly AreaInfo[] = [
 ]
 
 /** The areas with a JEPX price, in JEPX's column order. */
-export const PRICED_AREAS: readonly AreaInfo[] = AREAS.filter((a) => a.id !== 'okinawa')
+export const PRICED_AREAS: readonly PricedAreaInfo[] = AREAS.filter((a): a is PricedAreaInfo => a.id !== 'okinawa')
+
+export const PRICED_AREA_IDS: readonly PricedArea[] = PRICED_AREAS.map((a) => a.id)
 
 export const AREA_BY_ID: Readonly<Record<Area, AreaInfo>> = Object.fromEntries(AREAS.map((a) => [a.id, a])) as Record<
   Area,
   AreaInfo
 >
+
+/** The area as one with a price, or null for Okinawa and for none. */
+export const pricedArea = (area: Area | null): PricedArea | null => (area && area !== 'okinawa' ? area : null)
+
+const HALF_AREAS: Record<Hz, readonly PricedArea[]> = {
+  50: PRICED_AREAS.filter((a) => a.hz === 50).map((a) => a.id),
+  60: PRICED_AREAS.filter((a) => a.hz === 60).map((a) => a.id),
+}
+
+/** The priced areas of a half of the grid, or all nine for none. */
+export const areasOf = (half: Hz | null): readonly PricedArea[] => (half ? HALF_AREAS[half] : PRICED_AREA_IDS)
 
 /** The prefectures by JIS X 0401 code, as the geometry source labels them. */
 export const PREFECTURES: Readonly<Record<number, string>> = {

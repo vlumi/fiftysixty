@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { RecordSlot } from '../market/record'
 import { AREA_BY_ID, type Area } from '../regions/areas'
+import { areaName } from '../regions/names'
 import type { PlantProps } from '../regions/plants'
 import type { AreaProps, Regions } from '../regions/geometry'
 import { PALETTES } from '../shared/palette'
@@ -137,7 +138,7 @@ export default function MapView({
         (Object.entries(mixes) as [Area, RecordSlot | null][]).map(([area, record]) => (
           <AreaMarker key={area} map={map} area={area}>
             <MixGlyph
-              name={lang === 'ja' ? AREA_BY_ID[area].ja : AREA_BY_ID[area].name}
+              name={areaName(area, lang)}
               record={record}
               scale={mapScale(zoom)}
               dim={half !== null && AREA_BY_ID[area].hz !== half}

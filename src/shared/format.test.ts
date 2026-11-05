@@ -1,4 +1,4 @@
-import { mw, signed, yen } from './format'
+import { gwh, kt, mw, percent, signed, yen } from './format'
 
 test('prices and spreads', () => {
   expect(yen(9.5)).toBe('9.50')
@@ -10,4 +10,10 @@ test('prices and spreads', () => {
 test('megawatts', () => {
   expect(mw(36867)).toBe('36,867')
   expect(mw(-2260.4)).toBe('−2,260')
+})
+
+test('energy, tonnes and shares', () => {
+  expect(gwh(1234567)).toBe('1,234.6')
+  expect(kt(1950)).toBe('2.0')
+  expect(percent(0.526)).toBe('53%')
 })

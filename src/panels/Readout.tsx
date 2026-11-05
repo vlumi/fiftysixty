@@ -1,15 +1,15 @@
 import { Fragment, useState } from 'react'
 import { useStrings } from '../i18n/useStrings'
 import { useApp } from '../store'
-import type { PricedArea, SpotSlot } from '../market/jepx'
+import type { SpotSlot } from '../market/jepx'
 import type { DayTotals, JapanDay } from '../market/daily'
 import type { HistoryDay } from '../market/history'
 import type { Interchange } from '../market/interchange'
 import type { MonthDay, MonthPrice } from '../market/monthly'
 import type { RecordSlot } from '../market/record'
-import { AREA_BY_ID, PRICED_AREAS, type Area, type Hz } from '../regions/areas'
-import { neighbors, OCCTO_LINE_IDS } from '../regions/interconnectors'
-import { areaList } from '../regions/names'
+import { AREA_BY_ID, areasOf, pricedArea, type Area, type Hz, type PricedArea } from '../regions/areas'
+import { neighbors, OCCTO_LINES_ONCE } from '../regions/interconnectors'
+import { areaList, areaName, lineName } from '../regions/names'
 import type { PlantProps } from '../regions/plants'
 import { mw, signed, yen } from '../shared/format'
 import { useNarrow } from '../shared/useNarrow'
@@ -89,7 +89,7 @@ export default function Readout({
   const short = useShort()
   const [openFor, setOpenFor] = useState<string | null>(null)
   if (!slot) return null
-  const picked = area && area !== 'okinawa' ? (area as PricedArea) : null
+  const picked = pricedArea(area)
   // A half is a scope, not a pick, so choosing one from inside the open panel leaves it open.
   const key = plant ? `plant/${plant.id}` : (picked ?? 'system')
   const open = !narrow || openFor === key
@@ -259,7 +259,7 @@ function SystemHead({ slot }: { slot: SpotSlot }) {
 
 /** The lowest and the highest area price of the half hour, across all the areas or a half's. */
 function spreadOf(slot: SpotSlot, half: Hz | null): [number, number] {
-  const prices = PRICED_AREAS.filter((a) => !half || a.hz === half).map((a) => slot.areaPrice[a.id as PricedArea])
+  const prices = areasOf(half).map((a) => slot.areaPrice[a])
   return [Math.min(...prices), Math.max(...prices)]
 }
 
@@ -281,13 +281,8 @@ function HalfRows({ half, slot }: { half: Hz; slot: SpotSlot }) {
     <dl className={styles.rows}>
       <dt>{s.readout.system}</dt>
       <dd>{yen(slot.systemPrice)}</dd>
-      {PRICED_AREAS.filter((a) => a.hz === half).map((a) => (
-        <Neighbor
-          key={a.id}
-          area={a.id as PricedArea}
-          price={slot.areaPrice[a.id as PricedArea]}
-          against={slot.systemPrice}
-        />
+      {areasOf(half).map((a) => (
+        <Neighbor key={a} area={a} price={slot.areaPrice[a]} against={slot.systemPrice} />
       ))}
     </dl>
   )
@@ -310,11 +305,10 @@ function HalfHead({ half, slot }: { half: Hz; slot: SpotSlot }) {
 function AreaHead({ area, slot }: { area: PricedArea; slot: SpotSlot }) {
   const s = useStrings()
   const lang = useApp((x) => x.lang)
-  const info = AREA_BY_ID[area]
   return (
     <>
       <h2>
-        {lang === 'ja' ? info.ja : info.name} <span className="muted">{s.readout.hz(info.hz)}</span>
+        {areaName(area, lang)} <span className="muted">{s.readout.hz(AREA_BY_ID[area].hz)}</span>
       </h2>
       <p className={styles.price}>
         {yen(slot.areaPrice[area])} <span className="muted">{s.readout.yenPerKwh}</span>
@@ -333,7 +327,7 @@ function AreaRows({ area, slot }: { area: PricedArea; slot: SpotSlot }) {
         {yen(slot.systemPrice)} <span className="muted">{signed(slot.systemPrice - price)}</span>
       </dd>
       {neighbors(area).map((n) => (
-        <Neighbor key={n} area={n as PricedArea} price={slot.areaPrice[n as PricedArea]} against={price} />
+        <Neighbor key={n} area={n} price={slot.areaPrice[n]} against={price} />
       ))}
     </dl>
   )
@@ -343,7 +337,7 @@ function Neighbor({ area, price, against }: { area: PricedArea; price: number; a
   const lang = useApp((x) => x.lang)
   return (
     <>
-      <dt>{lang === 'ja' ? AREA_BY_ID[area].ja : AREA_BY_ID[area].name}</dt>
+      <dt>{areaName(area, lang)}</dt>
       <dd>
         {yen(price)} <span className="muted">{signed(price - against)}</span>
       </dd>
@@ -368,15 +362,15 @@ function Lines({
   const s = useStrings()
   const lang = useApp((x) => x.lang)
   if (!interchange) return null
-  const name = (a: Area) => (lang === 'ja' ? AREA_BY_ID[a].ja : AREA_BY_ID[a].name)
+  const name = (a: Area) => areaName(a, lang)
   const mine = (x: Area) => (area ? x === area : AREA_BY_ID[x].hz === half)
   const lines = interchange.links
     .filter((l) => mine(l.from) !== mine(l.to))
     .map((l) => {
-      const line = OCCTO_LINE_IDS.find((x) => x.id === l.id)!
+      const line = OCCTO_LINES_ONCE.find((x) => x.id === l.id)!
       return {
         id: l.id,
-        label: lang === 'ja' ? line.name : line.label,
+        label: lineName(line, lang),
         inward: mine(l.to),
         mw: l.mw,
         capacity: l.capacityMW,
