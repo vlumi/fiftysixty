@@ -69,6 +69,7 @@ export default function App() {
   const playing = useApp((s) => s.playing)
   const togglePlay = useApp((s) => s.togglePlay)
   const step = useApp((s) => s.step)
+  const reset = useApp((s) => s.reset)
   const now = useNow()
   const bar = useRef<HTMLDivElement>(null)
   const { height: barHeight } = useElementSize(bar)
@@ -219,9 +220,18 @@ export default function App() {
     <>
       <header>
         <h1>
-          <span className="hz50">50</span>
-          <span className="slash">/</span>
-          <span className="hz60">60</span>
+          <a
+            href="/"
+            title={words.home}
+            onClick={(e) => {
+              e.preventDefault()
+              reset()
+            }}
+          >
+            <span className="hz50">50</span>
+            <span className="slash">/</span>
+            <span className="hz60">60</span>
+          </a>
         </h1>
         <p>{words.subtitle}</p>
         <select

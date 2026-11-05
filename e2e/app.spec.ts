@@ -197,6 +197,10 @@ test('a link carries the day, the half hour, the pick and the view, and the addr
   // Back on the opening day, the day leaves the address as the other defaults do.
   await page.getByRole('button', { name: 'Next day' }).click()
   await expect(page).toHaveURL(/\?slot=23&half=60$/)
+  await page.getByRole('link', { name: '50/60' }).click()
+  await expect(page).toHaveURL(/\/$/)
+  await expect(page.getByRole('status')).toHaveText('Yesterday 12:00–12:30 JST')
+  await expect(readout).toContainText('System price')
   await open(page, '/?day=2030-01-01')
   await expect(page.getByLabel('Delivery day')).toHaveValue('2026-09-25')
 })

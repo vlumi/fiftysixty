@@ -57,6 +57,18 @@ test('the clock opens on yesterday in Japan, the newest complete day, with the s
   expect(screen.getByRole('complementary', { name: 'Readout' })).toHaveTextContent('System price')
 })
 
+test('the name in the header takes the page back to the opening view', async () => {
+  render(<App />)
+  expect(await screen.findByDisplayValue('2026-09-25')).toBeInTheDocument()
+  act(() => screen.getByRole('button', { name: 'Next day' }).click())
+  act(() => screen.getByRole('button', { name: /^Day$/ }).click())
+  expect(location.search).toBe('?day=2026-09-26&view=day')
+  act(() => screen.getByRole('link', { name: '50/60' }).click())
+  expect(await screen.findByDisplayValue('2026-09-25')).toBeInTheDocument()
+  expect(location.search).toBe('')
+  expect(screen.getByRole('button', { name: 'Half hour' })).toHaveAttribute('aria-pressed', 'true')
+})
+
 test('a step away from the opening day and back leaves the address plain, the opening day being no choice', async () => {
   render(<App />)
   expect(await screen.findByDisplayValue('2026-09-25')).toBeInTheDocument()

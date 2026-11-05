@@ -19,6 +19,16 @@ test('the address follows the choices', () => {
   expect(location.search).toBe('')
 })
 
+test('the opening view is a reset away', () => {
+  useApp.getState().setDate('2026-09-23')
+  useApp.getState().setSlot(24)
+  useApp.getState().selectArea('kansai')
+  useApp.getState().setView('day')
+  useApp.getState().reset()
+  expect(useApp.getState()).toMatchObject({ date: null, slot: 25, area: null, plant: null, half: null, view: 'slot' })
+  expect(location.search).toBe('')
+})
+
 test('the slot is kept in the day', () => {
   useApp.getState().setSlot(60)
   expect(useApp.getState().slot).toBe(48)

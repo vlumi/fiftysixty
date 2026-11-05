@@ -50,18 +50,25 @@ interface Actions {
   setThemeChoice: (choice: ThemeChoice) => void
   setLang: (lang: Lang) => void
   togglePlay: () => void
+  /** Back to the opening view: the opening day at noon, nothing picked, all Japan, the half hour. */
+  reset: () => void
   /** One half hour on from the displayed day; past the last, on to the next priced day, or a stop at the end of the data. */
   step: (days: readonly string[], displayed: string | null) => void
 }
 
-const initial = (): State => ({
+/** The opening view, which a link without choices and the name in the header open. */
+const opening = () => ({
   date: null,
   slot: 25,
   area: null,
   plant: null,
   half: null,
-  view: 'slot',
+  view: 'slot' as View,
   playing: false,
+})
+
+const initial = (): State => ({
+  ...opening(),
   layers: loadLayerChoice(),
   hiddenFuels: loadHiddenFuels(),
   themeChoice: loadThemeChoice(),
@@ -88,6 +95,7 @@ export const useApp = create<State & Actions>((set) => ({
       hiddenFuels: s.hiddenFuels.includes(fuel) ? s.hiddenFuels.filter((f) => f !== fuel) : [...s.hiddenFuels, fuel],
     })),
   togglePlay: () => set((s) => ({ playing: !s.playing })),
+  reset: () => set(opening()),
   step: (days, displayed) =>
     set((s) => {
       if (s.slot < SLOTS) return { slot: s.slot + 1 }
