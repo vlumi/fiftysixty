@@ -35,8 +35,8 @@ fi
 npm ci --no-audit --no-fund
 npm run build
 
-release="$WEBROOT/releases/$(git rev-parse --short HEAD)"
-rm -rf "$release"
+# A release is named by its commit and its time, so a redeploy of the same commit never removes the one being served.
+release="$WEBROOT/releases/$(git rev-parse --short HEAD)-$(date +%Y%m%d%H%M%S)"
 mkdir -p "$WEBROOT/releases"
 cp -R dist "$release"
 [[ -d "$WEBROOT/data" && -n "$(ls -A "$WEBROOT/data" 2>/dev/null)" ]] || node scripts/fetch-data.mjs "$WEBROOT/data"
