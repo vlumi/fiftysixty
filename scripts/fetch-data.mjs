@@ -171,6 +171,10 @@ for (const source of SOURCES) {
     await writeFile(`${target}.tmp`, text)
     await rename(`${target}.tmp`, target)
     console.log(`${text.split('\n').length - 1} rows → ${target}`)
+  } catch (error) {
+    // One host down leaves the others' files fresh; the run still fails for the log.
+    console.error(`${source.name}: ${error.message}`)
+    process.exitCode = 1
   } finally {
     await rm(raw, { force: true })
   }
