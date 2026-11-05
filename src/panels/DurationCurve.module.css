@@ -1,7 +1,5 @@
 .chart {
-  display: block;
-  width: 100%;
-  height: auto;
+  composes: chart from './DayChart.module.css';
 }
 
 .curve {

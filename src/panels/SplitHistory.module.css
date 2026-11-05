@@ -29,7 +29,6 @@
 
 .plot {
   composes: plot from './PriceHistory.module.css';
-  cursor: default;
 }
 
 .canvas {

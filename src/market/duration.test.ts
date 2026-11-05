@@ -17,6 +17,8 @@ test('every priced half hour from the dearest down, and the figures that read of
   expect(d.topTenth).toBe(sorted[19])
   expect(d.floorShare).toBe(sorted.filter((p) => p <= 0.01).length / 192)
   expect([d.from, d.to]).toEqual(['2026-09-22', '2026-09-26'])
+  expect(d.ranked[0]).toEqual({ price: 50.01, date: '2026-09-22', slot: 34 })
+  expect(d.ranked.map((r) => r.price)).toEqual(sorted)
 })
 
 test('a half hour without a price is left out, and nothing without any', () => {
