@@ -287,8 +287,8 @@ test('the history view: the heatmap over every priced day held, a press on it se
     />,
   )
   await userEvent.click(screen.getByRole('button', { name: 'History' }))
-  expect(screen.getByRole('img', { name: 'Market splits' })).toBeInTheDocument()
-  expect(screen.getByRole('img', { name: 'Price duration' })).toBeInTheDocument()
+  expect(screen.getByRole('slider', { name: 'Market splits' })).toBeInTheDocument()
+  expect(screen.getByRole('slider', { name: 'Price duration' })).toBeInTheDocument()
   const heat = screen.getByRole('slider', { name: 'Price history' })
   expect(heat).toHaveAttribute('aria-valuenow', '4')
   expect(heat).toHaveAttribute('aria-valuetext', '2026-09-26 (Sat) 23:00–23:30: 14.12 ¥/kWh')

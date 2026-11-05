@@ -169,8 +169,16 @@ test('the history view: a press on the heatmap sets the day and the half hour', 
   const heat = page.getByRole('complementary', { name: 'Readout' }).getByRole('slider', { name: 'Price history' })
   await expect(heat).toHaveAttribute('aria-valuenow', '3')
   await expect(heat).toHaveAttribute('aria-valuetext', /^2026-09-25 \(Fri\) 12:00–12:30: /)
-  await expect(page.getByRole('img', { name: 'Market splits' })).toBeVisible()
-  await expect(page.getByRole('img', { name: 'Price duration' })).toBeVisible()
+  const splits = page.getByRole('slider', { name: 'Market splits' })
+  const splitsBox = (await splits.boundingBox())!
+  await splits.click({ position: { x: splitsBox.width * 0.375, y: splitsBox.height / 2 } })
+  await expect(page.getByLabel('Delivery day')).toHaveValue('2026-09-23')
+  await expect(page.getByRole('status')).toHaveText('3 days ago 12:00–12:30 JST')
+  const curve = page.getByRole('slider', { name: 'Price duration' })
+  const curveBox = (await curve.boundingBox())!
+  // A press in the gutter counts as the left edge, the dearest half hour held.
+  await curve.click({ position: { x: curveBox.width * 0.03, y: curveBox.height / 2 } })
+  await expect(curve).toHaveAttribute('aria-valuenow', '1')
   const box = (await heat.boundingBox())!
   await heat.click({ position: { x: box.width * 0.125, y: box.height * 0.51 } })
   await expect(page.getByLabel('Delivery day')).toHaveValue('2026-09-22')

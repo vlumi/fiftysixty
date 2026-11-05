@@ -24,8 +24,10 @@ interface Props {
  */
 export default function HistoryView({ scope, history, splits, date, slot, onDate, onSlot }: Props) {
   const s = useStrings()
-  const at = date ? history.findIndex((d) => d.date === date) : -1
-  const price = at >= 0 ? history[at].prices[slot - 1] : NaN
+  const pick = (d: string, at: number) => {
+    if (d !== date) onDate(d)
+    onSlot(at)
+  }
   return (
     <>
       {scope.kind === 'half' && <p className="muted">{s.readout.halfHistory}</p>}
@@ -34,13 +36,10 @@ export default function HistoryView({ scope, history, splits, date, slot, onDate
         area={scope.kind === 'area' ? scope.area : null}
         date={date}
         slot={slot}
-        onPick={(d, at) => {
-          if (d !== date) onDate(d)
-          onSlot(at)
-        }}
+        onPick={pick}
       />
-      <SplitHistory splits={splits} date={date} />
-      <DurationCurve days={history} scope={scope} price={price} />
+      <SplitHistory splits={splits} date={date} onPick={(d) => pick(d, slot)} />
+      <DurationCurve days={history} scope={scope} date={date} slot={slot} onPick={pick} />
     </>
   )
 }
