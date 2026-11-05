@@ -57,6 +57,16 @@ test('the clock opens on yesterday in Japan, the newest complete day, with the s
   expect(screen.getByRole('complementary', { name: 'Readout' })).toHaveTextContent('System price')
 })
 
+test('a step away from the opening day and back leaves the address plain, the opening day being no choice', async () => {
+  render(<App />)
+  expect(await screen.findByDisplayValue('2026-09-25')).toBeInTheDocument()
+  act(() => screen.getByRole('button', { name: 'Next day' }).click())
+  expect(location.search).toBe('?day=2026-09-26')
+  act(() => screen.getByRole('button', { name: 'Previous day' }).click())
+  expect(await screen.findByDisplayValue('2026-09-25')).toBeInTheDocument()
+  expect(location.search).toBe('')
+})
+
 test('play runs the half hours on', async () => {
   vi.useFakeTimers({ toFake: ['Date', 'setInterval', 'clearInterval'], now: new Date('2026-09-26T10:00:00+09:00') })
   render(<App />)

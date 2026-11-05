@@ -194,6 +194,9 @@ test('a link carries the day, the half hour, the pick and the view, and the addr
   await page.keyboard.press('Escape')
   await page.getByRole('button', { name: '60 Hz' }).click()
   await expect(page).toHaveURL(/\?day=2026-09-23&slot=23&half=60$/)
+  // Back on the opening day, the day leaves the address as the other defaults do.
+  await page.getByRole('button', { name: 'Next day' }).click()
+  await expect(page).toHaveURL(/\?slot=23&half=60$/)
   await open(page, '/?day=2030-01-01')
   await expect(page.getByLabel('Delivery day')).toHaveValue('2026-09-25')
 })
