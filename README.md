@@ -18,7 +18,7 @@ Every capture, one per milestone, is shown in [docs/screenshots](docs/screenshot
 
 ## What you will see
 
-**The regions.** Each of the nine areas colored by its price in the displayed half-hour slot, with its supply mix beside it: how much of the demand was nuclear, gas, coal, hydro, solar, wind, and how much solar was curtailed.
+**The regions.** Each of the nine priced areas colored by its price in the displayed half-hour slot, with its supply mix beside it: how much of the demand was nuclear, gas, coal, hydro, solar, wind, and how much solar was curtailed.
 
 **The interconnectors.** Arrows between the regions sized by the flow and colored by how close it is to the line's limit: violet where the companies' records say what crossed, cyan where only OCCTO's plan is there yet, and a fork with one total where the numbers do not say how a loop divides between its lines. The three frequency-converter stations between the two halves are one of the lines, since that is where the east and west prices part.
 
@@ -27,6 +27,10 @@ Every capture, one per milestone, is shown in [docs/screenshots](docs/screenshot
 **The clock.** A time bar over the day with 48 slots and a date picker, so the solar hump can be watched rolling across the country at noon, the price collapsing under it and the evening peak arriving; play runs a day in seconds, and a menu jumps to the days the prices single out, the summer and the winter peak, the widest split, the most at the floor, the cheapest day.
 
 **Whole days.** A switch turns the readout from the half hour to the day: how the day's energy was supplied, source by source in GWh and shares, the peak and the low, the renewable share, the price weighted by demand and an estimate of the CO₂; for an area or all Japan, with the month's days side by side to scrub through and compare.
+
+**The price over time.** The day's auction as a curve above the supply chart, the picked area in its half's color over the dashed system price, or with nothing picked every area, so the day forks where the market split; under it, with nothing picked, what was offered, asked and cleared each half hour, since when far more is offered than asked the price falls to the floor. The day view gives the mean and the range with their half hours, and the month's strip a bar from each day's low to its high; a third view lays every priced day held as a heatmap, a day across and the 48 half hours down, a slider in both directions.
+
+**The halves.** A control above the readout scopes it to 50 Hz or 60 Hz: the half's spread as the headline, its areas against the system price, the three frequency converters as its only lines, and its supply summed from its areas' records; on the map the other half is muted and the half outlined.
 
 **The plants.** A layer to switch on, by fuel and capacity as OpenStreetMap maps them; what each one is running is not public, only the per-area totals, and the map says so.
 
@@ -57,8 +61,10 @@ npm run regions   # rebuild the committed area, split and border geometry
 npm run plants    # rebuild the committed plants from Overpass
 ```
 
+Node 24 or newer and curl. CI runs `npm run lint && npm run lint:md && npm run format:check && npm test && npm run build`, then the browser tests; `npm run format` fixes what prettier flags.
+
 `./deploy.sh` builds and publishes a release under a web root and installs the hourly data refresh; [nginx.conf.example](nginx.conf.example) is the server block.
 
 ## License
 
-MIT. See [LICENSE](LICENSE). The data belongs to its publishers under their own terms and is credited in the app.
+MIT for the code; see [LICENSE](LICENSE). The committed geometry derives from GSI's 地球地図日本, attribution required and non-commercial, and the plants from OpenStreetMap under the ODbL; the fetched data belongs to its publishers under their own terms. All are credited in the app.
