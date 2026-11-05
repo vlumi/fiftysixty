@@ -28,7 +28,6 @@ interface Props {
   record: RecordSlot | undefined
   /** The same for the whole displayed day, as far as it is published. */
   day: readonly RecordSlot[] | undefined
-  /** OCCTO's forecast for the slot's interconnectors, by line id. */
   /** The half hour's flows between the areas, recorded or planned. */
   interchange: Interchange | null
   /** The displayed day for the picked area, or for all Japan with none picked; its weighted price and its prices. */
@@ -345,7 +344,6 @@ function Neighbor({ area, price, against }: { area: PricedArea; price: number; a
   )
 }
 
-/** The area's lines for the slot as OCCTO forecast them: the flow toward or away from the area against the limit, and a split. */
 /**
  * The lines across the picked area's borders, or across the half's, which are the frequency converters alone, since
  * nothing else crosses the middle: each in or out against its limit, and for an area its loop as the total.

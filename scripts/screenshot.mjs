@@ -3,7 +3,7 @@
 //   node scripts/screenshot.mjs docs/screenshots/2026-09-04-m2.png            # deployed site
 //   node scripts/screenshot.mjs out.png http://localhost:4173/                # local preview
 //   CHROME=/usr/bin/google-chrome WAIT_MS=30000 node scripts/screenshot.mjs out.png
-//   EVAL="document.querySelector('[aria-label=Constellation] li button').click()" node scripts/screenshot.mjs out.png  # act first
+//   EVAL="document.querySelector('[aria-label=View] button:last-child').click()" node scripts/screenshot.mjs out.png  # act first
 //   HOVER=1 node scripts/screenshot.mjs out.png    # sweep the pointer across the map first (surfaces hover errors)
 //   CLICK=812,600 node scripts/screenshot.mjs out.png   # click the page at a point first, e.g. an area on the map
 //   WHEEL=812,600,-1500 node scripts/screenshot.mjs out.png   # scroll at a point first, a negative delta zooming the map in

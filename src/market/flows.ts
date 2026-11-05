@@ -1,7 +1,7 @@
 import { OCCTO_LINES } from '../regions/interconnectors'
 import { fetchText } from './fetch'
 
-/** One half hour of a line as OCCTO forecast it the day before: limits both ways, the flow, and whether the market split there. */
+/** One half hour of a line as OCCTO planned it: limits both ways, the flow, and whether the market split there. */
 export interface FlowSlot {
   slot: number
   /** The operating capacity in the forward and the reverse direction, MW. */

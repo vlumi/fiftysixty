@@ -138,10 +138,9 @@ export default function SupplyChart({ day, slot, onSlot }: Props) {
 
 /**
  * The chart's key and the half hour's figures in one table, read top down as the chart stacks: demand, curtailment,
- * imports and storage generating, the sources, then storage charging and exports below the line. Without a record for the half hour, the figures are
- * dashes and the key still stands.
+ * imports and storage generating, the sources, then storage charging and exports below the line. Without a record
+ * for the half hour, the figures are dashes and the key still stands.
  */
-/** `lines`: whether the day has border flows at all; all Japan has none, and its import and export rows are left out. */
 function MixKey({
   at,
   record,
@@ -151,6 +150,7 @@ function MixKey({
   at: StackedSlot | undefined
   record: RecordSlot | undefined
   curtailed: boolean
+  /** Whether the day has border flows at all; all Japan has none, and its import and export rows are left out. */
   lines: boolean
 }) {
   const s = useStrings()

@@ -26,7 +26,6 @@ interface Props extends LayerOptions {
   /** The basemap's labels and the areas' names come in this language. */
   lang: Lang
   regions: Regions | null
-  /** What ran in each recorded area for the displayed slot, drawn as a glyph beside it. */
   /** What ran in each wired area for the displayed slot, null where there is no record for it yet, which draws an empty column. */
   mixes?: Partial<Record<Area, RecordSlot | null>>
   /** A click on an area, or on the sea for none. */
