@@ -172,7 +172,7 @@ const en: Strings = {
     label: 'About and credits',
     title: 'About',
     about:
-      'The Japanese day-ahead power market on a map: the spot price of each area for each half hour, what ran in each area, the power forecast to flow between them, and the plants. Pick a day and a half hour under the map, an area or a plant for its numbers, and a story from the list for a day worth seeing.',
+      'The Japanese day-ahead power market on a map: the spot price of each area for each half hour, what ran in each area, what crossed the lines between them as the companies recorded it or OCCTO planned it, and the plants. Pick a day and a half hour under the map, an area, a half of the grid or a plant for its numbers, and a story from the list for a day worth seeing; the switch in the readout turns it to the whole day or the price history.',
     credits: 'Credits',
     map: 'Map',
     regions: 'Areas',
@@ -361,7 +361,7 @@ const ja: Strings = {
     label: '情報とクレジット',
     title: 'このサイトについて',
     about:
-      '日本の前日スポット電力市場を地図に。エリアごと・コマごとのスポット価格、各エリアで何が動いたか、連系線を流れる見込みの電力、そして発電所。地図の下で日とコマを選び、エリアや発電所を選ぶとその数字が、一覧から選ぶと見どころの日が出ます。',
+      '日本の前日スポット電力市場を地図に。エリアごと・コマごとのスポット価格、各エリアで何が動いたか、連系線を流れた電力（各社の実績、なければOCCTOの計画）、そして発電所。地図の下で日とコマを選び、エリア、50Hzか60Hzの系統、発電所を選ぶとその数字が、一覧から選ぶと見どころの日が出ます。パネルの切替で一日全体や価格の履歴も見られます。',
     credits: 'クレジット',
     map: '地図',
     regions: 'エリア',

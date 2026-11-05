@@ -1,6 +1,6 @@
 # Screenshots
 
-One capture per milestone, taken with [`scripts/screenshot.mjs`](../../scripts/screenshot.mjs), newest first. The files carry a running number so they sort in order, then a name for what they show; the headings carry the dates. The README shows the latest desktop and phone captures; the rest stay here as a record of how the site grew.
+One capture per milestone, taken with [`scripts/screenshot.mjs`](../../scripts/screenshot.mjs), newest first. The files carry a running number so they sort in order, then a name for what they show; the headings carry the dates. The README shows the latest desktop and phone captures; the rest stay here as a record of how the site grew, each caption describing the interface as it was that day. M1 has no phone capture, since the phone layout came with M5.
 
 ## 2026-11-02 · M8, the halves
 
@@ -22,7 +22,7 @@ A Sunday noon at the floor, 2026-11-01 at 12:00, with nothing picked: the system
 
 Kyushu's price history on a phone (390×844), the readout's third view: every priced day since April 2025 across and the 48 half hours down in the 60 Hz ramp, the midday floors a dark band through the spring and the autumn and the evening peaks bright, the crosshair on the displayed half hour, a tick a month along the foot with the year named.
 
-## 2026-09-29 · Recorded flows and whole days
+## 2026-09-29 · M6, whole days and the recorded flows
 
 ![Recorded flows](006-recorded.png)
 
