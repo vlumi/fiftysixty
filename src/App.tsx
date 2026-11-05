@@ -85,10 +85,13 @@ export default function App() {
     document.documentElement.dataset.theme = theme
   }, [theme])
   const date = chosenDate ?? openingDay(spot, now)
-  // A day a link named that the prices do not hold falls back to the opening day.
+  // A day the prices do not hold falls back to the opening day, and the opening day chosen is no choice, so the
+  // address lets it go as it does the other defaults; the store is set directly, since setDate would pause the play.
   useEffect(() => {
-    if (spot && chosenDate && !spot.has(chosenDate)) setDate(null)
-  }, [spot, chosenDate, setDate])
+    if (!spot || !chosenDate) return
+    if (!spot.has(chosenDate)) setDate(null)
+    else if (chosenDate === openingDay(spot, now)) useApp.setState({ date: null })
+  }, [spot, chosenDate, now, setDate])
   const days = useMemo(() => (spot ? [...spot.keys()].sort() : []), [spot])
   const storyDays = useMemo(() => stories(spot), [spot])
   const tick = useCallback(() => step(days, date), [step, days, date])
