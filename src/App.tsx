@@ -11,7 +11,7 @@ import { loadRecord, monthOf, recordSlot, type RecordDays, type RecordSlot } fro
 import { areasOf, pricedArea, type Area } from './regions/areas'
 import Corner from './panels/Corner'
 import Credits from './panels/Credits'
-import Readout from './panels/Readout'
+import Readout from './panels/readout/Readout'
 import { loadRegions, type Regions } from './regions/geometry'
 import { loadPlants, type Plants } from './regions/plants'
 import { useApp } from './store'
@@ -247,7 +247,7 @@ export default function App() {
         <Readout
           slot={displayed}
           record={record}
-          day={recordedDay}
+          recordDay={recordedDay}
           interchange={interchange}
           dayTotals={dayFigures.totals}
           dayPrice={dayFigures.price}
@@ -255,7 +255,7 @@ export default function App() {
           monthDays={monthDays}
           monthPrices={monthPrices}
           history={history}
-          japan={japan}
+          scoped={japan}
           date={date}
           onDate={setDate}
           area={area}

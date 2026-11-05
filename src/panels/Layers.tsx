@@ -4,6 +4,7 @@ import type { LayerChoice, MapLayer } from '../map/layerChoice'
 import { MAP_LAYERS } from '../map/layerChoice'
 import { SERIES, SERIES_TOP_DOWN, type Series } from '../market/stack'
 import type { Plants } from '../regions/plants'
+import Chevron from './Chevron'
 import styles from './Layers.module.css'
 
 interface Props {
@@ -45,9 +46,7 @@ export default function LayersPanel({ layers, onToggleLayer, plants, hiddenFuels
           aria-expanded={byFuel}
           onClick={() => setByFuel((open) => !open)}
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-            <path d="M4 6 8 10 12 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          </svg>
+          <Chevron size={16} />
         </button>
       </div>
       {byFuel && (

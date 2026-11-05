@@ -1,24 +1,77 @@
-import { useStrings } from '../i18n/useStrings'
-import { co2Intensity, floorSlots, priceStats, renewableShare, spreadStats, type DayTotals } from '../market/daily'
-import { SLOTS, type SpotSlot } from '../market/jepx'
-import { SERIES_TOP_DOWN } from '../market/stack'
-import { areasOf, type Hz, type PricedArea } from '../regions/areas'
-import { areaName } from '../regions/names'
-import { gwh, kt, mw, percent, yen } from '../shared/format'
-import { useApp } from '../store'
-import { slotEnd, slotStart } from '../time/slots'
+import { useStrings } from '../../i18n/useStrings'
+import {
+  co2Intensity,
+  floorSlots,
+  priceStats,
+  renewableShare,
+  spreadStats,
+  type DayTotals,
+  type JapanDay,
+} from '../../market/daily'
+import { SLOTS, type SpotSlot } from '../../market/jepx'
+import type { MonthDay, MonthPrice } from '../../market/monthly'
+import { SERIES_TOP_DOWN } from '../../market/stack'
+import { areasOf, type Hz, type PricedArea } from '../../regions/areas'
+import { areaName } from '../../regions/names'
+import { gwh, kt, mw, percent, yen } from '../../shared/format'
+import { useApp } from '../../store'
+import { slotEnd, slotStart } from '../../time/slots'
+import MonthStrip from '../MonthStrip'
 import styles from './DayView.module.css'
+import ScopeHeading from './ScopeHeading'
+import { scopeHz, type PricedScope } from './scope'
 
-/** The area, or none for all Japan. */
-type Picked = PricedArea | null
+interface Props {
+  scope: PricedScope
+  spotDay: readonly SpotSlot[] | undefined
+  /** The day's totals and its price weighted by demand, null without the record. */
+  totals: DayTotals | null
+  price: number | null
+  /** The scope's half hours of the day summed, for the areas left out of a half's or all Japan's. */
+  scoped: JapanDay
+  monthDays: readonly MonthDay[]
+  monthPrices: readonly MonthPrice[]
+  date: string | null
+  onDate: (date: string) => void
+}
+
+/** The whole day: its prices, its supply under the scope's name, and the month's days under it to scrub through. */
+export default function DayView({
+  scope,
+  spotDay,
+  totals,
+  price,
+  scoped,
+  monthDays,
+  monthPrices,
+  date,
+  onDate,
+}: Props) {
+  return (
+    <>
+      <DayPrices spot={spotDay} scope={scope} weighted={price} />
+      {scope.kind !== 'area' && <ScopeHeading scope={scope} missing={scoped.missing} />}
+      <DaySupply totals={totals} scope={scope} />
+      <MonthStrip
+        days={monthDays}
+        prices={monthPrices}
+        hz={scopeHz(scope)}
+        weighted={scope.kind === 'half'}
+        date={date}
+        onPick={onDate}
+      />
+    </>
+  )
+}
 
 /**
  * The displayed day in energy: how it was supplied, as one bar and a table of each source's GWh and share, read from
  * the top as the chart stacks, then the day's figures; or, while the records for it are not all in, a note. The prices
  * stand above it, as the price curve stands above the supply chart.
  */
-export function DaySupply({ totals, area }: { totals: DayTotals | null; area: Picked }) {
+export function DaySupply({ totals, scope }: { totals: DayTotals | null; scope: PricedScope }) {
   const s = useStrings()
+  const area = scope.kind === 'area'
   if (!totals) return <p className="muted">{area ? s.readout.noRecord : s.day.notAll}</p>
   const supply = [
     { key: 'imports', name: s.chart.imports, color: 'var(--src-exchange)', mwh: area ? totals.importMWh : 0 },
@@ -120,22 +173,20 @@ export function DaySupply({ totals, area }: { totals: DayTotals | null; area: Pi
  */
 export function DayPrices({
   spot,
-  area,
-  half = null,
+  scope,
   weighted,
 }: {
   spot: readonly SpotSlot[] | undefined
-  area: Picked
-  /** With nothing picked, the half of the grid the day is scoped to. */
-  half?: Hz | null
+  scope: PricedScope
   /** The price weighted by demand, ¥/kWh, or null without the record. */
   weighted: number | null
 }) {
   const s = useStrings()
-  if (half && !area) return <HalfPrices spot={spot} half={half} weighted={weighted} />
-  const stats = priceStats(spot, area ?? undefined)
+  if (scope.kind === 'half') return <HalfPrices spot={spot} half={scope.half} weighted={weighted} />
+  const area = scope.kind === 'area' ? scope.area : undefined
+  const stats = priceStats(spot, area)
   if (!stats) return null
-  const floors = floorSlots(spot, area ?? undefined)
+  const floors = floorSlots(spot, area)
   return (
     <section aria-label={s.day.prices}>
       <dl className={styles.figures}>

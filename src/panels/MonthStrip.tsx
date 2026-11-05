@@ -2,6 +2,7 @@ import type { PointerEvent } from 'react'
 import { useStrings } from '../i18n/useStrings'
 import { areaList } from '../regions/names'
 import type { DayTotals } from '../market/daily'
+import type { Hz } from '../regions/areas'
 import type { MonthDay, MonthPrice } from '../market/monthly'
 import { SERIES_TOP_DOWN } from '../market/stack'
 import { yen } from '../shared/format'
@@ -19,7 +20,7 @@ interface Props {
   /** The month's priced days in order, for the price row under the supply. */
   prices?: readonly MonthPrice[]
   /** The half whose price color the price row takes, or none for the system price. */
-  hz?: number | null
+  hz?: Hz | null
   /** Whether the price row's ticks are prices weighted by demand, a half's, rather than means. */
   weighted?: boolean
   date: string | null

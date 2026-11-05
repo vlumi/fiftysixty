@@ -1,6 +1,12 @@
 import { PRICED_AREAS, type PricedArea } from '../regions/areas'
 import { fetchText } from './fetch'
 
+/** The lowest and the highest price of the half hour across the areas. */
+export function slotSpread(slot: SpotSlot, areas: readonly PricedArea[]): [number, number] {
+  const prices = areas.map((a) => slot.areaPrice[a])
+  return [Math.min(...prices), Math.max(...prices)]
+}
+
 /**
  * One half hour of the day-ahead auction: the slot is 1 to 48 from 00:00 JST; the prices, and system-wide what was
  * offered, asked and contracted in kWh.
