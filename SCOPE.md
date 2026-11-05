@@ -81,6 +81,13 @@ Toolchain, CI, a map of Japan under the name, the data fetcher for JEPX and TEPC
 - The half on the map: the other half dimmed and the half outlined.
 - The half's lines: the three frequency converters as its imports and exports, since nothing else crosses the middle.
 
+### M9 — the links and the long view (done 2026-11-05)
+
+- A link carries the day, the half hour, the pick, the half and the view, so a half hour worth showing is an address to paste.
+- The market splits over time under the price history: a line a row and a day a column, each cell the share of the day's half hours the line's two ends priced apart, over the scope's lines; the frequency converters' row is the halves parting.
+- The price duration curve under it, every priced half hour held from the dearest down, with the mean, the median, the price a tenth of the time stood above and the share at the floor; the displayed half hour marked where it ranks.
+- The about modal says when the host last fetched, from a note the fetcher writes beside the data; and a data file that could not be loaded is said under the readout's headline instead of the console alone.
+
 ## Known gaps
 
 All in the data: Chubu's previous month sits behind a download form and is not fetched; Hokkaido's record runs two days behind the others; and the loops' per-line flows are measured only on OCCTONET, behind a browser session, so where the records give a loop's totals alone the map draws a fork.

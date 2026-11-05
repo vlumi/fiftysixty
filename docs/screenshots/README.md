@@ -2,6 +2,16 @@
 
 One capture per milestone, taken with [`scripts/screenshot.mjs`](../../scripts/screenshot.mjs), newest first. The files carry a running number so they sort in order, then a name for what they show; the headings carry the dates. The README shows the latest desktop and phone captures; the rest stay here as a record of how the site grew, each caption describing the interface as it was that day. M1 has no phone capture, since the phone layout came with M5.
 
+## 2026-11-05 · M9, the links and the long view
+
+![The long view](009-the-long-view.png)
+
+The Sunday noon at the floor again, 2026-11-01 at 12:00, opened from a link and switched to History with nothing picked: the system price's heatmap over every day since April 2025, under it the market splits over the same days, a line a row, where the Tokyo–Chubu row is the two halves parting through the year and Chubu–Kansai most days of it, and the price duration curve, 28,080 half hours from the dearest down with the displayed one marked at 98%, a mean of 13.56 ¥/kWh and a median of 11.69. On the map the recorded flows of the noon, violet, with the columns.
+
+<img src="009-the-long-view-phone.png" alt="Kyushu's long view on a phone" width="260">
+
+Kyushu's long view on a phone (390×844), scrolled to the splits and the curve: the Kanmon line's splits by day, and Kyushu's duration curve in its half's amber with the half hour marked at 93%, seven percent of its half hours at the floor.
+
 ## 2026-11-02 · M8, the halves
 
 ![The halves](008-the-halves.png)

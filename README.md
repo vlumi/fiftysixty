@@ -10,9 +10,9 @@ Unofficial demo project, built from public data; not affiliated with any exchang
 
 Live at [fiftysixty.misaki.fi](https://fiftysixty.misaki.fi). [SCOPE.md](SCOPE.md) is the plan; [ARCHITECTURE.md](ARCHITECTURE.md) explains how it works.
 
-![A Sunday noon at the floor from the 50 Hz point of view: the east outlined and the west muted on the map, and the readout scoped to the half, its spread, its areas against the system price, the frequency converters as its lines, its price curve and its supply summed](docs/screenshots/008-the-halves.png)
+![The long view on a Sunday noon at the floor: the price history as a heatmap, under it the market splits over time, a line a row, the Tokyo–Chubu row the halves parting through the year, and the price duration curve with the half hour marked near its cheap end, over the map with the recorded flows](docs/screenshots/009-the-long-view.png)
 
-<img src="docs/screenshots/008-the-halves-phone.png" alt="The 60 Hz half on a phone: the three-way control, the west's six areas against the system price, the frequency converters as its lines, and its price curve" width="260">
+<img src="docs/screenshots/009-the-long-view-phone.png" alt="Kyushu's long view on a phone: its price heatmap in the amber ramp, the Kanmon line's splits by day, and its duration curve with the half hour marked at the floor" width="260">
 
 Every capture, one per milestone, is shown in [docs/screenshots](docs/screenshots/README.md). The interface comes in English and Japanese, dark and light.
 
@@ -31,6 +31,10 @@ Every capture, one per milestone, is shown in [docs/screenshots](docs/screenshot
 **The price over time.** The day's auction as a curve above the supply chart, the picked area in its half's color over the dashed system price, or with nothing picked every area, so the day forks where the market split; under it, with nothing picked, what was offered, asked and cleared each half hour, since when far more is offered than asked the price falls to the floor. The day view gives the mean and the range with their half hours, and the month's strip a bar from each day's low to its high; a third view lays every priced day held as a heatmap, a day across and the 48 half hours down, a slider in both directions.
 
 **The halves.** A control above the readout scopes it to 50 Hz or 60 Hz: the half's spread as the headline, its areas against the system price, the three frequency converters as its only lines, and its supply summed from its areas' records; on the map the other half is muted and the half outlined.
+
+**The long view.** Under the price history, the market splits over time: a line a row and a day a column, each cell how much of the day the line's two ends priced apart, the Tokyo–Chubu row being the halves parting; and the price duration curve, every half hour held from the dearest down, with the mean, the median and how often the price sat at the floor.
+
+**Links.** The address follows what you look at, the day, the half hour, the area or the half and the view, so a half hour worth showing is a link to paste.
 
 **The plants.** A layer to switch on, by fuel and capacity as OpenStreetMap maps them; what each one is running is not public, only the per-area totals, and the map says so.
 
