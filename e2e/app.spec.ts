@@ -178,6 +178,24 @@ test('the history view: a press on the heatmap sets the day and the half hour', 
   await expect(page.getByRole('status')).toHaveText('Today 00:00–00:30 JST')
 })
 
+test('a link carries the day, the half hour, the pick and the view, and the address follows the choices', async ({
+  page,
+}) => {
+  await open(page, '/?day=2026-09-22&slot=23&area=kyushu&view=day')
+  const readout = page.getByRole('complementary', { name: 'Readout' })
+  await expect(readout.getByRole('heading', { level: 2 })).toHaveText(/^Kyushu/)
+  await expect(page.getByRole('status')).toHaveText('4 days ago 11:00–11:30 JST')
+  await expect(page.getByRole('button', { name: 'Day', exact: true })).toHaveAttribute('aria-pressed', 'true')
+  await page.getByRole('button', { name: 'Half hour' }).click()
+  await page.getByRole('button', { name: 'Next day' }).click()
+  await expect(page).toHaveURL(/\?day=2026-09-23&slot=23&area=kyushu$/)
+  await page.keyboard.press('Escape')
+  await page.getByRole('button', { name: '60 Hz' }).click()
+  await expect(page).toHaveURL(/\?day=2026-09-23&slot=23&half=60$/)
+  await open(page, '/?day=2030-01-01')
+  await expect(page.getByLabel('Delivery day')).toHaveValue('2026-09-25')
+})
+
 test('the light theme is a click away and is kept across a reload', async ({ page }) => {
   await open(page)
   await page.getByRole('button', { name: 'Light theme' }).click()

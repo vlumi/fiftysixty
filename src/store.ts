@@ -4,6 +4,7 @@ import { clampSlot } from './time/slots'
 import { SLOTS } from './market/jepx'
 import type { Series } from './market/stack'
 import { loadLang, saveLang, type Lang } from './i18n/strings'
+import { formatLink, parseLink } from './shared/link'
 import { loadThemeChoice, saveThemeChoice, type ThemeChoice } from './shared/theme'
 import {
   loadHiddenFuels,
@@ -58,10 +59,10 @@ const initial = (): State => ({
   slot: 25,
   area: null,
   plant: null,
+  half: null,
+  view: 'slot',
   playing: false,
   layers: loadLayerChoice(),
-  view: 'slot',
-  half: null,
   hiddenFuels: loadHiddenFuels(),
   themeChoice: loadThemeChoice(),
   lang: loadLang(),
@@ -69,6 +70,8 @@ const initial = (): State => ({
 
 export const useApp = create<State & Actions>((set) => ({
   ...initial(),
+  // The address's own choices open the page where a link pointed.
+  ...parseLink(typeof location === 'undefined' ? '' : location.search),
   // A day or a half hour chosen by hand pauses the playback, which otherwise would run on from it.
   setDate: (date) => set({ date, playing: false }),
   setSlot: (slot) => set({ slot: clampSlot(slot), playing: false }),
@@ -95,6 +98,9 @@ export const useApp = create<State & Actions>((set) => ({
 }))
 
 useApp.subscribe((s, previous) => {
+  const link = formatLink(s)
+  if (link !== formatLink(previous) && typeof history !== 'undefined')
+    history.replaceState(null, '', link || location.pathname)
   if (s.themeChoice !== previous.themeChoice) saveThemeChoice(s.themeChoice)
   if (s.lang !== previous.lang) saveLang(s.lang)
   if (s.layers !== previous.layers) saveLayerChoice(s.layers)

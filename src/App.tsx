@@ -80,6 +80,10 @@ export default function App() {
     document.documentElement.dataset.theme = theme
   }, [theme])
   const date = chosenDate ?? openingDay(spot, now)
+  // A day a link named that the prices do not hold falls back to the opening day.
+  useEffect(() => {
+    if (spot && chosenDate && !spot.has(chosenDate)) setDate(null)
+  }, [spot, chosenDate, setDate])
   const days = useMemo(() => (spot ? [...spot.keys()].sort() : []), [spot])
   const storyDays = useMemo(() => stories(spot), [spot])
   const tick = useCallback(() => step(days, date), [step, days, date])
