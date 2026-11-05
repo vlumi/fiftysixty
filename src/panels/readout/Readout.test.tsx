@@ -10,6 +10,7 @@ import { priceHistory } from '../../market/history'
 import { planned } from '../../market/interchange'
 import { parseSpot, slotOf } from '../../market/jepx'
 import { recordSlot } from '../../market/record'
+import { scopeLines, splitHistory } from '../../market/splits'
 import { TEPCO } from '../../market/tepco'
 import { SHORT_QUERY } from '../../shared/useShort'
 import { resetApp, useApp } from '../../store'
@@ -39,6 +40,7 @@ const base: ComponentProps<typeof Readout> = {
   monthDays: [],
   monthPrices: [],
   history: [],
+  splits: { lines: [], days: [] },
   date: null,
   onDate: vi.fn(),
   onBack: vi.fn(),
@@ -266,8 +268,18 @@ test("the day view: the switch shows the area's day in energy, and all Japan wit
 test('the history view: the heatmap over every priced day held, a press on it setting the day and the half hour', async () => {
   const onDate = vi.fn()
   const onSlot = vi.fn()
-  render(<Readout {...base} history={priceHistory(spot)} date="2026-09-26" onDate={onDate} onSlot={onSlot} />)
+  render(
+    <Readout
+      {...base}
+      history={priceHistory(spot)}
+      splits={splitHistory(spot, scopeLines(null, null))}
+      date="2026-09-26"
+      onDate={onDate}
+      onSlot={onSlot}
+    />,
+  )
   await userEvent.click(screen.getByRole('button', { name: 'History' }))
+  expect(screen.getByRole('img', { name: 'Market splits' })).toBeInTheDocument()
   const heat = screen.getByRole('slider', { name: 'Price history' })
   expect(heat).toHaveAttribute('aria-valuenow', '4')
   expect(heat).toHaveAttribute('aria-valuetext', '2026-09-26 (Sat) 23:00–23:30: 14.12 ¥/kWh')

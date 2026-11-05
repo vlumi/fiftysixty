@@ -1,19 +1,26 @@
 import { useStrings } from '../../i18n/useStrings'
 import type { HistoryDay } from '../../market/history'
+import type { SplitHistory as Splits } from '../../market/splits'
 import PriceHistory from '../PriceHistory'
+import SplitHistory from '../SplitHistory'
 import type { PricedScope } from './scope'
 
 interface Props {
   scope: PricedScope
   history: readonly HistoryDay[]
+  /** The scope's lines over the same days, for the splits under the prices. */
+  splits: Splits
   date: string | null
   slot: number
   onDate: (date: string) => void
   onSlot: (slot: number) => void
 }
 
-/** The price history as the heatmap: the picked area's price, or the system's for a half, which has none of its own, and for all Japan. */
-export default function HistoryView({ scope, history, date, slot, onDate, onSlot }: Props) {
+/**
+ * The long view: the price history as the heatmap, the picked area's price, or the system's for a half, which has
+ * none of its own, and for all Japan; under it the market splits over the same days on the scope's lines.
+ */
+export default function HistoryView({ scope, history, splits, date, slot, onDate, onSlot }: Props) {
   const s = useStrings()
   return (
     <>
@@ -28,6 +35,7 @@ export default function HistoryView({ scope, history, date, slot, onDate, onSlot
           onSlot(at)
         }}
       />
+      <SplitHistory splits={splits} date={date} />
     </>
   )
 }

@@ -6,6 +6,7 @@ import type { Interchange } from '../../market/interchange'
 import type { SpotSlot } from '../../market/jepx'
 import type { MonthDay, MonthPrice } from '../../market/monthly'
 import type { RecordSlot } from '../../market/record'
+import type { SplitHistory } from '../../market/splits'
 import type { Area } from '../../regions/areas'
 import type { PlantProps } from '../../regions/plants'
 import { useNarrow } from '../../shared/useNarrow'
@@ -41,6 +42,8 @@ interface Props {
   monthPrices: readonly MonthPrice[]
   /** Every priced day held, the picked area's price or the system's, for the history view. */
   history: readonly HistoryDay[]
+  /** The scope's lines over the same days: their market splits, for the history view. */
+  splits: SplitHistory
   date: string | null
   onDate: (date: string) => void
   /** Up a level: from a plant to the map, from an area to the system price. */
@@ -88,6 +91,7 @@ export default function Readout(props: Props) {
       <HistoryView
         scope={scope}
         history={props.history}
+        splits={props.splits}
         date={props.date}
         slot={slot.slot}
         onDate={props.onDate}

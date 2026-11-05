@@ -1,0 +1,57 @@
+.figure {
+  margin: 0.75rem 0 0;
+}
+
+/* The lines named down the left, the plot as tall as their rows, and the months along the foot under the plot alone. */
+.frame {
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  grid-template-rows: auto 1rem;
+  column-gap: 0.25rem;
+}
+
+.lines {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 0.7rem;
+  text-align: right;
+}
+
+.lines span {
+  height: 0.8rem;
+  line-height: 0.8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plot {
+  composes: plot from './PriceHistory.module.css';
+  cursor: default;
+}
+
+.canvas {
+  composes: canvas from './PriceHistory.module.css';
+}
+
+.column {
+  composes: column from './PriceHistory.module.css';
+}
+
+.months {
+  grid-column: 2;
+}
+
+.legend {
+  composes: legend from './PriceHistory.module.css';
+}
+
+.ramp {
+  composes: ramp from './PriceHistory.module.css';
+}
+
+.ends {
+  composes: ends from './PriceHistory.module.css';
+}

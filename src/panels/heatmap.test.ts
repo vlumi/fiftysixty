@@ -1,15 +1,15 @@
 import { DARK } from '../shared/palette'
-import { priceColor } from '../shared/scale'
+import { priceColor, scaleColor } from '../shared/scale'
 import { cellAt, heatmapPixels, labeled, monthStarts } from './heatmap'
 
-const day = (date: string, price: number) => ({ date, prices: new Array<number>(48).fill(price) })
+const day = (price: number) => new Array<number>(48).fill(price)
 const ramp = DARK.price[50]
 const at = (pixels: Uint8ClampedArray, width: number, x: number, row: number) => [
   ...pixels.slice((row * width + x) * 4, (row * width + x) * 4 + 4),
 ]
 
 test('a column a day when they fit, its rows the day’s half hours in the ramp', () => {
-  const days = [day('2026-09-22', 10), day('2026-09-23', 50)]
+  const days = [day(10), day(50)]
   const pixels = heatmapPixels(days, ramp, 4)
   expect(pixels).toHaveLength(4 * 48 * 4)
   expect(at(pixels, 4, 0, 0)).toEqual([...priceColor(10, ramp), 255])
@@ -19,13 +19,20 @@ test('a column a day when they fit, its rows the day’s half hours in the ramp'
 })
 
 test('more days than columns: a column is the mean of its days, and a half hour without a price is clear', () => {
-  const days = [day('2026-09-22', 10), day('2026-09-23', 30), day('2026-09-24', 50)]
-  days[2].prices[5] = NaN
+  const days = [day(10), day(30), day(50)]
+  days[2][5] = NaN
   const pixels = heatmapPixels(days, ramp, 2)
   expect(at(pixels, 2, 0, 0)).toEqual([...priceColor(10, ramp), 255])
   expect(at(pixels, 2, 1, 0)).toEqual([...priceColor(40, ramp), 255])
   expect(at(pixels, 2, 1, 5)).toEqual([...priceColor(30, ramp), 255])
-  expect(at(heatmapPixels([day('2026-09-22', NaN)], ramp, 1), 1, 0, 0)).toEqual([0, 0, 0, 0])
+  expect(at(heatmapPixels([day(NaN)], ramp, 1), 1, 0, 0)).toEqual([0, 0, 0, 0])
+})
+
+test('as many rows as a column has values, over another domain', () => {
+  const pixels = heatmapPixels([[0, 0.5, 1]], DARK.price.system, 1, [0, 1])
+  expect(pixels).toHaveLength(3 * 4)
+  expect(at(pixels, 1, 0, 1)).toEqual([...scaleColor(0.5, DARK.price.system, [0, 1]), 255])
+  expect(at(pixels, 1, 0, 2)).toEqual([...DARK.price.system[3], 255])
 })
 
 test('the cell under a point, clamped to the plot', () => {

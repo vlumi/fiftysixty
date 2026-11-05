@@ -6,6 +6,7 @@ import { dayTotals, japanDay, japanTotals, weightedPrice } from './market/daily'
 import { priceHistory } from './market/history'
 import { fiscalYear, loadSpotYears, slotOf, type SpotDays } from './market/jepx'
 import { pricedMonth, recordedMonth, spreadMonth, summedMonth } from './market/monthly'
+import { scopeLines, splitHistory } from './market/splits'
 import { stories } from './market/stories'
 import { loadRecord, monthOf, recordSlot, type RecordDays, type RecordSlot } from './market/record'
 import { areasOf, pricedArea, type Area } from './regions/areas'
@@ -185,6 +186,7 @@ export default function App() {
   // Every priced day held, the picked area's price or the system's, for the readout's history view.
   const history = useMemo(() => priceHistory(spot, picked ?? undefined), [spot, picked])
   const japan = useMemo(() => japanDay(scopedDays, scope), [scopedDays, scope])
+  const splits = useMemo(() => splitHistory(spot, scopeLines(area, half)), [spot, area, half])
   const dayFigures = useMemo(() => {
     if (picked) {
       const d = areaDays.get(picked)
@@ -259,6 +261,7 @@ export default function App() {
           monthDays={monthDays}
           monthPrices={monthPrices}
           history={history}
+          splits={splits}
           scoped={japan}
           date={date}
           onDate={setDate}

@@ -136,6 +136,8 @@ export interface Strings {
     gw: string
     price: string
     history: string
+    splits: string
+    splitsKey: string
     yen: (price: number) => string
     auction: string
     offered: string
@@ -314,6 +316,8 @@ const en: Strings = {
     gw: 'GW',
     price: 'Price over the day',
     history: 'Price history',
+    splits: 'Market splits',
+    splitsKey: 'Half hours the line split, share of the day',
     auction: 'Auction over the day',
     offered: 'Offered',
     asked: 'Asked',
@@ -500,6 +504,8 @@ const ja: Strings = {
     gw: 'GW',
     price: '一日の価格',
     history: '価格の推移',
+    splits: '市場分断の推移',
+    splitsKey: '分断したコマの割合',
     auction: '一日の入札',
     offered: '売り入札',
     asked: '買い入札',
