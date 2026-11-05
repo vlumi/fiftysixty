@@ -8,6 +8,7 @@ import { fiscalYear, loadSpotYears, slotOf, type SpotDays } from './market/jepx'
 import { pricedMonth, recordedMonth, spreadMonth, summedMonth } from './market/monthly'
 import { scopeLines, splitHistory } from './market/splits'
 import { stories } from './market/stories'
+import { loadFetched, type Fetched } from './market/fetched'
 import { loadRecord, monthOf, recordSlot, type RecordDays, type RecordSlot } from './market/record'
 import { areasOf, pricedArea, type Area } from './regions/areas'
 import Corner from './panels/Corner'
@@ -38,6 +39,7 @@ export default function App() {
   const [spot, setSpot] = useState<SpotDays | null>(null)
   const [records, setRecords] = useState<ReadonlyMap<string, RecordDays | null>>(new Map())
   const [flowMonths, setFlowMonths] = useState<ReadonlyMap<string, FlowDays | null>>(new Map())
+  const [fetched, setFetched] = useState<Fetched | null>(null)
   useEffect(() => {
     loadRegions().then(setRegions, console.error)
     loadPlants().then(setPlants, console.error)
@@ -125,6 +127,7 @@ export default function App() {
       ask(key, () => loadRecord(adapter, month).then((days) => setRecords((r) => new Map(r).set(key, days))))
     }
     ask(`flows/${month}`, () => loadFlows(month).then((days) => setFlowMonths((f) => new Map(f).set(month, days))))
+    ask('fetched', () => loadFetched().then(setFetched))
   }, [month, now])
   // The prices likewise, so an open tab learns of the next delivery day and, in April, of the next file.
   useEffect(() => {
@@ -231,7 +234,7 @@ export default function App() {
           ⓘ
         </button>
       </header>
-      {credits && <Credits onClose={() => setCredits(false)} />}
+      {credits && <Credits fetched={fetched} onClose={() => setCredits(false)} />}
       <main style={{ '--bar-inset': `${barHeight + 16}px` } as CSSProperties}>
         <Suspense fallback={null}>
           <MapView

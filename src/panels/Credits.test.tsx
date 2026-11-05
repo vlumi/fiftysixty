@@ -22,3 +22,10 @@ test('the about says what the page is, names every source, holds the page still,
   unmount()
   expect(document.body.style.overflow).toBe('')
 })
+
+test("the data's freshness from the fetcher's note, in Japan's time", () => {
+  render(<Credits fetched={{ at: '2026-11-05T03:23:04Z', files: {} }} onClose={vi.fn()} />)
+  expect(screen.getByText('Data').nextElementSibling).toHaveTextContent(
+    'Fetched hourly on the host, last at 2026-11-05 12:23 JST',
+  )
+})

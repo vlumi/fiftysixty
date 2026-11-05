@@ -27,6 +27,8 @@ export interface Strings {
     lines: string
     co2: string
     co2By: string
+    data: string
+    fetchedAt: (at: string) => string
     source: string
   }
   language: string
@@ -190,6 +192,8 @@ const en: Strings = {
     co2: 'CO₂',
     co2By:
       'Estimated from the fuel burnt, after CRIEPI (2016): coal 864, LNG 430, oil and other thermal 695 g/kWh; biomass as none.',
+    data: 'Data',
+    fetchedAt: (at) => `Fetched hourly on the host, last at ${at} JST`,
     source: 'Source on GitHub',
   },
   language: 'Language',
@@ -384,6 +388,8 @@ const ja: Strings = {
     lines: '連系線',
     co2: 'CO₂',
     co2By: '燃料の燃焼分を電中研（2016）の係数で推計：石炭 864、LNG 430、石油・その他火力 695 g/kWh、バイオマスは 0。',
+    data: 'データ',
+    fetchedAt: (at) => `毎時取得、最終 ${at} JST`,
     source: 'GitHub のソース',
   },
   language: '言語',

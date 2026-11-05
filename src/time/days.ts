@@ -47,6 +47,9 @@ const JST_TIME = new Intl.DateTimeFormat('en-GB', {
   hour12: false,
 })
 
+/** A moment as a day and a time in Japan, `2026-11-05 12:23`. */
+export const jstDateTime = (at: Date) => `${jstDate(at)} ${JST_TIME.format(at)}`
+
 /** The half hour under way in Japan, 1 to 48. */
 export const slotNow = (now: Date) => Math.floor(jstMinutes(now) / 30) + 1
 
