@@ -10,6 +10,8 @@ export const LANGUAGE_NAMES: Record<Lang, string> = { en: 'English', ja: '日本
 /** Every visible word, by key, in each language; the layout never changes with the language, only the words. */
 export interface Strings {
   subtitle: string
+  /** The name in the header as a link back to the opening view. */
+  home: string
   map: string
   theme: string
   close: string
@@ -177,6 +179,7 @@ export interface Strings {
 
 const en: Strings = {
   subtitle: 'The Japanese power market on a map',
+  home: 'Back to the opening view',
   map: 'Map',
   theme: 'Light theme',
   close: 'Close',
@@ -376,6 +379,7 @@ const en: Strings = {
 
 const ja: Strings = {
   subtitle: '地図で見る日本の電力市場',
+  home: '最初の表示に戻る',
   map: '地図',
   theme: 'ライトテーマ',
   close: '閉じる',

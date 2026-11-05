@@ -34,7 +34,7 @@ Every capture, one per milestone, is shown in [docs/screenshots](docs/screenshot
 
 **The long view.** Under the price history, the market splits over time: a line a row and a day a column, each cell how much of the day the line's two ends priced apart, the Tokyo–Chubu row being the halves parting; and the price duration curve, every half hour held from the dearest down, with the mean, the median and how often the price sat at the floor.
 
-**Links.** The address follows what you look at, the day, the half hour, the area or the half and the view, so a half hour worth showing is a link to paste.
+**Links.** The address follows what you look at, the day, the half hour, the area or the half and the view, so a half hour worth showing is a link to paste; the name in the header is the way back to the opening view.
 
 **The plants.** A layer to switch on, by fuel and capacity as OpenStreetMap maps them; what each one is running is not public, only the per-area totals, and the map says so.
 
