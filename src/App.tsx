@@ -2,9 +2,10 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type
 import { ADAPTERS } from './market/adapters'
 import { flowsAt, loadFlows, type FlowDays } from './market/flows'
 import { interchangeAt, RECORDED_AREAS } from './market/interchange'
-import { dayTotals, japanDay, japanTotals, priceStats, spreadStats, weightedPrice } from './market/daily'
+import { dayTotals, japanDay, japanTotals, weightedPrice } from './market/daily'
 import { priceHistory } from './market/history'
-import { fiscalYear, loadSpotYears, SLOTS, slotOf, type PricedArea, type SpotDays } from './market/jepx'
+import { fiscalYear, loadSpotYears, slotOf, type PricedArea, type SpotDays } from './market/jepx'
+import { pricedMonth, recordedMonth, spreadMonth, summedMonth } from './market/monthly'
 import { stories } from './market/stories'
 import { loadRecord, monthOf, recordSlot, type RecordDays, type RecordSlot } from './market/record'
 import { AREA_BY_ID, type Area } from './regions/areas'
@@ -46,6 +47,7 @@ export default function App() {
   const setDate = useApp((s) => s.setDate)
   const setSlot = useApp((s) => s.setSlot)
   const area = useApp((s) => s.area)
+  const picked = area && area !== 'okinawa' ? (area as PricedArea) : null
   const half = useApp((s) => s.half)
   const selectArea = useApp((s) => s.selectArea)
   const plantId = useApp((s) => s.plant)
@@ -163,77 +165,30 @@ export default function App() {
   // The areas all Japan sums, or with a half chosen and nothing picked, the half's.
   const scope = useMemo(() => (half ? RECORDED_AREAS.filter((a) => AREA_BY_ID[a].hz === half) : RECORDED_AREAS), [half])
   const scopedDays = useMemo(() => new Map([...areaDays].filter(([a]) => scope.includes(a))), [areaDays, scope])
-  // The displayed month's whole days, the picked area's, the half's or all Japan's, for the strip under the day.
-  const monthDays = useMemo(() => {
-    if (!month) return []
-    const picked = area && area !== 'okinawa' ? (area as PricedArea) : null
-    const dates = [...(records.get(`${picked ?? scope[0]}/${month}`)?.keys() ?? [])].sort()
-    return dates.flatMap((d) => {
-      if (picked) {
-        const day = records.get(`${picked}/${month}`)?.get(d)
-        return day?.length === SLOTS ? [{ date: d, totals: dayTotals(day), missing: [] }] : []
-      }
-      const byArea = new Map(
-        scope.flatMap((a) => {
-          const day = records.get(`${a}/${month}`)?.get(d)
-          return day ? [[a, day] as const] : []
-        }),
-      )
-      const japan = japanDay(byArea, scope)
-      // Whole days only, so a bar is a day; one with an area missing is marked as such.
-      return japan.slots.length === SLOTS ? [{ date: d, totals: dayTotals(japan.slots), missing: japan.missing }] : []
-    })
-  }, [records, month, area, scope])
-  // The displayed month's priced days for the strip's price row: the picked area's price or the system's, each
-  // day's low, high and mean; or a half's spread across its areas, the tick its weighted price where the day's
-  // records are whole.
+  const monthRecords = useMemo(
+    () => new Map(RECORDED_AREAS.map((a) => [a, month ? (records.get(`${a}/${month}`) ?? null) : null])),
+    [records, month],
+  )
+  const monthDays = useMemo(
+    () => (picked ? recordedMonth(monthRecords.get(picked)) : summedMonth(monthRecords, scope)),
+    [picked, monthRecords, scope],
+  )
   const monthPrices = useMemo(() => {
     if (!spot || !month) return []
-    const picked = area && area !== 'okinawa' ? (area as PricedArea) : undefined
-    const areas = scope.filter((a) => a !== 'okinawa') as PricedArea[]
-    return [...spot.keys()]
-      .filter((d) => monthOf(d) === month)
-      .sort()
-      .flatMap((d) => {
-        const spotDay = spot.get(d)
-        if (picked || !half) {
-          const stats = priceStats(spotDay, picked)
-          return stats ? [{ date: d, low: stats.low.price, high: stats.high.price, mean: stats.mean }] : []
-        }
-        const spread = spreadStats(spotDay, areas)
-        if (!spread) return []
-        const byArea = new Map(
-          areas.flatMap((a) => {
-            const day = records.get(`${a}/${month}`)?.get(d)
-            return day ? [[a, day] as const] : []
-          }),
-        )
-        const whole = japanDay(byArea, areas).slots.length === SLOTS
-        return [
-          {
-            date: d,
-            low: spread.low.price,
-            high: spread.high.price,
-            mean: whole ? weightedPrice(spotDay, byArea) : null,
-          },
-        ]
-      })
-  }, [spot, month, area, half, scope, records])
+    if (picked || !half) return pricedMonth(spot, month, picked ?? undefined)
+    return spreadMonth(spot, month, scope as readonly PricedArea[], monthRecords)
+  }, [spot, month, picked, half, scope, monthRecords])
   // Every priced day held, the picked area's price or the system's, for the readout's history view.
-  const history = useMemo(
-    () => priceHistory(spot, area && area !== 'okinawa' ? (area as PricedArea) : undefined),
-    [spot, area],
-  )
+  const history = useMemo(() => priceHistory(spot, picked ?? undefined), [spot, picked])
   const japan = useMemo(() => japanDay(scopedDays, scope), [scopedDays, scope])
   const dayFigures = useMemo(() => {
-    const picked = area && area !== 'okinawa' ? (area as PricedArea) : null
     if (picked) {
       const d = areaDays.get(picked)
       return { totals: d ? dayTotals(d) : null, price: d ? weightedPrice(spotDay, new Map([[picked, d]])) : null }
     }
     const totals = japanTotals(japan)
     return { totals, price: totals ? weightedPrice(spotDay, scopedDays) : null }
-  }, [area, areaDays, scopedDays, spotDay, japan])
+  }, [picked, areaDays, scopedDays, spotDay, japan])
 
   return (
     <>

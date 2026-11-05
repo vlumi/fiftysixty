@@ -1,8 +1,8 @@
 import type { PointerEvent } from 'react'
 import { useStrings } from '../i18n/useStrings'
-import type { Area } from '../regions/areas'
 import { areaList } from '../regions/names'
 import type { DayTotals } from '../market/daily'
+import type { MonthDay, MonthPrice } from '../market/monthly'
 import { SERIES } from '../market/stack'
 import { yen } from '../shared/format'
 import { priceAxis } from '../shared/scale'
@@ -12,21 +12,6 @@ import styles from './MonthStrip.module.css'
 import { scrub } from '../shared/scrub'
 
 const GWH = 1000
-
-/** A whole day of the month with its totals, and for all Japan the areas left out of them. */
-export interface MonthDay {
-  date: string
-  totals: DayTotals
-  missing: readonly Area[]
-}
-
-/** A priced day of the month: its lowest and highest half hour, and the mean, or for a half of the grid the price weighted by demand where the records allow it. */
-export interface MonthPrice {
-  date: string
-  low: number
-  high: number
-  mean: number | null
-}
 
 interface Props {
   /** The month's whole recorded days in order. */
