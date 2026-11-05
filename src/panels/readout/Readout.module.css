@@ -196,6 +196,12 @@ button.fold .price {
   background: var(--src-hydro);
 }
 
+/* A data file that could not be loaded, said under the headline in the warning hue. */
+.warning {
+  color: var(--hz60);
+  font-size: 0.8rem;
+}
+
 /* The scope, all Japan or a half, and the view switch, wrapping on a narrow panel. */
 .switches {
   display: flex;

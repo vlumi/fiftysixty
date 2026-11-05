@@ -13,6 +13,8 @@ export interface Strings {
   map: string
   theme: string
   close: string
+  /** A part of the page threw while rendering. */
+  failed: string
   credits: {
     label: string
     title: string
@@ -123,6 +125,8 @@ export interface Strings {
     whatRan: string
     noRecord: string
     notAllSlot: string
+    /** A data file could not be loaded; the app asks again. */
+    loadFailed: string
     aPlant: string
     plantNote: string
   }
@@ -176,6 +180,7 @@ const en: Strings = {
   map: 'Map',
   theme: 'Light theme',
   close: 'Close',
+  failed: 'Something went wrong; reload the page.',
   credits: {
     label: 'About and credits',
     title: 'About',
@@ -302,6 +307,7 @@ const en: Strings = {
     whatRan: 'What ran',
     noRecord: 'No record for this half hour yet.',
     notAllSlot: 'Not every area has recorded this half hour yet.',
+    loadFailed: 'Some of the data could not be loaded; trying again.',
     aPlant: 'A plant',
     plantNote: 'Capacity as mapped in OpenStreetMap; what it runs is not public.',
   },
@@ -373,6 +379,7 @@ const ja: Strings = {
   map: '地図',
   theme: 'ライトテーマ',
   close: '閉じる',
+  failed: 'エラーが起きました。ページを再読み込みしてください。',
   credits: {
     label: '情報とクレジット',
     title: 'このサイトについて',
@@ -498,6 +505,7 @@ const ja: Strings = {
     whatRan: '需給実績',
     noRecord: 'このコマの実績はまだありません。',
     notAllSlot: 'まだ全エリアのこのコマの実績がそろっていません。',
+    loadFailed: '一部のデータを読み込めませんでした。再試行します。',
     aPlant: '発電所',
     plantNote: '出力は OpenStreetMap の記載による設備容量。実際の発電量は公開されていません。',
   },

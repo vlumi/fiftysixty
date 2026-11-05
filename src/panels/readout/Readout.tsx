@@ -46,6 +46,8 @@ interface Props {
   splits: SplitHistory
   date: string | null
   onDate: (date: string) => void
+  /** A word under the headline while a data file could not be loaded. */
+  warning: string | null
   /** Up a level: from a plant to the map, from an area to the system price. */
   onBack: () => void
   onSlot: (slot: number) => void
@@ -58,7 +60,7 @@ interface Props {
  * tapped, remembered for what it was opened for, so another pick opens folded again.
  */
 export default function Readout(props: Props) {
-  const { slot, area, plant, onBack } = props
+  const { slot, area, plant, warning, onBack } = props
   const s = useStrings()
   const view = useApp((x) => x.view)
   const half = useApp((x) => x.half)
@@ -130,6 +132,11 @@ export default function Readout(props: Props) {
             <div className={styles.fold}>{head}</div>
           )}
         </div>
+        {warning && (
+          <p className={styles.warning} role="alert">
+            {warning}
+          </p>
+        )}
         {open && !short && switches}
       </div>
       {open && (

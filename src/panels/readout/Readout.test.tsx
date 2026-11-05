@@ -42,6 +42,7 @@ const base: ComponentProps<typeof Readout> = {
   history: [],
   splits: { lines: [], days: [] },
   date: null,
+  warning: null,
   onDate: vi.fn(),
   onBack: vi.fn(),
   onSlot: vi.fn(),
@@ -128,6 +129,13 @@ test('Okinawa has no price to show, whichever view the switch was left on', () =
   expect(screen.queryByRole('group', { name: 'View' })).not.toBeInTheDocument()
   expect(screen.queryByRole('heading', { name: 'All Japan' })).not.toBeInTheDocument()
   expect(screen.queryByRole('region', { name: 'How the day was supplied' })).not.toBeInTheDocument()
+})
+
+test('a data file that could not be loaded is said under the headline, pinned', () => {
+  render(<Readout {...base} warning="Some of the data could not be loaded; trying again." />)
+  const note = screen.getByRole('alert')
+  expect(note).toHaveTextContent('could not be loaded')
+  expect(note.parentElement).toContainElement(screen.getByRole('heading', { name: 'System price' }))
 })
 
 test('nothing before the prices arrive', () => {

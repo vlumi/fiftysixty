@@ -184,3 +184,9 @@ main > .map {
     animation: none !important;
   }
 }
+
+/* The note that stands in for the page's body when a part of it threw. */
+.failed {
+  padding: 1rem;
+  color: var(--muted);
+}

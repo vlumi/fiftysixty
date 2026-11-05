@@ -21,6 +21,7 @@ import { jstDate, openingDay } from './time/days'
 import { LANGS, LANGUAGE_NAMES, type Lang } from './i18n/strings'
 import { useStrings } from './i18n/useStrings'
 import { PALETTES } from './shared/palette'
+import ErrorBoundary from './shared/ErrorBoundary'
 import { useTheme } from './shared/useTheme'
 import TimeBar from './time/TimeBar'
 import { useNow } from './time/useNow'
@@ -40,6 +41,7 @@ export default function App() {
   const [records, setRecords] = useState<ReadonlyMap<string, RecordDays | null>>(new Map())
   const [flowMonths, setFlowMonths] = useState<ReadonlyMap<string, FlowDays | null>>(new Map())
   const [fetched, setFetched] = useState<Fetched | null>(null)
+  const [failed, setFailed] = useState<ReadonlySet<string>>(new Set())
   useEffect(() => {
     loadRegions().then(setRegions, console.error)
     loadPlants().then(setPlants, console.error)
@@ -117,10 +119,14 @@ export default function App() {
       const at = askedAt.current.get(key)
       if (at !== undefined && now.getTime() - at < REFRESH_MS) return
       askedAt.current.set(key, now.getTime())
-      load().catch((error: unknown) => {
-        console.error(error)
-        askedAt.current.delete(key)
-      })
+      load().then(
+        () => setFailed((f) => (f.has(key) ? new Set([...f].filter((k) => k !== key)) : f)),
+        (error: unknown) => {
+          console.error(error)
+          askedAt.current.delete(key)
+          setFailed((f) => new Set(f).add(key))
+        },
+      )
     }
     for (const adapter of Object.values(ADAPTERS)) {
       const key = `${adapter.area}/${month}`
@@ -135,10 +141,17 @@ export default function App() {
     const at = askedAt.current.get(key)
     if (at !== undefined && now.getTime() - at < REFRESH_MS) return
     askedAt.current.set(key, now.getTime())
-    loadSpotYears(fiscalYear(jstDate(now))).then(setSpot, (error: unknown) => {
-      console.error(error)
-      askedAt.current.delete(key)
-    })
+    loadSpotYears(fiscalYear(jstDate(now))).then(
+      (years) => {
+        setSpot(years)
+        setFailed((f) => (f.has(key) ? new Set([...f].filter((k) => k !== key)) : f))
+      },
+      (error: unknown) => {
+        console.error(error)
+        askedAt.current.delete(key)
+        setFailed((f) => new Set(f).add(key))
+      },
+    )
   }, [now])
   const flows = useMemo(
     () => flowsAt(month ? flowMonths.get(month) : null, date, slot),
@@ -236,64 +249,67 @@ export default function App() {
       </header>
       {credits && <Credits fetched={fetched} onClose={() => setCredits(false)} />}
       <main style={{ '--bar-inset': `${barHeight + 16}px` } as CSSProperties}>
-        <Suspense fallback={null}>
-          <MapView
-            theme={theme}
-            lang={lang}
-            regions={regions}
-            prices={displayed?.areaPrice}
-            selected={area}
-            half={area ? null : half}
-            interchange={layers.flows ? interchange : null}
-            plants={plants}
-            selectedPlant={plantId}
-            hiddenFuels={hiddenFuels}
-            mixes={layers.mixes ? mixes : NO_MIXES}
-            onPick={selectArea}
-            onPickPlant={pickPlant}
+        <ErrorBoundary fallback={<p className="failed">{words.failed}</p>}>
+          <Suspense fallback={null}>
+            <MapView
+              theme={theme}
+              lang={lang}
+              regions={regions}
+              prices={displayed?.areaPrice}
+              selected={area}
+              half={area ? null : half}
+              interchange={layers.flows ? interchange : null}
+              plants={plants}
+              selectedPlant={plantId}
+              hiddenFuels={hiddenFuels}
+              mixes={layers.mixes ? mixes : NO_MIXES}
+              onPick={selectArea}
+              onPickPlant={pickPlant}
+            />
+          </Suspense>
+          <Readout
+            slot={displayed}
+            record={record}
+            recordDay={recordedDay}
+            interchange={interchange}
+            dayTotals={dayFigures.totals}
+            dayPrice={dayFigures.price}
+            spotDay={spotDay}
+            monthDays={monthDays}
+            monthPrices={monthPrices}
+            history={history}
+            splits={splits}
+            scoped={japan}
+            date={date}
+            onDate={setDate}
+            warning={failed.size ? words.readout.loadFailed : null}
+            area={area}
+            plant={plant}
+            onBack={() => (plant ? pickPlant(null) : selectArea(null))}
+            onSlot={setSlot}
           />
-        </Suspense>
-        <Readout
-          slot={displayed}
-          record={record}
-          recordDay={recordedDay}
-          interchange={interchange}
-          dayTotals={dayFigures.totals}
-          dayPrice={dayFigures.price}
-          spotDay={spotDay}
-          monthDays={monthDays}
-          monthPrices={monthPrices}
-          history={history}
-          splits={splits}
-          scoped={japan}
-          date={date}
-          onDate={setDate}
-          area={area}
-          plant={plant}
-          onBack={() => (plant ? pickPlant(null) : selectArea(null))}
-          onSlot={setSlot}
-        />
-        <TimeBar
-          ref={bar}
-          date={date}
-          days={days}
-          slot={slot}
-          now={now}
-          playing={playing}
-          stories={storyDays}
-          onDate={setDate}
-          onSlot={setSlot}
-          onPlay={togglePlay}
-        />
-        <Corner
-          palette={PALETTES[theme]}
-          layers={layers}
-          onToggleLayer={toggleLayer}
-          plants={plants}
-          hiddenFuels={hiddenFuels}
-          onToggleFuel={toggleFuel}
-          onHideFuels={setHiddenFuels}
-        />
+          <TimeBar
+            ref={bar}
+            date={date}
+            days={days}
+            slot={slot}
+            now={now}
+            playing={playing}
+            stories={storyDays}
+            onDate={setDate}
+            onSlot={setSlot}
+            onPlay={togglePlay}
+          />
+          <Corner
+            palette={PALETTES[theme]}
+            layers={layers}
+            onToggleLayer={toggleLayer}
+            plants={plants}
+            hiddenFuels={hiddenFuels}
+            onToggleFuel={toggleFuel}
+            onHideFuels={setHiddenFuels}
+          />
+        </ErrorBoundary>
       </main>
     </>
   )
