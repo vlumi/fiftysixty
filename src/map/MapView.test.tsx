@@ -42,6 +42,9 @@ vi.mock('maplibre-gl', () => ({
   setWorkerUrl: vi.fn(),
 }))
 vi.mock('maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url', () => ({ default: '/worker.js' }))
+
+// The markers made are kept across tests by the hoisted mock; each test starts without them.
+beforeEach(() => markers.splice(0))
 interface OverlayProps {
   onClick?: (info: { object?: unknown }) => void
 }

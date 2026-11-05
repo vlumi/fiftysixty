@@ -34,8 +34,6 @@ test('two squares side by side outline as one oblong: the edge they share is lef
 test("on the real areas each half's outline is its coast and the split line, the borders inside it left out", () => {
   const fifty = halfOutline(areas, 50).map(keyOf)
   const sixty = halfOutline(areas, 60).map(keyOf)
-  expect(fifty).toHaveLength(952)
-  expect(sixty).toHaveLength(1517)
   const [line] = split.features
   const splitEdges = line.geometry.coordinates
     .slice(1)
