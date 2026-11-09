@@ -65,7 +65,7 @@ All are CSV with Japanese headers. JEPX is UTF-8 and the records Shift_JIS, or U
 
 Tohoku posts the running month as one file per day and the month's own file only around the 25th of the next, so its month is stitched from the days. A month no company has published at all is skipped, as Chubu's previous month is, which sits behind a download form.
 
-Each run ends by writing `fetched.json` beside the data, the run's time and each file's, which the about modal reads. A host down for the hour fails that source alone, logged by name, the run going on and exiting non-zero at the end.
+Each run ends by writing `fetched.json` beside the data, the run's time and each file's, which the about modal reads for each publisher's freshness and the readout for each label's tooltip. A host down for the hour fails that source alone, logged by name, the run going on and exiting non-zero at the end.
 
 ### The prices
 
@@ -148,7 +148,7 @@ The 50/60 split line is the inner boundary between the dissolved halves, written
 
 ### The page
 
-A header with the name and a map that fills the rest, the same skeleton as nebulosa. `App.tsx` lazy-loads the map view so MapLibre is a chunk of its own, cached across deploys. The map is MapLibre over OpenFreeMap's `fiord` style, bounded to Japan, with the navigation control, its own attribution off in favor of `panels/Credits.tsx`, a modal behind the header's ⓘ saying what the page is, naming every source and saying when the host last fetched, the page held still beneath it.
+A header with the name and a map that fills the rest, the same skeleton as nebulosa. `App.tsx` lazy-loads the map view so MapLibre is a chunk of its own, cached across deploys. The map is MapLibre over OpenFreeMap's `fiord` style, bounded to Japan, with the navigation control, its own attribution off in favor of `panels/Credits.tsx`, a modal behind the header's ⓘ saying what the page is, naming every source with when the host last changed its files, and tabling what kind of number each figure is, contract, actual, plan or estimate, and when its publisher speaks against the delivery day, the page held still beneath it.
 
 A deck.gl `MapLibreOverlay` is interleaved into the map beneath the style's first label layer, so the market layers sit under the place names. `map/layers.ts` builds the deck layers as a pure function of the loaded data and a numeric palette, `shared/palette.ts`, which mirrors the CSS tokens for WebGL.
 

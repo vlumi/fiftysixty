@@ -1,3 +1,4 @@
+import type { Publisher } from '../market/sources'
 import type { Series } from '../market/stack'
 import type { StoryId } from '../market/stories'
 import { readItem, storage, writeItem } from '../shared/storage'
@@ -31,8 +32,16 @@ export interface Strings {
     lines: string
     co2: string
     co2By: string
-    data: string
-    fetchedAt: (at: string) => string
+    /** When the host last changed a publisher's files, beside its name. */
+    updated: (at: string) => string
+    hourly: string
+    /** The table of what each figure is: its publisher, its kind and when it is published against the delivery day. */
+    sources: string
+    figure: string
+    publisher: string
+    kind: string
+    when: string
+    table: Record<Publisher | 'derived', { figure: string; publisher: string; kind: string; when: string }>
     source: string
   }
   language: string
@@ -237,8 +246,39 @@ const en: Strings = {
     co2: 'CO₂',
     co2By:
       'Estimated from the fuel burnt, after CRIEPI (2016): coal 864, LNG 430, oil and other thermal 695 g/kWh; biomass as none.',
-    data: 'Data',
-    fetchedAt: (at) => `Fetched hourly on the host, last at ${at} JST`,
+    updated: (at) => `updated ${at} JST`,
+    hourly: 'The host asks every publisher hourly; the times are when each file last changed.',
+    sources: 'Sources',
+    figure: 'Figure',
+    publisher: 'Publisher',
+    kind: 'Kind',
+    when: 'Published',
+    table: {
+      jepx: {
+        figure: 'Prices, bids, cleared volume',
+        publisher: 'JEPX',
+        kind: 'contract',
+        when: 'the day before, after the 10:00 auction',
+      },
+      record: {
+        figure: 'Demand, supply by source, curtailment, border flows',
+        publisher: 'The nine transmission companies',
+        kind: 'actual',
+        when: 'within about an hour of the half hour; Hokkaido two days later',
+      },
+      occto: {
+        figure: 'Line capacity, planned flow, market split',
+        publisher: 'OCCTO',
+        kind: 'plan',
+        when: 'two days ahead, around 17:30',
+      },
+      derived: {
+        figure: 'Turnover, weighted price, renewable share, CO₂',
+        publisher: 'This site',
+        kind: 'estimate',
+        when: 'computed here from the above',
+      },
+    },
     source: 'Source on GitHub',
   },
   language: 'Language',
@@ -471,8 +511,39 @@ const ja: Strings = {
     lines: '連系線',
     co2: 'CO₂',
     co2By: '燃料の燃焼分を電中研（2016）の係数で推計：石炭 864、LNG 430、石油・その他火力 695 g/kWh、バイオマスは 0。',
-    data: 'データ',
-    fetchedAt: (at) => `毎時取得、最終 ${at} JST`,
+    updated: (at) => `更新 ${at} JST`,
+    hourly: '各公表元に毎時問い合わせ。時刻は各ファイルが最後に変わった時点。',
+    sources: '出典',
+    figure: '数値',
+    publisher: '公表元',
+    kind: '種別',
+    when: '公表',
+    table: {
+      jepx: {
+        figure: '価格、入札量、約定量',
+        publisher: 'JEPX',
+        kind: '約定',
+        when: '前日、10時の入札締切後',
+      },
+      record: {
+        figure: '需要、電源別供給、出力制御、連系線潮流',
+        publisher: '一般送配電事業者9社',
+        kind: '実績',
+        when: 'コマの約1時間後。北海道は2日後',
+      },
+      occto: {
+        figure: '連系線の運用容量、予想潮流、市場分断',
+        publisher: 'OCCTO',
+        kind: '計画',
+        when: '2日前、17時半ごろ',
+      },
+      derived: {
+        figure: '約定金額、需要加重価格、再エネ比率、CO₂',
+        publisher: 'このサイト',
+        kind: '推計',
+        when: '上の数値から算出',
+      },
+    },
     source: 'GitHub のソース',
   },
   language: '言語',

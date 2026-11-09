@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useRef } from 'react'
 import { useStrings } from '../i18n/useStrings'
 import type { Fetched } from '../market/fetched'
+import { latestFetch, type Publisher } from '../market/sources'
 import { SHORTCUTS } from '../shortcuts'
 import { jstDateTime } from '../time/days'
 import CloseButton from './CloseButton'
@@ -8,10 +9,15 @@ import styles from './Credits.module.css'
 
 /**
  * What the page is and where the map, the shapes and the figures come from, behind the header's ⓘ, the map's own
- * attribution being off; and how fresh the data is, from the fetcher's note of its last run.
+ * attribution being off; how fresh each publisher's data is, from the fetcher's note of its files; and a table of what
+ * kind of number each figure is and when its publisher speaks against the delivery day.
  */
 export default function Credits({ fetched = null, onClose }: { fetched?: Fetched | null; onClose: () => void }) {
   const s = useStrings()
+  const updated = (publisher: Publisher) => {
+    const at = latestFetch(fetched, publisher)
+    return at && <span className={styles.updated}>{s.credits.updated(jstDateTime(new Date(at)))}</span>
+  }
   const dialog = useRef<HTMLDivElement>(null)
   useEffect(() => {
     // Focus moves into the dialog and back to what opened it; Tab cycles within it.
@@ -77,22 +83,43 @@ export default function Credits({ fetched = null, onClose }: { fetched?: Fetched
           <dt>{s.credits.prices}</dt>
           <dd>
             <a href="https://www.jepx.jp/electricpower/market-data/spot/">JEPX</a>
+            {updated('jepx')}
           </dd>
           <dt>{s.credits.records}</dt>
-          <dd>{s.credits.recordsBy}</dd>
+          <dd>
+            {s.credits.recordsBy}
+            {updated('record')}
+          </dd>
           <dt>{s.credits.lines}</dt>
           <dd>
             <a href="https://web-kohyo.occto.or.jp/kks-web-public/">OCCTO</a>
+            {updated('occto')}
           </dd>
           <dt>{s.credits.co2}</dt>
           <dd>{s.credits.co2By}</dd>
-          {fetched && (
-            <>
-              <dt>{s.credits.data}</dt>
-              <dd>{s.credits.fetchedAt(jstDateTime(new Date(fetched.at)))}</dd>
-            </>
-          )}
         </dl>
+        {fetched && <p className={styles.note}>{s.credits.hourly}</p>}
+        <h3>{s.credits.sources}</h3>
+        <table className={styles.sources}>
+          <thead>
+            <tr>
+              <th scope="col">{s.credits.figure}</th>
+              <th scope="col">{s.credits.publisher}</th>
+              <th scope="col">{s.credits.kind}</th>
+              <th scope="col">{s.credits.when}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(['jepx', 'record', 'occto', 'derived'] as const).map((row) => (
+              <tr key={row}>
+                <th scope="row">{s.credits.table[row].figure}</th>
+                <td>{s.credits.table[row].publisher}</td>
+                <td>{s.credits.table[row].kind}</td>
+                <td>{s.credits.table[row].when}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
         <h3>{s.help.title}</h3>
         <dl className={styles.rows}>
           {SHORTCUTS.map(({ keys, does }) => (

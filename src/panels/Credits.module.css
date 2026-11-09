@@ -72,6 +72,51 @@
   white-space: nowrap;
 }
 
+/* When the host last changed the publisher's files, under its name. */
+.updated {
+  display: block;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.note {
+  margin: 0.5rem 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+/* What kind of number each figure is and when its publisher speaks, a row a publisher. */
+.sources {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.sources th,
+.sources td {
+  padding: 0.2rem 0.5rem 0.2rem 0;
+  border-top: 1px solid var(--border);
+  font-weight: 400;
+  text-align: left;
+  vertical-align: top;
+}
+
+.sources thead th {
+  border-top: 0;
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.sources tbody th {
+  font-weight: 600;
+}
+
+.sources td:last-child,
+.sources th:last-child {
+  padding-right: 0;
+}
+
 .source {
   margin: 1rem 0 0;
 }
