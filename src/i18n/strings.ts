@@ -151,6 +151,8 @@ export interface Strings {
     splitsKey: string
     duration: string
     durationKey: (halfHours: string, from: string, to: string) => string
+    turnoverHistory: string
+    turnoverKey: (unit: string) => string
     mean: string
     median: string
     topTenth: string
@@ -345,6 +347,8 @@ const en: Strings = {
     splitsKey: 'Half hours the line split, share of the day',
     duration: 'Price duration',
     durationKey: (halfHours, from, to) => `${halfHours} half hours, ${from} to ${to}, the dearest first`,
+    turnoverHistory: 'Turnover history',
+    turnoverKey: (unit) => `Turnover a day, ${unit}`,
     mean: 'Mean',
     median: 'Median',
     topTenth: 'A tenth of the time above',
@@ -547,6 +551,8 @@ const ja: Strings = {
     splitsKey: '分断したコマの割合',
     duration: '価格持続曲線',
     durationKey: (halfHours, from, to) => `${from}〜${to}の${halfHours}コマ、高い順`,
+    turnoverHistory: '約定金額の推移',
+    turnoverKey: (unit) => `1日の約定金額（${unit}）`,
     mean: '平均',
     median: '中央値',
     topTenth: '上位1割の下限',

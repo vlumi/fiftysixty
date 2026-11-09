@@ -1,0 +1,44 @@
+.figure {
+  composes: figure from './PriceHistory.module.css';
+}
+
+/* The price history's frame at half its height, so the days stand under the heatmap's: the scale's ends down the left, the plot, and the months along the foot. */
+.frame {
+  display: grid;
+  grid-template-columns: 1.4rem 1fr;
+  grid-template-rows: 3rem 1rem;
+  column-gap: 0.25rem;
+}
+
+.scale {
+  composes: hours from './PriceHistory.module.css';
+}
+
+.plot {
+  composes: plot from './PriceHistory.module.css';
+}
+
+.columns {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: var(--muted);
+}
+
+.column {
+  composes: column from './PriceHistory.module.css';
+}
+
+.months {
+  grid-column: 2;
+}
+
+.legend {
+  composes: legend from './PriceHistory.module.css';
+  justify-content: space-between;
+}
+
+.value {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}

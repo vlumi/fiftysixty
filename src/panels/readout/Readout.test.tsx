@@ -287,6 +287,7 @@ test('the history view: the heatmap over every priced day held, a press on it se
     />,
   )
   await userEvent.click(screen.getByRole('button', { name: 'History' }))
+  expect(screen.getByRole('slider', { name: 'Turnover history' })).toBeInTheDocument()
   expect(screen.getByRole('slider', { name: 'Market splits' })).toBeInTheDocument()
   expect(screen.getByRole('slider', { name: 'Price duration' })).toBeInTheDocument()
   const heat = screen.getByRole('slider', { name: 'Price history' })
@@ -298,4 +299,19 @@ test('the history view: the heatmap over every priced day held, a press on it se
   fireEvent.pointerDown(heat, { clientX: 10, clientY: 1, pointerId: 1 })
   expect(onDate).toHaveBeenCalledWith('2026-09-22')
   expect(onSlot).toHaveBeenCalledWith(1)
+})
+
+test('an area’s history leaves the turnover out, since the volume is the system’s alone', async () => {
+  render(
+    <Readout
+      {...base}
+      area="kyushu"
+      history={priceHistory(spot, 'kyushu')}
+      splits={splitHistory(spot, scopeLines('kyushu', null))}
+      date="2026-09-26"
+    />,
+  )
+  await userEvent.click(screen.getByRole('button', { name: 'History' }))
+  expect(screen.getByRole('slider', { name: 'Price history' })).toBeInTheDocument()
+  expect(screen.queryByRole('slider', { name: 'Turnover history' })).not.toBeInTheDocument()
 })

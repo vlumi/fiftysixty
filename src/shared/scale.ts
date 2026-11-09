@@ -30,3 +30,10 @@ export function priceAxis(max: number): { top: number; step: number } {
   const step = AXIS_STEPS.find((s) => high / s <= 5) ?? 200
   return { top: Math.ceil(high / step) * step, step }
 }
+
+/** The first round figure at or above a value, in steps of its leading digit's place: 32.4 gives 40 and 324 gives 400. */
+export function roundTop(max: number): number {
+  if (!(max > 0)) return 1
+  const step = 10 ** Math.floor(Math.log10(max))
+  return Math.ceil(max / step) * step
+}

@@ -1,5 +1,5 @@
 import type { Rgb } from './palette'
-import { cssRgb, lerpRgb, PRICE_DOMAIN, priceColor, priceAxis } from './scale'
+import { cssRgb, lerpRgb, PRICE_DOMAIN, priceColor, priceAxis, roundTop } from './scale'
 
 const ramp: Rgb[] = [
   [0, 0, 0],
@@ -34,4 +34,9 @@ test('the day chart’s axis: zero-based, about five gridlines, never under 20 y
   expect(priceAxis(40.01)).toEqual({ top: 50, step: 10 })
   expect(priceAxis(63)).toEqual({ top: 80, step: 20 })
   expect(priceAxis(201)).toEqual({ top: 250, step: 50 })
+})
+
+test('a round top is the next step of the leading digit’s place at or above the value', () => {
+  expect([32.4, 324, 40, 9.99].map(roundTop)).toEqual([40, 400, 40, 10])
+  expect(roundTop(0)).toBe(1)
 })

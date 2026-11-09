@@ -169,6 +169,10 @@ test('the history view: a press on the heatmap sets the day and the half hour', 
   const heat = page.getByRole('complementary', { name: 'Readout' }).getByRole('slider', { name: 'Price history' })
   await expect(heat).toHaveAttribute('aria-valuenow', '3')
   await expect(heat).toHaveAttribute('aria-valuetext', /^2026-09-25 \(Fri\) 12:00–12:30: /)
+  const turnover = page.getByRole('slider', { name: 'Turnover history' })
+  const turnoverBox = (await turnover.boundingBox())!
+  await turnover.click({ position: { x: turnoverBox.width * 0.875, y: turnoverBox.height / 2 } })
+  await expect(page.getByLabel('Delivery day')).toHaveValue('2026-09-26')
   const splits = page.getByRole('slider', { name: 'Market splits' })
   const splitsBox = (await splits.boundingBox())!
   await splits.click({ position: { x: splitsBox.width * 0.375, y: splitsBox.height / 2 } })

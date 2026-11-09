@@ -32,7 +32,7 @@ flowchart LR
 | `src/market/` | The CSVs parsed into days of 48 half hours, and what is derived from them | `jepx` the prices; `record` with `jukyu`, `standard`, `kyushu` and `adapters` the nine companies' records; `flows` OCCTO's file; `interchange` the half hour's flows from either; `daily` the day's totals and price figures; `monthly` the month strip's days; `stack` the series; `history`, `splits` and `duration` the long view; `stories` the story days; `fetch` reads a file off the host, `fetched` the fetcher's note |
 | `src/regions/` | The hand-written tables and the committed geometry | `areas`, `interconnectors`, `names`; `geometry` and `plants` load the files |
 | `src/map/` | The map view and the deck layers as pure functions of the data and a palette | `MapView`, `layers`, `flowLayers`, `plantLayers`, `outline`, the `MixGlyph` columns, `scale`, `basemap`, `layerChoice` |
-| `src/panels/` | The readout and its charts | `readout/` the panel in parts: `scope`, `Readout`, `Headline`, `Switches`, `SlotView` with `Lines`, `DayView`, `HistoryView`; the `DayChart` frame with `SupplyChart`, `PriceChart` and `AuctionChart`; `MonthStrip`; `PriceHistory` and `SplitHistory` with `heatmap` and `MonthTicks`; `DurationCurve`; the corner's `Legend`, `Layers`, `Corner` and `Credits` |
+| `src/panels/` | The readout and its charts | `readout/` the panel in parts: `scope`, `Readout`, `Headline`, `Switches`, `SlotView` with `Lines`, `DayView`, `HistoryView`; the `DayChart` frame with `SupplyChart`, `PriceChart` and `AuctionChart`; `MonthStrip`; `PriceHistory`, `TurnoverHistory` and `SplitHistory` with `heatmap` and `MonthTicks`; `DurationCurve`; the corner's `Legend`, `Layers`, `Corner` and `Credits` |
 | `src/time/` | The clock | `days`, `slots`, `TimeBar`, `usePlayer`, `useNow` |
 | `src/shared/` | What the rest share | `scale` and `palette` for the colors, `theme`, `format`, `storage`, `scrub`, `link`, `ErrorBoundary`, the media-query hooks, `useElementSize` |
 | `src/i18n/` | Every visible word in both languages | `strings`, `useStrings` |
@@ -217,7 +217,7 @@ flowchart LR
   priced --> view{"view, from the switch"}
   view --> slot["SlotView: the price rows, Lines,<br>PriceChart, AuctionChart, SupplyChart"]
   view --> day["DayView: DayPrices, DaySupply,<br>MonthStrip"]
-  view --> history["HistoryView: PriceHistory,<br>SplitHistory, DurationCurve"]
+  view --> history["HistoryView: PriceHistory, TurnoverHistory,<br>SplitHistory, DurationCurve"]
 ```
 
 With nothing picked, the headline is the system price and the half hour's note the spread across the areas. An area picked by a click on the map shows its price against the system price and against each neighbor across an interconnector, then its lines and what ran in it. The picked area is outlined on the map, and a back button on the left of its name goes up a level, since a tap on the map elsewhere does the same.
@@ -240,7 +240,7 @@ The charts are sliders under a finger too. `shared/scrub.ts` is their pointer ha
 
 With nothing picked, `panels/AuctionChart.tsx` draws under the price curve what lies behind the system price: the sell bids, the buy bids and the contracted volume JEPX's file carries per half hour, as three lines over a zero-based gigawatt axis, the energy of a half hour as the power it averages, with the gap between the two bids shaded, since when far more is offered than asked the price falls to the floor. The lines are told apart by weight and dash alone, offered dashed, asked thin and cleared heavy, so the chart takes no color from the sources or the halves; the key carries the half hour's figures and its turnover.
 
-`turnover` in `market/jepx.ts` is the cleared energy at the system price, in yen. JEPX gives the volume system-wide alone, so it is exact while every area clears at the system price and close when they split, and it is shown for the system only: the half hour's in the auction chart's key, the day's in the day view. The demand at each area's price would be a larger figure and not a market's, since much of it never goes through the exchange.
+`turnover` in `market/jepx.ts` is the cleared energy at the system price, in yen. JEPX gives the volume system-wide alone, so it is exact while every area clears at the system price and close when they split, and it is shown for the system only: the half hour's in the auction chart's key, the day's in the day view, and every day's in the long view. The demand at each area's price would be a larger figure and not a market's, since much of it never goes through the exchange.
 
 `panels/SupplyChart.tsx` draws the day as the stack under the demand line, the gigawatt labels in the gutter and a solid line at zero, drawn over the bands so the part below it reads as what left the area; the gridlines step with the range, about five whatever the scale. Under it, the chart's key and the half hour's figures are one table, a row a series read top down as the chart stacks, the idle rows muted, each supplying row with its share of what supplied the half hour, and under that the half hour's renewable share and its CO₂ per kWh generated.
 
@@ -258,9 +258,11 @@ One slider spans both rows: pressing and dragging across it moves the map throug
 
 ### The long view
 
-The third view, after the half hour and the day, lays the whole price history held, two fiscal years at most, in three figures on the same days.
+The third view, after the half hour and the day, lays the whole price history held, two fiscal years at most, in four figures on the same days.
 
 `market/history.ts` lays out every priced day as its 48 prices by half hour, the picked area's or the system's; `panels/PriceHistory.tsx` draws them as a heatmap, a day a column across and the half hours down from midnight, each cell in the map's own ramp over its fixed 0 to 50 yen domain, so a cell means what the map's fill means: the area's half's ramp, or for the system price, which is of neither half, a neutral one. `panels/heatmap.ts` computes the pixels, a device pixel a column so a year fits the panel, each column the mean of the one or two days that fall in it, and the component puts them on a canvas, since two years of cells are too many SVG nodes. It is a slider over the days with the pointer working in two dimensions, pressing or dragging on a cell setting the day and the half hour, which a crosshair marks.
+
+Each day of the history carries its turnover too, and where the system price is the one drawn, with nothing picked or a half, `panels/TurnoverHistory.tsx` stands it under the heatmap in the same frame at half the height, so the days line up: a column a day as one SVG path, from zero to a round figure above the most turned over, in the language's large unit, the displayed day marked and its figure in the key. It is a slider over the days as well.
 
 `market/splits.ts` gives every priced day's share of half hours in which each line's two ends priced apart, which is what a wall marks, over the scope's lines: a picked area's own borders, the frequency converters alone for a half, all ten with nothing chosen. `panels/SplitHistory.tsx` draws them as a second heatmap, a line a row named by its ends and a day a column, each cell from the surface to the split line's own color, the displayed day marked, so the Tokyo–Chubu row is the halves parting through the year; it is a slider over the days like the heatmap above it.
 
