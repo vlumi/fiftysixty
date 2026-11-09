@@ -212,7 +212,8 @@ export interface Strings {
     plants: string
     planned: string
     recorded: string
-    atLimit: string
+    /** The arrows' two encodings, the width the megawatts and the color the load, said under them. */
+    howArrows: string
     fork: string
     split: string
     byFuel: string
@@ -469,7 +470,7 @@ const en: Strings = {
     plants: 'Plants',
     planned: 'OCCTO plan',
     recorded: 'recorded',
-    atLimit: 'at the limit',
+    howArrows: 'Wider, more MW; brighter, nearer the limit.',
     fork: 'two lines, total only',
     split: 'market split',
     byFuel: 'By fuel',
@@ -734,7 +735,7 @@ const ja: Strings = {
     plants: '発電所',
     planned: 'OCCTO計画',
     recorded: '実績',
-    atLimit: '上限',
+    howArrows: '太いほど潮流が大きく、明るいほど上限に近い。',
     fork: '2本の合計のみ',
     split: '市場分断',
     byFuel: '燃料別',

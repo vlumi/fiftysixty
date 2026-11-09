@@ -42,3 +42,9 @@
 .arrowKey {
   display: block;
 }
+
+/* What the arrows' two encodings are, under them, since neither can be read off a shape alone. */
+.howArrows {
+  margin: 0.35rem 0 0;
+  line-height: 1.3;
+}
