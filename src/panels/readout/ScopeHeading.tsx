@@ -10,9 +10,9 @@ export default function ScopeHeading({ scope, missing }: { scope: SummedScope; m
   const s = useStrings()
   const lang = useApp((x) => x.lang)
   return (
-    <h3>
+    <h4>
       {scope.kind === 'half' ? s.readout.hz(scope.half) : s.day.japan}
       {missing.length > 0 && <span className={styles.without}> · {s.day.without(areaList(missing, lang))}</span>}
-    </h3>
+    </h4>
   )
 }

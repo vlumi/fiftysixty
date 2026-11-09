@@ -1,21 +1,32 @@
 import { render, screen, within } from '@testing-library/react'
+import type { ReactNode } from 'react'
 import csv from '../../test/fixtures/jepx-spot.csv?raw'
 import tepcoCsv from '../../test/fixtures/tepco-jukyu.csv?raw'
 import { dayTotals } from '../../market/daily'
 import { parseSpot } from '../../market/jepx'
 import { TEPCO } from '../../market/tepco'
+import { ProvenanceContext } from '../provenance'
 import { DayPrices, DaySupply } from './DayView'
+import { DayDerived } from './Derived'
 
 /** A split day: Tokyo touched 50.01 in the evening while Kansai spent the night at 8.40. */
 const spot = parseSpot(csv).get('2026-09-22')!
 const totals = dayTotals(TEPCO.parse(tepcoCsv).get('2026-09-24')!)
 
-test('the price figures stand without a record: the mean, the low and the high with when', () => {
+/** The views on the split day, which names the files behind their tooltips; the fetcher's note not loaded. */
+const onDay = (children: ReactNode) => (
+  <ProvenanceContext value={{ date: '2026-09-22', fetched: null }}>{children}</ProvenanceContext>
+)
+
+test('the price figures stand without a record: the mean, the low and the high with when, and nothing derived', () => {
   render(
-    <>
-      <DayPrices spot={spot} scope={{ kind: 'area', area: 'tokyo' }} weighted={null} />
-      <DaySupply totals={null} scope={{ kind: 'area', area: 'tokyo' }} />
-    </>,
+    onDay(
+      <>
+        <DayPrices spot={spot} scope={{ kind: 'area', area: 'tokyo' }} />
+        <DaySupply totals={null} scope={{ kind: 'area', area: 'tokyo' }} />
+        <DayDerived spot={spot} scope={{ kind: 'area', area: 'tokyo' }} totals={null} weighted={null} />
+      </>,
+    ),
   )
   expect(screen.getByText('No record for this half hour yet.')).toBeInTheDocument()
   const prices = screen.getByRole('region', { name: 'Prices' })
@@ -28,39 +39,71 @@ test('the price figures stand without a record: the mean, the low and the high w
     expect.stringMatching(/^Lowest price: \d+\.\d\d ¥\/kWh · \d\d:\d\d$/),
     'Highest price: 50.01 ¥/kWh · 16:30',
   ])
-  expect(screen.queryByText('Price, weighted by demand')).not.toBeInTheDocument()
-  expect(screen.queryByText('Turnover, at the system price')).not.toBeInTheDocument()
+  expect(within(prices).getByText('Mean price')).toHaveAttribute(
+    'title',
+    'jepx-spot-2026.csv · エリアプライス東京(円/kWh), mean over the 48 half hours',
+  )
+  expect(screen.queryByRole('region', { name: 'Derived' })).not.toBeInTheDocument()
 })
 
-test('with the record, the supply and the weighted price too, the half hours at the floor when there were any, and for the system the turnover', () => {
+test('with the record, the supply and the derived figures too: the weighted price, the half hours at the floor when there were any, and for the system the turnover', () => {
   const floored = spot.map((s, i) => (i < 3 ? { ...s, systemPrice: 0.01 } : s))
   render(
-    <>
-      <DayPrices spot={floored} scope={{ kind: 'system' }} weighted={12.34} />
-      <DaySupply totals={totals} scope={{ kind: 'system' }} />
-    </>,
+    onDay(
+      <>
+        <DayPrices spot={floored} scope={{ kind: 'system' }} />
+        <DaySupply totals={totals} scope={{ kind: 'system' }} />
+        <DayDerived spot={floored} scope={{ kind: 'system' }} totals={totals} weighted={12.34} />
+      </>,
+    ),
   )
-  expect(screen.getByRole('region', { name: 'How the day was supplied' })).toBeInTheDocument()
+  const supply = screen.getByRole('region', { name: 'How the day was supplied' })
+  expect(within(supply).getByText('Demand')).toHaveAttribute(
+    'title',
+    'one file an area, <area>-jukyu-202609.csv · エリア需要, summed over the areas',
+  )
   const prices = screen.getByRole('region', { name: 'Prices' })
-  expect(within(prices).getByText('Price, weighted by demand').nextElementSibling).toHaveTextContent('12.34 ¥/kWh')
   expect(within(prices).getByText('Half hours at the floor').nextElementSibling).toHaveTextContent('3')
   expect(within(prices).getByText('Lowest price').nextElementSibling).toHaveTextContent('0.01 ¥/kWh · 00:00')
+  const derived = screen.getByRole('region', { name: 'Derived' })
+  const rows = [...derived.querySelectorAll('dt')].map((dt) => dt.textContent)
+  expect(rows).toEqual([
+    'Price, weighted by demand',
+    'Turnover, at the system price',
+    'Renewable share',
+    'CO₂, estimated',
+    'CO₂ per kWh generated',
+  ])
+  expect(within(derived).getByText('Price, weighted by demand').nextElementSibling).toHaveTextContent('12.34 ¥/kWh')
   const yen = floored.reduce((sum, s) => sum + s.volumeKWh * s.systemPrice, 0)
-  expect(within(prices).getByText('Turnover, at the system price').nextElementSibling).toHaveTextContent(
+  expect(within(derived).getByText('Turnover, at the system price').nextElementSibling).toHaveTextContent(
     `${(yen / 1e9).toFixed(2)} ¥ bn`,
+  )
+  expect(within(derived).getByText('Turnover, at the system price')).toHaveAttribute(
+    'title',
+    'computed here: cleared kWh × system price, summed over the half hours',
   )
 })
 
-test("a half's prices are what JEPX's give: the spread across its areas with where and when, and the area half hours at the floor", () => {
-  render(<DayPrices spot={spot} scope={{ kind: 'half', half: 60 }} weighted={9.5} />)
+test("a half's prices are what JEPX's give: the spread across its areas with where and when, and the area half hours at the floor; its weighted price is derived", () => {
+  render(
+    <>
+      <DayPrices spot={spot} scope={{ kind: 'half', half: 60 }} />
+      <DayDerived spot={spot} scope={{ kind: 'half', half: 60 }} totals={null} weighted={9.5} />
+    </>,
+  )
   const rows = [...screen.getByRole('region', { name: 'Prices' }).querySelectorAll('dt')].map(
     (dt) => `${dt.textContent}: ${dt.nextElementSibling!.textContent}`,
   )
   expect(rows).toEqual([
-    'Price, weighted by demand: 9.50 ¥/kWh',
     'Lowest price: 0.01 ¥/kWh · 08:30 Kyushu',
     'Highest price: 38.23 ¥/kWh · 17:30 Chubu',
     'Area half hours at the floor: 29',
   ])
   expect(screen.queryByText('Mean price')).not.toBeInTheDocument()
+  const derived = screen.getByRole('region', { name: 'Derived' })
+  expect([...derived.querySelectorAll('dt, dd')].map((x) => x.textContent)).toEqual([
+    'Price, weighted by demand',
+    '9.50 ¥/kWh',
+  ])
 })

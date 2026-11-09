@@ -295,6 +295,7 @@ export default function App() {
             scoped={japan}
             date={date}
             onDate={setDate}
+            fetched={fetched}
             warning={failed.size ? words.readout.loadFailed : null}
             area={area}
             plant={plant}

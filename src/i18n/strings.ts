@@ -134,6 +134,37 @@ export interface Strings {
     loadFailed: string
     aPlant: string
     plantNote: string
+    /** The headers over the readout's rows by who published them, each with what kind of number they are, and the tooltips' parts. */
+    source: {
+      jepx: string
+      jepxWhen: string
+      record: (company: string) => string
+      records: string
+      recordWhen: string
+      occto: string
+      occtoWhen: string
+      derived: string
+      derivedWhen: string
+      fetched: (at: string) => string
+      newestFetched: (at: string) => string
+      eachArea: (file: string) => string
+      summed: string
+      settled: string
+      capacityFrom: string
+      formula: {
+        turnover: string
+        weighted: string
+        renewable: string
+        co2: string
+        co2Intensity: string
+        gw: string
+        mean: string
+        floor: string
+        share: string
+        peak: string
+        low: string
+      }
+    }
   }
   chart: {
     label: string
@@ -321,6 +352,36 @@ const en: Strings = {
     loadFailed: 'Some of the data could not be loaded; trying again.',
     aPlant: 'A plant',
     plantNote: 'Capacity as mapped in OpenStreetMap; what it runs is not public.',
+    source: {
+      jepx: 'JEPX day-ahead',
+      jepxWhen: 'contract prices',
+      record: (company) => `${company}'s record`,
+      records: "Companies' records",
+      recordWhen: 'actuals',
+      occto: 'OCCTO plan',
+      occtoWhen: 'never revised',
+      derived: 'Derived',
+      derivedWhen: 'computed here',
+      fetched: (at) => `fetched ${at} JST`,
+      newestFetched: (at) => `the newest fetched ${at} JST`,
+      eachArea: (file) => `one file an area, ${file}`,
+      summed: 'summed over the areas',
+      settled: "settled from the nine records' 連系線",
+      capacityFrom: 'capacity from',
+      formula: {
+        turnover: 'cleared kWh × system price, summed over the half hours',
+        weighted: "each half hour's area price × its demand, over the demand",
+        renewable: 'solar, wind, hydro, geothermal and biomass over all generated',
+        co2: 'coal 864, LNG 430, oil and other 695 g/kWh of each fuel burnt, after CRIEPI (2016)',
+        co2Intensity: 'the estimated CO₂ over all generated',
+        gw: 'kWh over the half hour × 2 ÷ 10⁶',
+        mean: 'mean over the 48 half hours',
+        floor: 'half hours at 0.01 ¥/kWh',
+        share: 'the row over all that supplied',
+        peak: 'the highest half hour',
+        low: 'the lowest half hour',
+      },
+    },
   },
   chart: {
     label: 'Supply over the day',
@@ -525,6 +586,36 @@ const ja: Strings = {
     loadFailed: '一部のデータを読み込めませんでした。再試行します。',
     aPlant: '発電所',
     plantNote: '出力は OpenStreetMap の記載による設備容量。実際の発電量は公開されていません。',
+    source: {
+      jepx: 'JEPX 前日スポット',
+      jepxWhen: '約定価格',
+      record: (company) => `${company}の実績`,
+      records: '一般送配電事業者の実績',
+      recordWhen: '実測値',
+      occto: 'OCCTO計画',
+      occtoWhen: '事後修正なし',
+      derived: '算出値',
+      derivedWhen: 'ここで計算',
+      fetched: (at) => `取得 ${at} JST`,
+      newestFetched: (at) => `最新の取得 ${at} JST`,
+      eachArea: (file) => `エリアごとに1ファイル、${file}`,
+      summed: 'エリア合計',
+      settled: '9社の実績の連系線から算定',
+      capacityFrom: '運用容量は',
+      formula: {
+        turnover: '約定総量(kWh) × システムプライス のコマ合計',
+        weighted: '各コマの エリアプライス × エリア需要 の合計 ÷ 需要合計',
+        renewable: '太陽光・風力・水力・地熱・バイオマス ÷ 発電量',
+        co2: '燃料ごとに 石炭 864、LNG 430、石油・その他 695 g/kWh（電中研 2016）',
+        co2Intensity: '推計CO₂ ÷ 発電量',
+        gw: 'コマの kWh × 2 ÷ 10⁶',
+        mean: '48コマの平均',
+        floor: '0.01 円/kWh のコマ数',
+        share: '供給全体に対する比率',
+        peak: '最大のコマ',
+        low: '最小のコマ',
+      },
+    },
   },
   chart: {
     label: '一日の供給',

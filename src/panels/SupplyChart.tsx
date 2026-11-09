@@ -1,11 +1,11 @@
 import { useMemo } from 'react'
-import { co2Intensity, dayTotals, renewableShare } from '../market/daily'
 import type { RecordSlot } from '../market/record'
 import { useStrings } from '../i18n/useStrings'
 import { aboveMW, SERIES, SERIES_TOP_DOWN, stackDay, type StackedSlot } from '../market/stack'
 import { mw, percent } from '../shared/format'
 import DayChart from './DayChart'
 import frame from './DayChart.module.css'
+import { RECORD_FIELDS, useProvenance } from './provenance'
 import { LEFT, slotX, TOP, WIDTH } from './slotAxis'
 import styles from './SupplyChart.module.css'
 
@@ -26,6 +26,7 @@ const EXCHANGE = [
   {
     key: 'storageOut',
     color: 'var(--src-storage)',
+    field: RECORD_FIELDS.storage,
     top: (t: StackedSlot) => t.generatedMW + up(t.storageMW),
     bottom: (t: StackedSlot) => t.generatedMW,
     mw: (t: StackedSlot) => up(t.storageMW),
@@ -33,6 +34,7 @@ const EXCHANGE = [
   {
     key: 'imports',
     color: 'var(--src-exchange)',
+    field: RECORD_FIELDS.lines,
     top: (t: StackedSlot) => t.generatedMW + up(t.storageMW) + up(t.linesMW),
     bottom: (t: StackedSlot) => t.generatedMW + up(t.storageMW),
     mw: (t: StackedSlot) => up(t.linesMW),
@@ -40,6 +42,7 @@ const EXCHANGE = [
   {
     key: 'storageIn',
     color: 'var(--src-storage)',
+    field: RECORD_FIELDS.storage,
     top: () => 0,
     bottom: (t: StackedSlot) => down(t.storageMW),
     mw: (t: StackedSlot) => up(-t.storageMW),
@@ -47,20 +50,26 @@ const EXCHANGE = [
   {
     key: 'exports',
     color: 'var(--src-exchange)',
+    field: RECORD_FIELDS.lines,
     top: (t: StackedSlot) => down(t.storageMW),
     bottom: (t: StackedSlot) => down(t.storageMW) + down(t.linesMW),
     mw: (t: StackedSlot) => up(-t.linesMW),
   },
 ] as const
 
+/** The tooltip for a row of the key: the record's file and the column the row is from. */
+type RecordOf = (field: string, note?: string) => string
+
 interface Props {
   day: readonly RecordSlot[]
   slot: number
   onSlot: (slot: number) => void
+  /** Names the record behind the key's rows, the one company's or the areas' summed; without it the rows carry no tooltip. */
+  provenance?: RecordOf
 }
 
 /** The day's supply stack under the demand line, in the day charts' frame, with its key and the half hour's figures under it. */
-export default function SupplyChart({ day, slot, onSlot }: Props) {
+export default function SupplyChart({ day, slot, onSlot, provenance }: Props) {
   const s = useStrings()
   const stack = useMemo(() => stackDay(day), [day])
   const y = (mw: number) => TOP + ((stack.maxMW - mw) / (stack.maxMW - stack.minMW)) * PLOT
@@ -128,9 +137,9 @@ export default function SupplyChart({ day, slot, onSlot }: Props) {
       </DayChart>
       <MixKey
         at={stack.slots.find((t) => t.slot === slot)}
-        record={day.find((r) => r.slot === slot)}
         curtailed={curtailed}
         lines={stack.slots.some((t) => t.linesMW !== 0)}
+        provenance={provenance}
       />
     </figure>
   )
@@ -143,26 +152,41 @@ export default function SupplyChart({ day, slot, onSlot }: Props) {
  */
 function MixKey({
   at,
-  record,
   curtailed,
   lines,
+  provenance,
 }: {
   at: StackedSlot | undefined
-  record: RecordSlot | undefined
   curtailed: boolean
   /** Whether the day has border flows at all; all Japan has none, and its import and export rows are left out. */
   lines: boolean
+  provenance: RecordOf | undefined
 }) {
   const s = useStrings()
-  const half = record && dayTotals([record])
+  const p = useProvenance()
   const row = (e: (typeof EXCHANGE)[number]) => ({
     key: e.key,
     name: s.chart[e.key],
     color: e.color,
     mw: at && e.mw(at),
+    field: e.field,
   })
-  const rows: { key: string; name: string; color: string; mw: number | undefined; kind?: 'line' | 'hatched' }[] = [
-    { key: 'demand', name: s.chart.demand, color: 'var(--text)', mw: at?.demandMW, kind: 'line' },
+  const rows: {
+    key: string
+    name: string
+    color: string
+    mw: number | undefined
+    field: string
+    kind?: 'line' | 'hatched'
+  }[] = [
+    {
+      key: 'demand',
+      name: s.chart.demand,
+      color: 'var(--text)',
+      mw: at?.demandMW,
+      field: RECORD_FIELDS.demand,
+      kind: 'line',
+    },
     ...(curtailed
       ? [
           {
@@ -170,6 +194,7 @@ function MixKey({
             name: s.chart.curtailed,
             color: 'var(--src-solar)',
             mw: at?.curtailedMW,
+            field: RECORD_FIELDS.curtailed,
             kind: 'hatched' as const,
           },
         ]
@@ -180,6 +205,7 @@ function MixKey({
       name: s.chart.series[x],
       color: `var(--src-${x})`,
       mw: at?.bands[x].value,
+      field: RECORD_FIELDS[x],
     })),
     ...(lines ? [EXCHANGE[2], EXCHANGE[3]] : [EXCHANGE[2]]).map(row),
   ]
@@ -194,13 +220,15 @@ function MixKey({
           <tr>
             <td />
             <th scope="col">{s.readout.mw}</th>
-            <th scope="col">{s.day.share}</th>
+            <th scope="col" title={p.derived(s.readout.source.formula.share)}>
+              {s.day.share}
+            </th>
           </tr>
         </thead>
         <tbody>
           {rows.map((r) => (
             <tr key={r.key} className={r.mw === 0 ? styles.idle : r.key === 'demand' ? styles.demandRow : undefined}>
-              <th scope="row">
+              <th scope="row" title={provenance?.(r.field)}>
                 <span
                   className={
                     r.kind === 'line' ? styles.lineKey : r.kind === 'hatched' ? styles.hatchedKey : styles.swatch
@@ -215,16 +243,6 @@ function MixKey({
           ))}
         </tbody>
       </table>
-      {half && (
-        <dl className={styles.figures}>
-          <dt>{s.day.renewables}</dt>
-          <dd>{percent(renewableShare(half))}</dd>
-          <dt>{s.day.co2Intensity}</dt>
-          <dd>
-            {Math.round(co2Intensity(half))} <span className="muted">g · {s.day.estimated}</span>
-          </dd>
-        </dl>
-      )}
     </section>
   )
 }

@@ -150,7 +150,7 @@ test('a half of the grid from its toggle: the east summed from its records, and 
   const readout = page.getByRole('complementary', { name: 'Readout' })
   await page.getByRole('button', { name: '50 Hz' }).click()
   await expect(readout.getByRole('heading', { level: 2 })).toHaveText(/^50 Hz/)
-  await expect(readout.getByRole('heading', { level: 3 })).toHaveText(
+  await expect(readout.getByRole('heading', { level: 4 })).toHaveText(
     '50 Hz · without Hokkaido and Tohoku, not recorded yet',
   )
   await expect(readout.getByRole('slider', { name: 'Supply over the day' })).toBeVisible()
