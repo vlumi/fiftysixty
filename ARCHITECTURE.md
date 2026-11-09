@@ -170,7 +170,7 @@ Where two areas an interconnector joins cleared at different prices, which is wh
 
 ### The key and the layers
 
-`panels/Legend.tsx` is the key: the two ramps with the ends they share, drawn arrows for a planned flow, a recorded one and one at the limit, a fork, and the wall.
+`panels/Legend.tsx` is the key: the two ramps with the ends they share; drawn arrows for a planned flow and a recorded one, each a gradient from its idle gray to its full color, since on the map the width is the megawatts and the color how near the line is to its limit, which a line under them says outright, so no row pretends the limit can be read from a shape; a fork; and the wall.
 
 `panels/Layers.tsx` is the Layers panel: a box each for the flows' arrows, the mix columns and the plants, kept for the next visit by `map/layerChoice.ts`. The plants' box shows or hides them all and is half-checked while some fuels are hidden, which is the whole of the plants' state, every fuel hidden being the plants off, as by default; a chevron beside it opens their filter, by the same token the fuels' key: a row a fuel with its swatch and its count of plants, pressed when shown.
 
