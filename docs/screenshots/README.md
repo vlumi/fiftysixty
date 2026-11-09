@@ -56,7 +56,7 @@ The same in the light theme and Japanese on a phone (390×844), the fourth item 
 
 ![The summer peak](004-story-days.png)
 
-The summer peak, found in the prices rather than chosen: 2026-08-26 at 16:30, the system price at the exchange's 50 ¥/kWh cap and every area within a few yen of it, so the whole map glows. Tokyo is picked at 51.8 GW of demand, half of it gas, the Soma–Futaba trunk from Tohoku near its limit and the converters sending a little west. The time bar has the new pieces: the jump menu of story days, the summer and the winter peak, the widest split, the most at the floor and the cheapest day, and the play button that runs a day in twelve seconds.
+The summer peak, found in the prices rather than chosen: 2026-08-26 at 16:30, the system price at 50.01 ¥/kWh, its highest in the data, and every area within a few yen of it, so the whole map glows. Tokyo is picked at 51.8 GW of demand, half of it gas, the Soma–Futaba trunk from Tohoku near its limit and the converters sending a little west. The time bar has the new pieces: the jump menu of story days, the summer and the winter peak, the widest split, the most at the floor and the cheapest day, and the play button that runs a day in twelve seconds.
 
 <img src="004-story-days-phone.png" alt="The summer peak, on a phone" width="260">
 

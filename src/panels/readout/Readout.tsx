@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useStrings } from '../../i18n/useStrings'
 import type { DayTotals, JapanDay } from '../../market/daily'
+import type { Fetched } from '../../market/fetched'
 import type { HistoryDay } from '../../market/history'
 import type { Interchange } from '../../market/interchange'
 import type { SpotSlot } from '../../market/jepx'
@@ -13,6 +14,7 @@ import { useNarrow } from '../../shared/useNarrow'
 import { useShort } from '../../shared/useShort'
 import { useApp } from '../../store'
 import Chevron from '../Chevron'
+import { ProvenanceContext } from '../provenance'
 import DayView from './DayView'
 import Headline from './Headline'
 import HistoryView from './HistoryView'
@@ -46,6 +48,8 @@ interface Props {
   splits: SplitHistory
   date: string | null
   onDate: (date: string) => void
+  /** The fetcher's note of each file's time, for the tooltips saying where a figure is from and how fresh. */
+  fetched: Fetched | null
   /** A word under the headline while a data file could not be loaded. */
   warning: string | null
   /** Up a level: from a plant to the map, from an area to the system price. */
@@ -142,7 +146,7 @@ export default function Readout(props: Props) {
       {open && (
         <div className={styles.body}>
           {short && switches}
-          {body}
+          <ProvenanceContext value={{ date: props.date, fetched: props.fetched }}>{body}</ProvenanceContext>
         </div>
       )}
     </aside>

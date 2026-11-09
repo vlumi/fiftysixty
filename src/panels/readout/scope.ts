@@ -1,5 +1,7 @@
+import type { Publisher } from '../../market/sources'
 import { AREA_BY_ID, areasOf, type Area, type Hz, type PricedArea } from '../../regions/areas'
 import type { PlantProps } from '../../regions/plants'
+import type { Provenance } from '../provenance'
 
 /** What the readout is about: a picked plant, Okinawa, which has no price, a picked area, a half of the grid, or the system. */
 export type Scope =
@@ -56,3 +58,14 @@ export function scopeAreas(scope: Scope): readonly PricedArea[] {
       ? areasOf(scopeHz(scope))
       : []
 }
+
+/** Who a group of the readout's rows is from: JEPX, a picked area's company or the companies together, OCCTO, or this site. */
+export type SourceGroup = { kind: Publisher | 'derived'; area?: PricedArea }
+
+/** The record a scope's figures come from: the picked area's company's, or the companies' summed for a half or all Japan. */
+export const recordGroup = (scope: PricedScope): SourceGroup =>
+  scope.kind === 'area' ? { kind: 'record', area: scope.area } : { kind: 'record' }
+
+/** A tooltip for a figure from the scope's record: the one company's file, or the areas' files summed. */
+export const recordProvenance = (p: Provenance, scope: PricedScope) => (field: string, note?: string) =>
+  scope.kind === 'area' ? p.record(scope.area, field, note) : p.records(scopeAreas(scope), field, note)

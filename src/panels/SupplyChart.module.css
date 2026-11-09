@@ -103,20 +103,3 @@
   width: 2.75rem;
   color: var(--muted);
 }
-
-.figures {
-  display: grid;
-  grid-template-columns: auto auto;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.15rem 1rem;
-  margin: 0.5rem 0 0;
-  font-size: 0.8rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.figures dd {
-  margin: 0;
-  text-align: right;
-  white-space: nowrap;
-}

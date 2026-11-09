@@ -42,6 +42,7 @@ const base: ComponentProps<typeof Readout> = {
   history: [],
   splits: { lines: [], days: [] },
   date: null,
+  fetched: null,
   warning: null,
   onDate: vi.fn(),
   onBack: vi.fn(),
@@ -69,11 +70,11 @@ test('a picked area against the system price and its neighbors', async () => {
   expect(onBack).toHaveBeenCalled()
 })
 
-test('the day’s price curve above the supply chart, for an area, and over the auction for all Japan, the hours once', () => {
+test('the day’s price curve above the supply chart, for an area, each with its hours since the record’s header parts them, and over the auction for all Japan, the hours once', () => {
   const { rerender } = render(<Readout {...base} record={record} recordDay={day} spotDay={spotDay} area="tokyo" />)
   const sliders = () => screen.getAllByRole('slider').map((c) => c.getAttribute('aria-label'))
   expect(sliders()).toEqual(['Price over the day', 'Supply over the day'])
-  expect(screen.getAllByText('18')).toHaveLength(1)
+  expect(screen.getAllByText('18')).toHaveLength(2)
   rerender(<Readout {...base} spotDay={spotDay} />)
   expect(sliders()).toEqual(['Price over the day', 'Auction over the day'])
   expect(screen.getAllByText('18')).toHaveLength(1)
@@ -95,7 +96,7 @@ test('a half of the grid from its toggle: its spread as the headline, the system
       .slice(0, 4)
       .map((d) => d.textContent),
   ).toEqual(['14.12', '10.45 −3.67', '10.45 −3.67', '22.02 +7.90'])
-  expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent(
+  expect(screen.getByRole('heading', { level: 4 })).toHaveTextContent(
     '50 Hz · without Hokkaido and Tohoku, not recorded yet',
   )
   expect(screen.getByRole('button', { name: '50 Hz' })).toHaveAttribute('aria-pressed', 'true')
@@ -112,12 +113,12 @@ test("a half's day: its figures from JEPX's prices under its name with the areas
   const east = japanDay(new Map([['tokyo', day]]), ['hokkaido', 'tohoku', 'tokyo'])
   render(<Readout {...base} spotDay={spotDay} scoped={east} dayTotals={dayTotals(east.slots)} dayPrice={9.5} />)
   await userEvent.click(screen.getByRole('button', { name: 'Day' }))
-  expect(screen.getAllByRole('heading', { level: 3 }).map((h) => h.textContent)).toEqual([
+  expect(screen.getAllByRole('heading', { level: 4 }).map((h) => h.textContent)).toEqual([
     '50 Hz · without Hokkaido and Tohoku, not recorded yet',
   ])
-  const prices = screen.getByRole('region', { name: 'Prices' })
-  expect(within(prices).getByText('Price, weighted by demand').nextElementSibling).toHaveTextContent('9.50')
-  expect(within(prices).queryByText('Mean price')).not.toBeInTheDocument()
+  const derived = screen.getByRole('region', { name: 'Derived' })
+  expect(within(derived).getByText('Price, weighted by demand').nextElementSibling).toHaveTextContent('9.50')
+  expect(within(screen.getByRole('region', { name: 'Prices' })).queryByText('Mean price')).not.toBeInTheDocument()
   expect(screen.getByRole('region', { name: 'How the day was supplied' })).toBeInTheDocument()
 })
 
@@ -168,13 +169,60 @@ test("what ran in a picked area is the chart's key with the half hour's figures,
   expect(within(mix).getByRole('row', { name: /^Demand/ })).toHaveTextContent(/\d{2},\d{3}/)
   expect(screen.getByRole('slider', { name: 'Supply over the day' })).toHaveAttribute('aria-valuenow', '47')
   expect(screen.queryByText('No record for this half hour yet.')).not.toBeInTheDocument()
+  // The half hour's renewable share and CO₂ per kWh are computed here, and say so under their own header.
+  expect(screen.getByText('Renewable share').nextElementSibling).toHaveTextContent(/^\d+%$/)
+  expect(screen.getByText('CO₂ per kWh generated').nextElementSibling).toHaveTextContent(/^\d+ g · estimated$/)
+})
+
+test('every group of rows is headed by who published it and what kind of number it is, and each label says its file and field', () => {
+  const fetched = {
+    at: '2026-11-05T11:13:36Z',
+    files: { 'jepx-spot-2026.csv': '2026-11-05T11:13:19Z', 'tepco-jukyu-202609.csv': '2026-11-05T11:13:33Z' },
+  }
+  render(<Readout {...base} record={record} recordDay={day} area="tokyo" date="2026-09-24" fetched={fetched} />)
+  expect(screen.getAllByRole('heading', { level: 3 }).map((h) => h.textContent)).toEqual([
+    'JEPX day-ahead · contract prices',
+    "TEPCO's record · actuals",
+    'Derived · computed here',
+  ])
+  expect(screen.getByText('System')).toHaveAttribute(
+    'title',
+    'jepx-spot-2026.csv · システムプライス(円/kWh)\nfetched 2026-11-05 20:13 JST',
+  )
+  expect(screen.getByText('Tohoku')).toHaveAttribute(
+    'title',
+    'jepx-spot-2026.csv · エリアプライス東北(円/kWh)\nfetched 2026-11-05 20:13 JST',
+  )
+  expect(screen.getByRole('rowheader', { name: 'Gas' })).toHaveAttribute(
+    'title',
+    'TEPCO Power Grid\ntepco-jukyu-202609.csv · 火力(LNG)\nfetched 2026-11-05 20:13 JST',
+  )
+  expect(screen.getByText('Renewable share')).toHaveAttribute(
+    'title',
+    'computed here: solar, wind, hydro, geothermal and biomass over all generated',
+  )
+})
+
+test("a half's lines under OCCTO's header when the half hour has its plan alone, before the nine companies' records", () => {
+  useApp.getState().setHalf(50)
+  render(<Readout {...base} slot={holiday} interchange={noon} date="2026-09-23" />)
+  expect(screen.getAllByRole('heading', { level: 3 }).map((h) => h.textContent)).toEqual([
+    'JEPX day-ahead · contract prices',
+    'OCCTO plan · never revised',
+    "Companies' records · actuals",
+  ])
+  expect(screen.getByText('Frequency converters')).toHaveAttribute(
+    'title',
+    'occto-renkei-202609.csv · 順方向予想潮流(MW)\ncapacity from occto-renkei-202609.csv · 順方向運用容量(MW), 逆方向運用容量(MW)',
+  )
+  expect(screen.getByText('No area has recorded the day yet.')).toBeInTheDocument()
 })
 
 test("a picked area's lines in or out against the limit, and its loop as the total across its two lines, marked as OCCTO's plan", () => {
   render(<Readout {...base} slot={holiday} interchange={noon} area="kansai" />)
   const lines = screen.getByRole('region', { name: 'Lines' })
   const names = [...lines.querySelectorAll('dt')].map((d) => d.textContent?.trim())
-  expect(lines).toHaveTextContent('Lines · OCCTO plan')
+  expect(screen.getByRole('heading', { name: /OCCTO plan/ })).toBeInTheDocument()
   expect(names).toEqual(['Kansai–Chugoku split', 'Anan–Kihoku split', 'Chubu and Hokuriku'])
   const values = [...lines.querySelectorAll('dd')].map((d) => d.textContent)
   expect(values).toEqual(['in 3,290 of 3,290', 'in 550 of 550', 'out 1,290'])
@@ -265,8 +313,8 @@ test("the day view: the switch shows the area's day in energy, and all Japan wit
   await userEvent.click(screen.getByRole('button', { name: 'Day' }))
   const supply = screen.getByRole('region', { name: 'How the day was supplied' })
   expect(within(supply).getByRole('row', { name: /^Nuclear/ })).toHaveTextContent(/\d+\.\d\d+%/)
-  const prices = screen.getByRole('region', { name: 'Prices' })
-  expect(within(prices).getByText('Price, weighted by demand').nextElementSibling).toHaveTextContent('12.34')
+  const derived = screen.getByRole('region', { name: 'Derived' })
+  expect(within(derived).getByText('Price, weighted by demand').nextElementSibling).toHaveTextContent('12.34')
   expect(screen.getByRole('button', { name: 'Day' })).toHaveAttribute('aria-pressed', 'true')
   rerender(<Readout {...base} record={record} recordDay={day} />)
   expect(screen.getByRole('heading', { name: 'All Japan' })).toBeInTheDocument()

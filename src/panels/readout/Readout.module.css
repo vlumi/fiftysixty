@@ -92,10 +92,34 @@ button.fold .price {
   margin: 0.25rem 0 0;
 }
 
-.panel h3 {
+.panel h3,
+.panel h4 {
   margin: 0.75rem 0 0;
   font-size: 0.875rem;
   font-weight: 600;
+}
+
+/* Who published the rows under it, in small caps with a rule above, so the groups read apart from the rows; the name and the tail each stay whole. */
+.panel .source {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 0.3em;
+  margin: 1rem 0 0;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.72rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.02em;
+}
+
+.panel .source > span {
+  white-space: nowrap;
+}
+
+.panel .source:first-child {
+  margin-top: 0.5rem;
+  padding-top: 0;
+  border-top: 0;
 }
 
 .price {
@@ -273,4 +297,10 @@ button.fold .price {
 .without {
   color: var(--hz60);
   font-weight: 400;
+}
+
+/* Small caps do nothing for kana and kanji, so the Japanese header keeps the rows' size. */
+.panel .source:lang(ja) {
+  font-size: 0.8rem;
+  letter-spacing: 0;
 }

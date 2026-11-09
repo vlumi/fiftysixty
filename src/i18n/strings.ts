@@ -1,3 +1,4 @@
+import type { Publisher } from '../market/sources'
 import type { Series } from '../market/stack'
 import type { StoryId } from '../market/stories'
 import { readItem, storage, writeItem } from '../shared/storage'
@@ -31,8 +32,16 @@ export interface Strings {
     lines: string
     co2: string
     co2By: string
-    data: string
-    fetchedAt: (at: string) => string
+    /** When the host last changed a publisher's files, beside its name. */
+    updated: (at: string) => string
+    hourly: string
+    /** The table of what each figure is: its publisher, its kind and when it is published against the delivery day. */
+    sources: string
+    figure: string
+    publisher: string
+    kind: string
+    when: string
+    table: Record<Publisher | 'derived', { figure: string; publisher: string; kind: string; when: string }>
     source: string
   }
   language: string
@@ -134,6 +143,37 @@ export interface Strings {
     loadFailed: string
     aPlant: string
     plantNote: string
+    /** The headers over the readout's rows by who published them, each with what kind of number they are, and the tooltips' parts. */
+    source: {
+      jepx: string
+      jepxWhen: string
+      record: (company: string) => string
+      records: string
+      recordWhen: string
+      occto: string
+      occtoWhen: string
+      derived: string
+      derivedWhen: string
+      fetched: (at: string) => string
+      newestFetched: (at: string) => string
+      eachArea: (file: string) => string
+      summed: string
+      settled: string
+      capacityFrom: string
+      formula: {
+        turnover: string
+        weighted: string
+        renewable: string
+        co2: string
+        co2Intensity: string
+        gw: string
+        mean: string
+        floor: string
+        share: string
+        peak: string
+        low: string
+      }
+    }
   }
   chart: {
     label: string
@@ -206,8 +246,39 @@ const en: Strings = {
     co2: 'CO₂',
     co2By:
       'Estimated from the fuel burnt, after CRIEPI (2016): coal 864, LNG 430, oil and other thermal 695 g/kWh; biomass as none.',
-    data: 'Data',
-    fetchedAt: (at) => `Fetched hourly on the host, last at ${at} JST`,
+    updated: (at) => `updated ${at} JST`,
+    hourly: 'The host asks every publisher hourly; the times are when each file last changed.',
+    sources: 'Sources',
+    figure: 'Figure',
+    publisher: 'Publisher',
+    kind: 'Kind',
+    when: 'Published',
+    table: {
+      jepx: {
+        figure: 'Prices, bids, cleared volume',
+        publisher: 'JEPX',
+        kind: 'contract',
+        when: 'the day before, after the 10:00 auction',
+      },
+      record: {
+        figure: 'Demand, supply by source, curtailment, border flows',
+        publisher: 'The nine transmission companies',
+        kind: 'actual',
+        when: 'within about an hour of the half hour; Hokkaido two days later',
+      },
+      occto: {
+        figure: 'Line capacity, planned flow, market split',
+        publisher: 'OCCTO',
+        kind: 'plan',
+        when: 'two days ahead, around 17:30',
+      },
+      derived: {
+        figure: 'Turnover, weighted price, renewable share, CO₂',
+        publisher: 'This site',
+        kind: 'estimate',
+        when: 'computed here from the above',
+      },
+    },
     source: 'Source on GitHub',
   },
   language: 'Language',
@@ -321,6 +392,36 @@ const en: Strings = {
     loadFailed: 'Some of the data could not be loaded; trying again.',
     aPlant: 'A plant',
     plantNote: 'Capacity as mapped in OpenStreetMap; what it runs is not public.',
+    source: {
+      jepx: 'JEPX day-ahead',
+      jepxWhen: 'contract prices',
+      record: (company) => `${company}'s record`,
+      records: "Companies' records",
+      recordWhen: 'actuals',
+      occto: 'OCCTO plan',
+      occtoWhen: 'never revised',
+      derived: 'Derived',
+      derivedWhen: 'computed here',
+      fetched: (at) => `fetched ${at} JST`,
+      newestFetched: (at) => `the newest fetched ${at} JST`,
+      eachArea: (file) => `one file an area, ${file}`,
+      summed: 'summed over the areas',
+      settled: "settled from the nine records' 連系線",
+      capacityFrom: 'capacity from',
+      formula: {
+        turnover: 'cleared kWh × system price, summed over the half hours',
+        weighted: "each half hour's area price × its demand, over the demand",
+        renewable: 'solar, wind, hydro, geothermal and biomass over all generated',
+        co2: 'coal 864, LNG 430, oil and other 695 g/kWh of each fuel burnt, after CRIEPI (2016)',
+        co2Intensity: 'the estimated CO₂ over all generated',
+        gw: 'kWh over the half hour × 2 ÷ 10⁶',
+        mean: 'mean over the 48 half hours',
+        floor: 'half hours at 0.01 ¥/kWh',
+        share: 'the row over all that supplied',
+        peak: 'the highest half hour',
+        low: 'the lowest half hour',
+      },
+    },
   },
   chart: {
     label: 'Supply over the day',
@@ -410,8 +511,39 @@ const ja: Strings = {
     lines: '連系線',
     co2: 'CO₂',
     co2By: '燃料の燃焼分を電中研（2016）の係数で推計：石炭 864、LNG 430、石油・その他火力 695 g/kWh、バイオマスは 0。',
-    data: 'データ',
-    fetchedAt: (at) => `毎時取得、最終 ${at} JST`,
+    updated: (at) => `更新 ${at} JST`,
+    hourly: '各公表元に毎時問い合わせ。時刻は各ファイルが最後に変わった時点。',
+    sources: '出典',
+    figure: '数値',
+    publisher: '公表元',
+    kind: '種別',
+    when: '公表',
+    table: {
+      jepx: {
+        figure: '価格、入札量、約定量',
+        publisher: 'JEPX',
+        kind: '約定',
+        when: '前日、10時の入札締切後',
+      },
+      record: {
+        figure: '需要、電源別供給、出力制御、連系線潮流',
+        publisher: '一般送配電事業者9社',
+        kind: '実績',
+        when: 'コマの約1時間後。北海道は2日後',
+      },
+      occto: {
+        figure: '連系線の運用容量、予想潮流、市場分断',
+        publisher: 'OCCTO',
+        kind: '計画',
+        when: '2日前、17時半ごろ',
+      },
+      derived: {
+        figure: '約定金額、需要加重価格、再エネ比率、CO₂',
+        publisher: 'このサイト',
+        kind: '推計',
+        when: '上の数値から算出',
+      },
+    },
     source: 'GitHub のソース',
   },
   language: '言語',
@@ -525,6 +657,36 @@ const ja: Strings = {
     loadFailed: '一部のデータを読み込めませんでした。再試行します。',
     aPlant: '発電所',
     plantNote: '出力は OpenStreetMap の記載による設備容量。実際の発電量は公開されていません。',
+    source: {
+      jepx: 'JEPX 前日スポット',
+      jepxWhen: '約定価格',
+      record: (company) => `${company}の実績`,
+      records: '一般送配電事業者の実績',
+      recordWhen: '実測値',
+      occto: 'OCCTO計画',
+      occtoWhen: '事後修正なし',
+      derived: '算出値',
+      derivedWhen: 'ここで計算',
+      fetched: (at) => `取得 ${at} JST`,
+      newestFetched: (at) => `最新の取得 ${at} JST`,
+      eachArea: (file) => `エリアごとに1ファイル、${file}`,
+      summed: 'エリア合計',
+      settled: '9社の実績の連系線から算定',
+      capacityFrom: '運用容量は',
+      formula: {
+        turnover: '約定総量(kWh) × システムプライス のコマ合計',
+        weighted: '各コマの エリアプライス × エリア需要 の合計 ÷ 需要合計',
+        renewable: '太陽光・風力・水力・地熱・バイオマス ÷ 発電量',
+        co2: '燃料ごとに 石炭 864、LNG 430、石油・その他 695 g/kWh（電中研 2016）',
+        co2Intensity: '推計CO₂ ÷ 発電量',
+        gw: 'コマの kWh × 2 ÷ 10⁶',
+        mean: '48コマの平均',
+        floor: '0.01 円/kWh のコマ数',
+        share: '供給全体に対する比率',
+        peak: '最大のコマ',
+        low: '最小のコマ',
+      },
+    },
   },
   chart: {
     label: '一日の供給',

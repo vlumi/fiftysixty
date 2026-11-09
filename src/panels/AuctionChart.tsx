@@ -4,6 +4,7 @@ import { largeYen } from '../shared/format'
 import DayChart from './DayChart'
 import frame from './DayChart.module.css'
 import styles from './AuctionChart.module.css'
+import { JEPX_FIELDS, useProvenance } from './provenance'
 import { LEFT, slotX, TOP, WIDTH } from './slotAxis'
 
 const PLOT = 96
@@ -25,6 +26,7 @@ interface Props {
  */
 export default function AuctionChart({ day, slot, onSlot, hours }: Props) {
   const s = useStrings()
+  const p = useProvenance()
   const max = Math.max(...day.flatMap((d) => [gw(d.sellKWh), gw(d.buyKWh)]))
   // About five gridlines whatever the scale, as the supply chart's; the unit on the zero label alone, so a hundred fits the gutter.
   const step = [5, 10, 20, 50].find((g) => max / g <= 5) ?? 100
@@ -37,10 +39,23 @@ export default function AuctionChart({ day, slot, onSlot, hours }: Props) {
   const gridlines = []
   for (let v = 0; v <= top; v += step) gridlines.push(v)
   const at = day.find((d) => d.slot === slot)
+  const gwFrom = (field: string) => p.jepx(field, s.readout.source.formula.gw)
   const lines = [
-    { key: 'offered', name: s.chart.offered, className: styles.offered, kwh: at?.sellKWh },
-    { key: 'asked', name: s.chart.asked, className: styles.asked, kwh: at?.buyKWh },
-    { key: 'cleared', name: s.chart.cleared, className: styles.cleared, kwh: at?.volumeKWh },
+    {
+      key: 'offered',
+      name: s.chart.offered,
+      className: styles.offered,
+      kwh: at?.sellKWh,
+      title: gwFrom(JEPX_FIELDS.sell),
+    },
+    { key: 'asked', name: s.chart.asked, className: styles.asked, kwh: at?.buyKWh, title: gwFrom(JEPX_FIELDS.buy) },
+    {
+      key: 'cleared',
+      name: s.chart.cleared,
+      className: styles.cleared,
+      kwh: at?.volumeKWh,
+      title: gwFrom(JEPX_FIELDS.volume),
+    },
   ] as const
 
   return (
@@ -67,7 +82,7 @@ export default function AuctionChart({ day, slot, onSlot, hours }: Props) {
       </DayChart>
       <figcaption className={styles.legend}>
         {lines.map((l) => (
-          <span key={l.key}>
+          <span key={l.key} title={l.title}>
             <span className={`${styles.lineKey} ${l.className}`} />
             {l.name}
             {l.kwh !== undefined && (
@@ -78,7 +93,7 @@ export default function AuctionChart({ day, slot, onSlot, hours }: Props) {
           </span>
         ))}
         {at && (
-          <span>
+          <span title={p.derived(s.readout.source.formula.turnover)}>
             {s.chart.turnover}
             <span className={styles.figure}>
               {largeYen(turnover([at]), s.readout.largeYen)} {s.readout.largeYen.unit}

@@ -29,10 +29,10 @@ flowchart LR
 
 | Directory | What it holds | Modules |
 | --- | --- | --- |
-| `src/market/` | The CSVs parsed into days of 48 half hours, and what is derived from them | `jepx` the prices; `record` with `jukyu`, `standard`, `kyushu` and `adapters` the nine companies' records; `flows` OCCTO's file; `interchange` the half hour's flows from either; `daily` the day's totals and price figures; `monthly` the month strip's days; `stack` the series; `history`, `splits` and `duration` the long view; `stories` the story days; `fetch` reads a file off the host, `fetched` the fetcher's note |
-| `src/regions/` | The hand-written tables and the committed geometry | `areas`, `interconnectors`, `names`; `geometry` and `plants` load the files |
+| `src/market/` | The CSVs parsed into days of 48 half hours, and what is derived from them | `jepx` the prices; `record` with `jukyu`, `standard`, `kyushu` and `adapters` the nine companies' records; `flows` OCCTO's file; `interchange` the half hour's flows from either; `daily` the day's totals and price figures; `monthly` the month strip's days; `stack` the series; `history`, `splits` and `duration` the long view; `stories` the story days; `fetch` reads a file off the host, `fetched` the fetcher's note, `sources` the publishers' files and their freshness |
+| `src/regions/` | The hand-written tables and the committed geometry | `areas`, `interconnectors`, `companies`, `names`; `geometry` and `plants` load the files |
 | `src/map/` | The map view and the deck layers as pure functions of the data and a palette | `MapView`, `layers`, `flowLayers`, `plantLayers`, `outline`, the `MixGlyph` columns, `scale`, `basemap`, `layerChoice` |
-| `src/panels/` | The readout and its charts | `readout/` the panel in parts: `scope`, `Readout`, `Headline`, `Switches`, `SlotView` with `Lines`, `DayView`, `HistoryView`; the `DayChart` frame with `SupplyChart`, `PriceChart` and `AuctionChart`; `MonthStrip`; `PriceHistory`, `TurnoverHistory` and `SplitHistory` with `heatmap` and `MonthTicks`; `DurationCurve`; the corner's `Legend`, `Layers`, `Corner` and `Credits` |
+| `src/panels/` | The readout and its charts | `readout/` the panel in parts: `scope`, `Readout`, `Headline`, `Switches`, `SourceHeading`, `SlotView` with `Lines`, `DayView`, `Derived`, `HistoryView`; `provenance` the tooltips' files and fields; the `DayChart` frame with `SupplyChart`, `PriceChart` and `AuctionChart`; `MonthStrip`; `PriceHistory`, `TurnoverHistory` and `SplitHistory` with `heatmap` and `MonthTicks`; `DurationCurve`; the corner's `Legend`, `Layers`, `Corner` and `Credits` |
 | `src/time/` | The clock | `days`, `slots`, `TimeBar`, `usePlayer`, `useNow` |
 | `src/shared/` | What the rest share | `scale` and `palette` for the colors, `theme`, `format`, `storage`, `scrub`, `link`, `ErrorBoundary`, the media-query hooks, `useElementSize` |
 | `src/i18n/` | Every visible word in both languages | `strings`, `useStrings` |
@@ -65,7 +65,7 @@ All are CSV with Japanese headers. JEPX is UTF-8 and the records Shift_JIS, or U
 
 Tohoku posts the running month as one file per day and the month's own file only around the 25th of the next, so its month is stitched from the days. A month no company has published at all is skipped, as Chubu's previous month is, which sits behind a download form.
 
-Each run ends by writing `fetched.json` beside the data, the run's time and each file's, which the about modal reads. A host down for the hour fails that source alone, logged by name, the run going on and exiting non-zero at the end.
+Each run ends by writing `fetched.json` beside the data, the run's time and each file's, which the about modal reads for each publisher's freshness and the readout for each label's tooltip. A host down for the hour fails that source alone, logged by name, the run going on and exiting non-zero at the end.
 
 ### The prices
 
@@ -110,7 +110,7 @@ When all nine companies' records are in, each record's 連系線 is that area's 
 
 Otherwise they are OCCTO's plan, which sets a flow per block of similar days, weekdays or a weekend and its holidays, and is never revised to what happened; it gives the Kansai–Chugoku–Shikoku loop line by line and the Chubu–Hokuriku–Kansai loop only as its three fences.
 
-Both kinds brighten toward the line's operating capacity, and the readout's Lines heading says which kind the half hour shows.
+Both kinds brighten toward the line's operating capacity, and in the readout the lines stand under the header of the kind the half hour shows, OCCTO's plan or the records.
 
 ### A day in energy
 
@@ -148,7 +148,7 @@ The 50/60 split line is the inner boundary between the dissolved halves, written
 
 ### The page
 
-A header with the name and a map that fills the rest, the same skeleton as nebulosa. `App.tsx` lazy-loads the map view so MapLibre is a chunk of its own, cached across deploys. The map is MapLibre over OpenFreeMap's `fiord` style, bounded to Japan, with the navigation control, its own attribution off in favor of `panels/Credits.tsx`, a modal behind the header's ⓘ saying what the page is, naming every source and saying when the host last fetched, the page held still beneath it.
+A header with the name and a map that fills the rest, the same skeleton as nebulosa. `App.tsx` lazy-loads the map view so MapLibre is a chunk of its own, cached across deploys. The map is MapLibre over OpenFreeMap's `fiord` style, bounded to Japan, with the navigation control, its own attribution off in favor of `panels/Credits.tsx`, a modal behind the header's ⓘ saying what the page is, naming every source with when the host last changed its files, and tabling what kind of number each figure is, contract, actual, plan or estimate, and when its publisher speaks against the delivery day, the page held still beneath it.
 
 A deck.gl `MapLibreOverlay` is interleaved into the map beneath the style's first label layer, so the market layers sit under the place names. `map/layers.ts` builds the deck layers as a pure function of the loaded data and a numeric palette, `shared/palette.ts`, which mirrors the CSS tokens for WebGL.
 
@@ -215,12 +215,14 @@ flowchart LR
   scope --> okinawa["Okinawa: the spread,<br>and a note"]
   scope --> priced["area · half · system"]
   priced --> view{"view, from the switch"}
-  view --> slot["SlotView: the price rows, Lines,<br>PriceChart, AuctionChart, SupplyChart"]
-  view --> day["DayView: DayPrices, DaySupply,<br>MonthStrip"]
+  view --> slot["SlotView: the price rows, Lines,<br>PriceChart, AuctionChart, SupplyChart, SlotDerived"]
+  view --> day["DayView: DayPrices, DaySupply,<br>DayDerived, MonthStrip"]
   view --> history["HistoryView: PriceHistory, TurnoverHistory,<br>SplitHistory, DurationCurve"]
 ```
 
 With nothing picked, the headline is the system price and the half hour's note the spread across the areas. An area picked by a click on the map shows its price against the system price and against each neighbor across an interconnector, then its lines and what ran in it. The picked area is outlined on the map, and a back button on the left of its name goes up a level, since a tap on the map elsewhere does the same.
+
+The rows stand in groups under who published them, since a day-ahead price JEPX contracted the day before, an actual a transmission company recorded within the hour after delivery and a flow OCCTO planned two days ahead are three kinds of number. `readout/SourceHeading.tsx` is the header, in small caps on one line: JEPX day-ahead, the picked area's company by its short name from `regions/companies.ts` or the companies' records for a half or all Japan, OCCTO plan, and derived for what this site computes, each with what kind of number it is as a muted tail, contract prices, actuals, a plan never revised, computed here; when each publisher speaks is the about modal's table, since a tail about timing read oddly on a day long settled. The lines go under OCCTO's header when the half hour has the plan alone and under the record's when the records settle them, and the derived figures, the price weighted by demand, the turnover, the renewable share and the CO₂, stand together at the end rather than among the published ones. Every label carries a tooltip from `panels/provenance.ts`: the file and the field the figure is read from, the company's name for a record, or the formula for a derived one, and when the host last changed the file, from `fetched.json` through a context the panel provides, so a tooltip in a chart's key needs no props threaded to it.
 
 The headline row stays pinned at the top of the panel while the rest scrolls under it, and the switches with it where the screen is tall enough, `shared/useShort.ts` reading a media query, so the scope and the view are a tap away wherever the reader is, while on a short phone the content keeps the room. A data file that could not be loaded is said under the headline, pinned, until the next try succeeds, since a host down would otherwise pass for a quiet day.
 
@@ -242,13 +244,13 @@ With nothing picked, `panels/AuctionChart.tsx` draws under the price curve what 
 
 `turnover` in `market/jepx.ts` is the cleared energy at the system price, in yen. JEPX gives the volume system-wide alone, so it is exact while every area clears at the system price and close when they split, and it is shown for the system only: the half hour's in the auction chart's key, the day's in the day view, and every day's in the long view. The demand at each area's price would be a larger figure and not a market's, since much of it never goes through the exchange.
 
-`panels/SupplyChart.tsx` draws the day as the stack under the demand line, the gigawatt labels in the gutter and a solid line at zero, drawn over the bands so the part below it reads as what left the area; the gridlines step with the range, about five whatever the scale. Under it, the chart's key and the half hour's figures are one table, a row a series read top down as the chart stacks, the idle rows muted, each supplying row with its share of what supplied the half hour, and under that the half hour's renewable share and its CO₂ per kWh generated.
+`panels/SupplyChart.tsx` draws the day as the stack under the demand line, the gigawatt labels in the gutter and a solid line at zero, drawn over the bands so the part below it reads as what left the area; the gridlines step with the range, about five whatever the scale. Under it, the chart's key and the half hour's figures are one table, a row a series read top down as the chart stacks, the idle rows muted, each supplying row with its share of what supplied the half hour; the half hour's renewable share and its CO₂ per kWh generated follow under the derived header.
 
 With nothing picked the supply is all Japan's, or the chosen half's, the areas not yet recorded named beside it; the interconnectors cancel between the areas and are left at none, so the key drops its import and export rows. The hour labels are drawn once, on the last chart of the stack.
 
 ### The day
 
-A switch at the top of the readout turns it from the half hour to the whole day. `panels/readout/DayView.tsx` lists the day's prices first, as the price curve stands above the supply chart: the mean and the lowest and the highest with when, for any priced day, one without a record included, since the auction runs a day ahead of the record, with the demand-weighted price where the record allows it, the half hours at the floor, and for the system the day's turnover.
+A switch at the top of the readout turns it from the half hour to the whole day. `panels/readout/DayView.tsx` lists the day's prices first, as the price curve stands above the supply chart: the mean and the lowest and the highest with when, for any priced day, one without a record included, since the auction runs a day ahead of the record, and the half hours at the floor; the demand-weighted price where the record allows it and, for the system, the day's turnover stand with the derived figures after the supply.
 
 Under them the supply as one bar and a table of each source's GWh and share, read from the top as the chart stacks, then the day's figures; a day still under way says how far it runs.
 
