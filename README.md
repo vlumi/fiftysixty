@@ -32,7 +32,7 @@ Every capture, one per milestone, is shown in [docs/screenshots](docs/screenshot
 
 **The halves.** A control above the readout scopes it to 50 Hz or 60 Hz: the half's spread as the headline, its areas against the system price, the three frequency converters as its only lines, and its supply summed from its areas' records; on the map the other half is muted and the half outlined.
 
-**The long view.** Under the price history, the market splits over time: a line a row and a day a column, each cell how much of the day the line's two ends priced apart, the Tokyo–Chubu row being the halves parting; and the price duration curve, every half hour held from the dearest down, with the mean, the median and how often the price sat at the floor.
+**The long view.** Under the price history, what the auction turned over each day, and the market splits over time: a line a row and a day a column, each cell how much of the day the line's two ends priced apart, the Tokyo–Chubu row being the halves parting; and the price duration curve, every half hour held from the dearest down, with the mean, the median and how often the price sat at the floor.
 
 **Links.** The address follows what you look at, the day, the half hour, the area or the half and the view, so a half hour worth showing is a link to paste; the name in the header is the way back to the opening view.
 

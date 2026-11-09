@@ -4,6 +4,7 @@ import type { SplitHistory as Splits } from '../../market/splits'
 import DurationCurve from '../DurationCurve'
 import PriceHistory from '../PriceHistory'
 import SplitHistory from '../SplitHistory'
+import TurnoverHistory from '../TurnoverHistory'
 import type { PricedScope } from './scope'
 
 interface Props {
@@ -19,8 +20,9 @@ interface Props {
 
 /**
  * The long view: the price history as the heatmap, the picked area's price, or the system's for a half, which has
- * none of its own, and for all Japan; under it the market splits over the same days on the scope's lines, and the
- * price duration curve over every half hour of them.
+ * none of its own, and for all Japan; under it what the auction turned over each day, where the system price is the
+ * one drawn, the market splits over the same days on the scope's lines, and the price duration curve over every half
+ * hour of them.
  */
 export default function HistoryView({ scope, history, splits, date, slot, onDate, onSlot }: Props) {
   const s = useStrings()
@@ -38,6 +40,7 @@ export default function HistoryView({ scope, history, splits, date, slot, onDate
         slot={slot}
         onPick={pick}
       />
+      {scope.kind !== 'area' && <TurnoverHistory days={history} date={date} onPick={(d) => pick(d, slot)} />}
       <SplitHistory splits={splits} date={date} onPick={(d) => pick(d, slot)} />
       <DurationCurve days={history} scope={scope} date={date} slot={slot} onPick={pick} />
     </>
