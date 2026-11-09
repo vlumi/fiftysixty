@@ -1,5 +1,6 @@
 import { useStrings } from '../i18n/useStrings'
-import type { SpotSlot } from '../market/jepx'
+import { turnover, type SpotSlot } from '../market/jepx'
+import { largeYen } from '../shared/format'
 import DayChart from './DayChart'
 import frame from './DayChart.module.css'
 import styles from './AuctionChart.module.css'
@@ -20,7 +21,7 @@ interface Props {
 /**
  * The auction behind the system price, in the day charts' frame: what was offered, what was asked and what cleared
  * each half hour, system-wide, as three lines with the gap between the bids shaded, since when far more is offered
- * than asked the price falls to the floor. The key carries the half hour's figures.
+ * than asked the price falls to the floor. The key carries the half hour's figures, and what it cleared came to in yen.
  */
 export default function AuctionChart({ day, slot, onSlot, hours }: Props) {
   const s = useStrings()
@@ -76,6 +77,14 @@ export default function AuctionChart({ day, slot, onSlot, hours }: Props) {
             )}
           </span>
         ))}
+        {at && (
+          <span>
+            {s.chart.turnover}
+            <span className={styles.figure}>
+              {largeYen(turnover([at]), s.readout.largeYen)} {s.readout.largeYen.unit}
+            </span>
+          </span>
+        )}
       </figcaption>
     </figure>
   )

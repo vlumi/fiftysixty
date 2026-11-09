@@ -25,6 +25,12 @@ export type SpotDays = Map<string, SpotSlot[]>
 
 export const SLOTS = 48
 
+/**
+ * What the half hours' cleared energy came to at the system price, in yen. JEPX gives the volume system-wide alone,
+ * so this is exact while every area clears at the system price and close when they split.
+ */
+export const turnover = (slots: readonly SpotSlot[]) => slots.reduce((yen, s) => yen + s.volumeKWh * s.systemPrice, 0)
+
 /** JEPX's fiscal year runs April to March and names the file; `date` is a day in Japan, YYYY-MM-DD. */
 export function fiscalYear(date: string): number {
   const [year, month] = date.split('-').map(Number)

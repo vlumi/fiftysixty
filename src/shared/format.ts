@@ -13,6 +13,10 @@ export const percent = (share: number) => `${Math.round(share * 100)}%`
 /** A price in yen per kWh to two decimals, as JEPX quotes it. */
 export const yen = (price: number) => price.toFixed(2)
 
+/** An amount of yen in a language's large unit, as billions or 億, to the decimals the unit wants. */
+export const largeYen = (yen: number, { per, digits }: { per: number; digits: number }) =>
+  (yen / per).toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits })
+
 /** A difference with its sign, a real minus for the negative. */
 export function signed(delta: number): string {
   const text = yen(Math.abs(delta))

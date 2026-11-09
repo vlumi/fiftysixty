@@ -29,9 +29,10 @@ test('the price figures stand without a record: the mean, the low and the high w
     'Highest price: 50.01 ¥/kWh · 16:30',
   ])
   expect(screen.queryByText('Price, weighted by demand')).not.toBeInTheDocument()
+  expect(screen.queryByText('Turnover, at the system price')).not.toBeInTheDocument()
 })
 
-test('with the record, the supply and the weighted price too, and the half hours at the floor when there were any', () => {
+test('with the record, the supply and the weighted price too, the half hours at the floor when there were any, and for the system the turnover', () => {
   const floored = spot.map((s, i) => (i < 3 ? { ...s, systemPrice: 0.01 } : s))
   render(
     <>
@@ -44,6 +45,10 @@ test('with the record, the supply and the weighted price too, and the half hours
   expect(within(prices).getByText('Price, weighted by demand').nextElementSibling).toHaveTextContent('12.34 ¥/kWh')
   expect(within(prices).getByText('Half hours at the floor').nextElementSibling).toHaveTextContent('3')
   expect(within(prices).getByText('Lowest price').nextElementSibling).toHaveTextContent('0.01 ¥/kWh · 00:00')
+  const yen = floored.reduce((sum, s) => sum + s.volumeKWh * s.systemPrice, 0)
+  expect(within(prices).getByText('Turnover, at the system price').nextElementSibling).toHaveTextContent(
+    `${(yen / 1e9).toFixed(2)} ¥ bn`,
+  )
 })
 
 test("a half's prices are what JEPX's give: the spread across its areas with where and when, and the area half hours at the floor", () => {
