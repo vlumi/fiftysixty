@@ -92,6 +92,7 @@ export interface Strings {
     price: string
     floor: string
     floorArea: string
+    turnover: string
     soFar: (time: string) => string
     japan: string
     notAll: string
@@ -107,6 +108,8 @@ export interface Strings {
     back: string
     systemPrice: string
     yenPerKwh: string
+    /** The unit large amounts of yen are counted in, and the decimals it reads well to. */
+    largeYen: { per: number; digits: number; unit: string }
     spread: (low: string, high: string) => string
     everyAreaSystem: string
     pickArea: string
@@ -157,6 +160,7 @@ export interface Strings {
     offered: string
     asked: string
     cleared: string
+    turnover: string
   }
   key: {
     key: string
@@ -275,6 +279,7 @@ const en: Strings = {
     price: 'Price, weighted by demand',
     floor: 'Half hours at the floor',
     floorArea: 'Area half hours at the floor',
+    turnover: 'Turnover, at the system price',
     soFar: (time) => `Through ${time} so far.`,
     japan: 'All Japan',
     notAll: 'No area has recorded the day yet.',
@@ -290,6 +295,7 @@ const en: Strings = {
     back: 'Back',
     systemPrice: 'System price',
     yenPerKwh: '¥/kWh',
+    largeYen: { per: 1e9, digits: 2, unit: '¥ bn' },
     spread: (low, high) => `Areas from ${low} to ${high}.`,
     everyAreaSystem: 'Every area at the system price.',
     pickArea: 'Pick an area for its price.',
@@ -347,6 +353,7 @@ const en: Strings = {
     offered: 'Offered',
     asked: 'Asked',
     cleared: 'Cleared',
+    turnover: 'Turnover',
     yen: (price) => `¥${price}`,
   },
   key: {
@@ -474,6 +481,7 @@ const ja: Strings = {
     price: '需要加重平均価格',
     floor: '下限価格のコマ',
     floorArea: '下限価格のエリア・コマ',
+    turnover: '約定金額（システムプライス換算）',
     soFar: (time) => `${time}まで。`,
     japan: '全国',
     notAll: 'まだどのエリアもこの日の実績がありません。',
@@ -489,6 +497,7 @@ const ja: Strings = {
     back: '戻る',
     systemPrice: 'システムプライス',
     yenPerKwh: '円/kWh',
+    largeYen: { per: 1e8, digits: 1, unit: '億円' },
     spread: (low, high) => `エリアプライスは ${low}〜${high}。`,
     everyAreaSystem: '全エリアがシステムプライス。',
     pickArea: 'エリアを選ぶと価格が出ます。',
@@ -546,6 +555,7 @@ const ja: Strings = {
     offered: '売り入札',
     asked: '買い入札',
     cleared: '約定',
+    turnover: '約定金額',
     yen: (price) => `${price}円`,
   },
   key: {

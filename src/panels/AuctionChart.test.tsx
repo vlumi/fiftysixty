@@ -6,7 +6,7 @@ import AuctionChart from './AuctionChart'
 /** A day with more than half again offered than asked at noon, when the west fell to the floor. */
 const day = parseSpot(csv).get('2026-09-22')!
 
-test('offered, asked and cleared as three lines over a gigawatt axis, the half hour’s figures in the key', () => {
+test('offered, asked and cleared as three lines over a gigawatt axis, the half hour’s figures and its turnover in the key', () => {
   render(<AuctionChart day={day} slot={24} onSlot={vi.fn()} />)
   const chart = screen.getByRole('slider', { name: 'Auction over the day' })
   expect(chart).toHaveAttribute('aria-valuetext', '11:30–12:00')
@@ -28,7 +28,7 @@ test('offered, asked and cleared as three lines over a gigawatt axis, the half h
   const at = day[23]
   const figure = (kwh: number) => `${((kwh * 2) / 1e6).toFixed(1)} GW`
   expect(chart.parentElement!.querySelector('figcaption')).toHaveTextContent(
-    `Offered${figure(at.sellKWh)}Asked${figure(at.buyKWh)}Cleared${figure(at.volumeKWh)}`,
+    `Offered${figure(at.sellKWh)}Asked${figure(at.buyKWh)}Cleared${figure(at.volumeKWh)}Turnover${((at.volumeKWh * at.systemPrice) / 1e9).toFixed(2)} ¥ bn`,
   )
 })
 

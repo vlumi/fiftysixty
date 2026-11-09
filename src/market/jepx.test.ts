@@ -1,4 +1,4 @@
-import { fiscalYear, latestDay, loadSpotYears, parseSpot, slotOf } from './jepx'
+import { fiscalYear, latestDay, loadSpotYears, parseSpot, slotOf, turnover } from './jepx'
 import csv from '../test/fixtures/jepx-spot.csv?raw'
 
 test('four real days parse into 48 slots each, found by column name', () => {
@@ -53,4 +53,11 @@ test('the years are loaded together, a year the host lacks contributing nothing'
   const days = await loadSpotYears(2026)
   expect([...days.keys()]).toEqual(['2026-09-22', '2026-09-23', '2026-09-25', '2026-09-26'])
   vi.unstubAllGlobals()
+})
+
+test('turnover is the cleared energy at the system price, summed over the half hours given', () => {
+  const day = parseSpot(csv).get('2026-09-26')!
+  expect(turnover([day[46]])).toBeCloseTo(18827400 * 14.12)
+  expect(turnover(day)).toBeCloseTo(day.reduce((yen, s) => yen + turnover([s]), 0))
+  expect(turnover([])).toBe(0)
 })

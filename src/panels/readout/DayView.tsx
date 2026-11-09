@@ -8,12 +8,12 @@ import {
   type DayTotals,
   type JapanDay,
 } from '../../market/daily'
-import { SLOTS, type SpotSlot } from '../../market/jepx'
+import { SLOTS, turnover, type SpotSlot } from '../../market/jepx'
 import type { MonthDay, MonthPrice } from '../../market/monthly'
 import { SERIES_TOP_DOWN } from '../../market/stack'
 import { areasOf, type Hz, type PricedArea } from '../../regions/areas'
 import { areaName } from '../../regions/names'
-import { gwh, kt, mw, percent, yen } from '../../shared/format'
+import { gwh, kt, largeYen, mw, percent, yen } from '../../shared/format'
 import { useApp } from '../../store'
 import { slotEnd, slotStart } from '../../time/slots'
 import MonthStrip from '../MonthStrip'
@@ -167,7 +167,7 @@ export function DaySupply({ totals, scope }: { totals: DayTotals | null; scope: 
 
 /**
  * The displayed day in price: the mean, the price weighted by demand where the record allows it, the low and the high
- * with when, and the half hours at the floor; they stand for any priced day, since the auction runs a day ahead of
+ * with when, the half hours at the floor, and for the system what the auction turned over; they stand for any priced day, since the auction runs a day ahead of
  * the record. For a half of the grid, which has no price of its own, the figures JEPX's prices give: the lowest and
  * the highest across its areas with where and when, the area half hours at the floor, and the weighted price.
  */
@@ -220,6 +220,14 @@ export function DayPrices({
           <>
             <dt>{s.day.floor}</dt>
             <dd>{floors}</dd>
+          </>
+        )}
+        {!area && spot && (
+          <>
+            <dt>{s.day.turnover}</dt>
+            <dd>
+              {largeYen(turnover(spot), s.readout.largeYen)} <span className="muted">{s.readout.largeYen.unit}</span>
+            </dd>
           </>
         )}
       </dl>
